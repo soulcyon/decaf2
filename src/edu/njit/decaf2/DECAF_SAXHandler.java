@@ -1,4 +1,5 @@
 package edu.njit.decaf2;
+
 import java.util.HashMap;
 
 import org.xml.sax.Attributes;
@@ -8,10 +9,15 @@ import org.xml.sax.helpers.DefaultHandler;
 import edu.njit.decaf2.data.FailureNode;
 
 /**
+ * ______  _______ _______ _______ _______      _____ _____
+ * |     \ |______ |       |_____| |______        |     |  
+ * |_____/ |______ |_____  |     | |            __|__ __|__
+ *
  * @author Sashank Tadepalli
  *
  */
 public class DECAF_SAXHandler extends DefaultHandler {
+	
 	/*
 	 * Singleton Instance
 	 */

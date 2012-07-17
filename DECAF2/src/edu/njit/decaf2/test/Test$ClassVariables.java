@@ -6,7 +6,7 @@ import java.util.HashMap;
  */
 
 /**
- * @author soulcyon
+ * @author Sashank Tadepalli
  *
  */
 public class Test$ClassVariables {

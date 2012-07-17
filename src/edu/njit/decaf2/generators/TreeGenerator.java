@@ -1,4 +1,4 @@
-package edu.njit.decaf2.data;
+package edu.njit.decaf2.generators;
 
 /**
  * ______  _______ _______ _______ _______      _____ _____
@@ -8,6 +8,6 @@ package edu.njit.decaf2.data;
  * @author Sashank Tadepalli
  *
  */
-public class FailureTree {
+public class TreeGenerator {
 
 }

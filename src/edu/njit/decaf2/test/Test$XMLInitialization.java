@@ -1,17 +1,14 @@
-/**
- * 
- */
 package edu.njit.decaf2.test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Stack;
 
 /**
- * @author soulcyon
+ * ______  _______ _______ _______ _______      _____ _____
+ * |     \ |______ |       |_____| |______        |     |  
+ * |_____/ |______ |_____  |     | |            __|__ __|__
+ *
+ * @author Sashank Tadepalli
  *
  */
 public class Test$XMLInitialization {
