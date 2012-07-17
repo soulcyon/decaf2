@@ -54,7 +54,7 @@ public class Simulation extends DECAF {
 		
 		System.out.println(decaf_transitionStates.length);
 		System.out.println("Time to SG: " + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
-		//System.out.println(sg);
+		System.out.println(sg);
 		
 		t = System.nanoTime();
 		
@@ -64,7 +64,7 @@ public class Simulation extends DECAF {
 		setDecaf_qMatrix(qg.generateTransitionMatrix());
 		
 		System.out.println("Time to QG: " + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
-		//System.out.println(qg);
+		System.out.println(qg);
 	}
 	
 	/**
