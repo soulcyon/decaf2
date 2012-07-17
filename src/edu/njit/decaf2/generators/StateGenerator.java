@@ -10,7 +10,11 @@ import edu.njit.decaf2.data.FailureNode;
 import edu.njit.decaf2.data.State;
 
 /**
- * @author soulcyon
+ * ______  _______ _______ _______ _______      _____ _____
+ * |     \ |______ |       |_____| |______        |     |  
+ * |_____/ |______ |_____  |     | |            __|__ __|__
+ *
+ * @author Sashank Tadepalli
  *
  */
 public class StateGenerator extends DECAF {

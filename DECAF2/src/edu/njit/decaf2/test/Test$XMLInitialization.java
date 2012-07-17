@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edu.njit.decaf2.test;
 
 import java.util.ArrayList;
@@ -11,7 +8,7 @@ import java.util.List;
 import java.util.Stack;
 
 /**
- * @author soulcyon
+ * @author Sashank Tadepalli
  *
  */
 public class Test$XMLInitialization {

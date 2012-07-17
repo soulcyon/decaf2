@@ -5,7 +5,7 @@ import java.util.HashMap;
 import edu.njit.decaf2.data.FailureNode;
 
 /**
- * @author soulcyon
+ * @author Sashank Tadepalli
  *
  */
 public class Test$HashMaps {

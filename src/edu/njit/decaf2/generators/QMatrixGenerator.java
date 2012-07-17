@@ -1,10 +1,13 @@
 package edu.njit.decaf2.generators;
+
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.data.State;
 
-
 /**
- * 
+ * ______  _______ _______ _______ _______      _____ _____
+ * |     \ |______ |       |_____| |______        |     |  
+ * |_____/ |______ |_____  |     | |            __|__ __|__
+ *
  * @author Sashank Tadepalli
  *
  */

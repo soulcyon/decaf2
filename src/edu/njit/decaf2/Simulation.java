@@ -14,12 +14,16 @@ import edu.njit.decaf2.generators.QMatrixGenerator;
 import edu.njit.decaf2.generators.StateGenerator;
 
 /**
- * 
+ * ______  _______ _______ _______ _______      _____ _____
+ * |     \ |______ |       |_____| |______        |     |  
+ * |_____/ |______ |_____  |     | |            __|__ __|__
+ *
  * @author Sashank Tadepalli
  *
  */
 public class Simulation extends DECAF {
 	private boolean 						decaf_debug;
+	private boolean							decaf_debugVerbose;
 	private State[] 						decaf_transitionStates;
 	private double[][] 						decaf_demandMatrix;
 	private HashMap<String, FailureNode>	decaf_nodeMap = new HashMap<String, FailureNode>();
@@ -43,18 +47,25 @@ public class Simulation extends DECAF {
 			return;
 		}
 
-		
+		double resultProcessing = 0.0;
 		double t = System.nanoTime();
 		loadSimulationData("data/input.xml");
-		System.out.println("Time to Load XML: " + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
+		
+		resultProcessing += System.nanoTime() - t;
+		System.out.println("Time to Load XML:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
 		
 		t = System.nanoTime();
 		StateGenerator sg = new StateGenerator(decaf_nodeMap, decaf_demandMatrix);
 		decaf_transitionStates = sg.generateStates();
 		
-		System.out.println(decaf_transitionStates.length);
-		System.out.println("Time to SG: " + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
-		System.out.println(sg);
+		if( decaf_debugVerbose )
+			System.out.println(decaf_transitionStates.length);
+		
+		resultProcessing += System.nanoTime() - t;
+		System.out.println("Time to SG:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
+
+		if( decaf_debugVerbose )
+			System.out.println(sg);
 		
 		t = System.nanoTime();
 		
@@ -62,9 +73,14 @@ public class Simulation extends DECAF {
 		decaf_nodeMap.keySet().toArray(nodeKeyArray);
 		QMatrixGenerator qg = new QMatrixGenerator(decaf_transitionStates, nodeKeyArray, decaf_demandMatrix);
 		setDecaf_qMatrix(qg.generateTransitionMatrix());
+
+		resultProcessing += System.nanoTime() - t;
+		System.out.println("Time to QG:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
+
+		if( decaf_debugVerbose )
+			System.out.println(qg);
 		
-		System.out.println("Time to QG: " + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
-		System.out.println(qg);
+		System.out.println("Total CPU Time:\t"+ resultProcessing/1000.0/1000.0/1000.0);
 	}
 	
 	/**
