@@ -36,7 +36,6 @@ public class Test$XMLInitialization {
 		/****************************************************************************/
 		t = System.nanoTime();
 		String s = "";
-		int m = 0;
 		
 		// Create generator string with appropriate number of redundancies
 		for( int j = 0; j < comps; j++ ){
