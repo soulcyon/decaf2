@@ -9,6 +9,10 @@ package edu.njit.decaf2.test;
  *
  */
 public class Test$StringVsCharArr {
+	private static String 				temp = "";
+	private static char[] 				char1;
+	private static char[] 				char2;
+	
 	public static void main(String[] args){
 		/****************************************************************************/
 		/* String */
@@ -18,7 +22,7 @@ public class Test$StringVsCharArr {
 		
 		double t = System.nanoTime();
 		while( i++ < max ){
-			String temp = "1";
+			setTemp("1");
 		}
 		System.out.println("Strings:");
 		System.out.println((System.nanoTime() - t)/1000.0/1000.0/1000.0);
@@ -31,11 +35,40 @@ public class Test$StringVsCharArr {
 		
 		t = System.nanoTime();
 		while( i++ < max ){
-			char[] temp = new char[0];
-			char[] temp2 = new char[]{ '1' };
-			temp = temp2;
+			char1 = new char[0];
+			char2 = new char[]{ '1' };
+			char1 = char2;
+			char2 = char1;
 		}
 		System.out.println("Char Arr:");
 		System.out.println((System.nanoTime() - t)/1000.0/1000.0/1000.0);
+	}
+
+	/**
+	 * @return the temp
+	 */
+	public static String getTemp() {
+		return temp;
+	}
+
+	/**
+	 * @param temp the temp to set
+	 */
+	public static void setTemp(String temp) {
+		Test$StringVsCharArr.temp = temp;
+	}
+
+	/**
+	 * @return the char1
+	 */
+	public static char[] getChar1() {
+		return char1;
+	}
+
+	/**
+	 * @param char1 the char1 to set
+	 */
+	public static void setChar1(char[] char1) {
+		Test$StringVsCharArr.char1 = char1;
 	}
 }

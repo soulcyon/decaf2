@@ -15,6 +15,7 @@ public class Test$ClassVariables {
 	private HashMap<String, Double> 	testB;
 	private int 						testC;
 	private String 						testD;
+	private static double				_;
 	
 	public static void main(String[] args){
 		Test$ClassVariables tcv = new Test$ClassVariables();
@@ -31,14 +32,14 @@ public class Test$ClassVariables {
 		double t = System.nanoTime();
 		int i = 0;
 		while( i++ < 1000000 ){
-			double _ = this.testA[0][0];
+			set_(this.testA[0][0]);
 		}
 		System.out.println("Test A1: " + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
 		
 		t = System.nanoTime();
 		i = 0;
 		while( i++ < 1000000 ){
-			double _ = testA[0][0];
+			set_(testA[0][0]);
 		}
 		System.out.println("Test A2: " + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
 		
@@ -111,5 +112,19 @@ public class Test$ClassVariables {
 	 */
 	public void setTestD(String testD) {
 		this.testD = testD;
+	}
+
+	/**
+	 * @return the _
+	 */
+	public static double get_() {
+		return _;
+	}
+
+	/**
+	 * @param _ the _ to set
+	 */
+	public static void set_(double _) {
+		Test$ClassVariables._ = _;
 	}
 }
