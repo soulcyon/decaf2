@@ -45,7 +45,7 @@ public class QMatrixGenerator extends DECAF {
 		// Step 1: Iterate over matrix, ignore diagonal
 		for( int i = 0; i < statesLen; i++ ){
 			for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 ){
-				qMatrix[i][j] = findFailureRate(transitionStates[i], transitionStates[j]);
+				qMatrix[i][j] = fillQMatrix(transitionStates[i], transitionStates[j]);
 			}
 		}
 		
@@ -66,7 +66,7 @@ public class QMatrixGenerator extends DECAF {
 	 * @param to
 	 * @return rate
 	 */
-	private double findFailureRate(State from, State to){
+	private double fillQMatrix(State from, State to){
 		boolean equality = true;
 		boolean gentrees = true;
 		String repair = null;

@@ -27,7 +27,7 @@ import edu.njit.decaf2.generators.TreeGenerator;
  */
 public class Simulation extends DECAF {
 	private boolean 						decaf_debug;
-	private boolean							decaf_debugVerbose;
+	private boolean							decaf_debugVerbose = true;
 	private State[] 						decaf_transitionStates;
 	private double[][] 						decaf_demandMatrix;
 	private HashMap<String, FailureNode>	decaf_nodeMap = new HashMap<String, FailureNode>();
@@ -62,13 +62,13 @@ public class Simulation extends DECAF {
 		StateGenerator sg = new StateGenerator(decaf_nodeMap, decaf_demandMatrix);
 		decaf_transitionStates = sg.generateStates();
 		
-		if( decaf_debugVerbose )
+		if( DECAF.VerboseDebug )
 			System.out.println(decaf_transitionStates.length);
 		
 		resultProcessing += System.nanoTime() - t;
 		System.out.println("Time to SG:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
 
-		if( decaf_debugVerbose )
+		if( DECAF.VerboseDebug )
 			System.out.println(sg);
 		
 		t = System.nanoTime();
@@ -83,10 +83,10 @@ public class Simulation extends DECAF {
 		resultProcessing += System.nanoTime() - t;
 		System.out.println("Time to QG:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
 
-		if( decaf_debugVerbose )
+		if( DECAF.VerboseDebug )
 			System.out.println("Generated Trees:\t" + tg.getStateCache().size() + " (reused " + tg.getMisses() + ")");
 		
-		if( decaf_debugVerbose )
+		if( DECAF.VerboseDebug )
 			System.out.println(qg);
 		
 		System.out.println("Total CPU Time:\t"+ resultProcessing/1000.0/1000.0/1000.0);

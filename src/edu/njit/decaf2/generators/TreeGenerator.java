@@ -9,7 +9,7 @@ import java.util.HashSet;
 
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.data.FailureNode;
-import edu.njit.decaf2.data.FailureTree;
+import edu.njit.decaf2.data.TreeNode;
 import edu.njit.decaf2.data.State;
 
 /**
@@ -20,8 +20,8 @@ import edu.njit.decaf2.data.State;
  *
  */
 public class TreeGenerator extends DECAF {
-	private HashSet<FailureTree>			treeCache = new HashSet<FailureTree>();
-	private HashMap<State, Double> 			stateCache = new HashMap<State, Double>();
+	private HashSet<TreeNode>				treeCache = new HashSet<TreeNode>();
+	private HashMap<String, TreeNode> 		stateCache = new HashMap<String, TreeNode>();
 	private HashMap<String, FailureNode>	nodeMap = new HashMap<String, FailureNode>();
 	private int								misses = 0;
 	
@@ -40,30 +40,44 @@ public class TreeGenerator extends DECAF {
 	 */
 	public double getFailureRate(State from, State to){
 		State diffState = from.diff(to);
-		if( stateCache.containsKey(diffState) ){
+		if( stateCache.containsKey(diffState.toString()) ){
 			misses++;
-			return stateCache.get(diffState);
+			return stateCache.get(diffState.toString()).getRate();
 		}
 
 		double failureRate = 0.0;
 		HashMap<String, Integer> diffVector = diffState.getVector();
 		for( String k : diffVector.keySet() ){
-			FailureTree curr = buildTree(k, diffState);
+			failureRate += buildTree(k, diffState);
 		}
-		stateCache.put(diffState, failureRate);
 		return failureRate;
 	}
 	
-	private FailureTree buildTree(String root, State transition){
-		FailureTree ft = new FailureTree(nodeMap.get(root));
-		return ft;
+	private double buildTree(String root, State transition){
+		TreeNode ft = new TreeNode(nodeMap.get(root), transition.getDemand());
+		stateCache.put(transition.toString(), ft);
+		return ft.getRate();
 	}
 
 	/**
 	 * @return the nodeM
 	 */
-	public HashMap<String, FailureNode> getNodeMap() {
+	public HashMap<String, FailureNode> getNodeM() {
 		return nodeMap;
+	}
+	
+	/**
+	 * @return the cache
+	 */
+	public HashMap<String, TreeNode> getCache() {
+		return stateCache;
+	}
+	
+	/**
+	 * @return the stateCache
+	 */
+	public HashMap<String, TreeNode> getStateCache() {
+		return stateCache;
 	}
 
 	/**
@@ -71,12 +85,5 @@ public class TreeGenerator extends DECAF {
 	 */
 	public int getMisses() {
 		return misses;
-	}
-	
-	/**
-	 * @return the stateCache
-	 */
-	public HashMap<State, Double> getStateCache() {
-		return stateCache;
 	}
 }
