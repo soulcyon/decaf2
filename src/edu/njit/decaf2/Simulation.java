@@ -12,6 +12,7 @@ import edu.njit.decaf2.data.FailureNode;
 import edu.njit.decaf2.data.State;
 import edu.njit.decaf2.generators.QMatrixGenerator;
 import edu.njit.decaf2.generators.StateGenerator;
+import edu.njit.decaf2.generators.TreeGenerator;
 
 /**
  * ______  _______ _______ _______ _______      _____ _____
@@ -72,11 +73,16 @@ public class Simulation extends DECAF {
 		String[] nodeKeyArray = new String[decaf_nodeMap.keySet().size()];
 		decaf_nodeMap.keySet().toArray(nodeKeyArray);
 		QMatrixGenerator qg = new QMatrixGenerator(decaf_transitionStates, nodeKeyArray, decaf_demandMatrix);
-		setDecaf_qMatrix(qg.generateTransitionMatrix());
+		TreeGenerator tg = new TreeGenerator(decaf_nodeMap);
+		qg.setTreeGenerator(tg);
+		setDecaf_qMatrix(qg.generateQMatrix());
 
 		resultProcessing += System.nanoTime() - t;
 		System.out.println("Time to QG:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
 
+		if( decaf_debugVerbose )
+			System.out.println("Generated Trees:\t" + tg.getCache().size() + " (reused " + tg.getMisses() + ")");
+		
 		if( decaf_debugVerbose )
 			System.out.println(qg);
 		
@@ -99,7 +105,7 @@ public class Simulation extends DECAF {
 		String[] nodeKeyArray = new String[decaf_nodeMap.keySet().size()];
 		decaf_nodeMap.keySet().toArray(nodeKeyArray);
 		QMatrixGenerator qg = new QMatrixGenerator(decaf_transitionStates, nodeKeyArray, decaf_demandMatrix);
-		setDecaf_qMatrix(qg.generateTransitionMatrix());
+		setDecaf_qMatrix(qg.generateQMatrix());
 	}
 	
 	/**

@@ -12,6 +12,7 @@ import edu.njit.decaf2.data.State;
  *
  */
 public class QMatrixGenerator extends DECAF {
+	private TreeGenerator					tg;
 	private State[] 						transitionStates;
 	private String[] 						vectorKeys;
 	private double[][]						qMatrix;
@@ -32,7 +33,7 @@ public class QMatrixGenerator extends DECAF {
 	 * 
 	 * @return
 	 */
-	public double[][] generateTransitionMatrix(){
+	public double[][] generateQMatrix(){
 		int statesLen = transitionStates.length;
 		//int keysLen = vectorKeys.length;
 		
@@ -41,17 +42,7 @@ public class QMatrixGenerator extends DECAF {
 		// Step 1: Iterate over matrix, ignore diagonal
 		for( int i = 0; i < statesLen; i++ ){
 			for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 ){
-				State currentState = transitionStates[i].diff(transitionStates[j]);
-				int sum = currentState.sum();
-				
-				switch( sum ){
-					// In case of negatives, fill in proper Repair probability
-					case -1: 
-						qMatrix[i][j] = 1.0;
-					break;
-					default:
-						qMatrix[i][j] = 0;
-				}
+				qMatrix[i][j] = findFailureRate(transitionStates[i], transitionStates[j]);
 			}
 		}
 		
@@ -64,6 +55,45 @@ public class QMatrixGenerator extends DECAF {
 			qMatrix[i][i] = sum;
 		}
 		return qMatrix;
+	}
+	
+	/**
+	 * 
+	 * @param from
+	 * @param to
+	 * @return rate
+	 */
+	private double findFailureRate(State from, State to){
+		boolean equality = true;
+		boolean gentrees = true;
+		String repair = null;
+		
+		if( from.getDemand() != to.getDemand() /*&& from.diff(to).sum() == 0*/ ){
+			for( int i = 0; i < vectorKeys.length; i++ )
+				if( from.getVector().get(vectorKeys[i]) != to.getVector().get(vectorKeys[i]) )
+					return 0.0;
+			return demandMatrix[from.getDemand()][to.getDemand()];
+		}
+		for( int i = 0; i < vectorKeys.length; i++ ){
+			int iFrom = from.getVector().get(vectorKeys[i]),
+				iTo = to.getVector().get(vectorKeys[i]);
+
+			if( repair == null && equality && iTo == iFrom - 1 ){
+				repair = vectorKeys[i];
+			} else if( iFrom != iTo ){
+				equality = false;
+			}
+			if( iTo < iFrom ){
+				gentrees = false;
+			}
+		}
+		if( gentrees ){
+			return tg.getFailureRate(from, to);
+		}
+		if( equality && repair != null ){
+			return (double)from.getVector().get(repair) / (double)from.sum();
+		}
+		return 0.0;
 	}
 	
 	/**
@@ -107,19 +137,6 @@ public class QMatrixGenerator extends DECAF {
 	public void setqMatrix(double[][] qMatrix) {
 		this.qMatrix = qMatrix;
 	}
-	
-	@Override
-	public String toString(){
-		int statesLen = transitionStates.length;
-		String result = "";
-		for( int i = 0; i < statesLen; i++ ){
-			for( int j = 0; j < statesLen; j++ ){
-				result += "(" + qMatrix[i][j] + ")" + "\t";
-			}
-			result += "\n";
-		}
-		return error(result);
-	}
 
 	/**
 	 * @return the demandLevels
@@ -133,5 +150,26 @@ public class QMatrixGenerator extends DECAF {
 	 */
 	public void setDemandLevels(double[][] demandLevels) {
 		this.demandMatrix = demandLevels;
+	}
+	
+	/**
+	 * 
+	 * @param tg
+	 */
+	public void setTreeGenerator(TreeGenerator tg){
+		this.tg = tg;
+	}
+	
+	@Override
+	public String toString(){
+		int statesLen = transitionStates.length;
+		String result = "";
+		for( int i = 0; i < statesLen; i++ ){
+			for( int j = 0; j < statesLen; j++ ){
+				result += "(" + qMatrix[i][j] + ")" + "\t";
+			}
+			result += "\n";
+		}
+		return error(result);
 	}
 }
