@@ -12,6 +12,9 @@ package edu.njit.decaf2;
  *
  */
 public class DECAF {
+	public static boolean ForceStateDemandValidate = false;
+	public static boolean VerboseDebug = false;
+	
 	public String error(String message){
 		return "[DECAF." + this.getClass().getSimpleName() + "::\n" + message + "]\n";
 	}

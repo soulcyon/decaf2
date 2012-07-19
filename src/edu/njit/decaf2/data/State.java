@@ -180,7 +180,7 @@ public class State extends DECAF {
 	public int hashCode() {
 		int result = new Integer(demand).hashCode();
 		for( String k : vector.keySet() ){
-			result += new Integer(vector.get(k)).hashCode();
+			result += k.hashCode() + new Integer(vector.get(k)).hashCode();
 		}
 		return new Integer(result).hashCode();
 	}
@@ -191,11 +191,8 @@ public class State extends DECAF {
 		
 		State other = (State) o;
 		
-		// Environment strict-equals?
-		// Un-comment below this line:
-		// -----------------------------------
-		//if( demand != other.demand )
-		//	return false;
+		if( DECAF.ForceStateDemandValidate && demand != other.demand )
+			return false;
 		
 		for( String k : vector.keySet() ){
 			if( !other.vector.containsKey(k) ||
