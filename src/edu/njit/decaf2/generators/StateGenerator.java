@@ -1,3 +1,7 @@
+/* ______  _______ _______ _______ _______      _____ _____
+ * |     \ |______ |       |_____| |______        |     |  
+ * |_____/ |______ |______ |     | |            __|__ __|__
+ */
 package edu.njit.decaf2.generators;
 
 import java.util.Arrays;
@@ -10,11 +14,10 @@ import edu.njit.decaf2.data.FailureNode;
 import edu.njit.decaf2.data.State;
 
 /**
- * ______  _______ _______ _______ _______      _____ _____
- * |     \ |______ |       |_____| |______        |     |  
- * |_____/ |______ |_____  |     | |            __|__ __|__
+ * DECAF 2 - StateGenerator
  *
  * @author Sashank Tadepalli
+ * @version 2.0
  *
  */
 public class StateGenerator extends DECAF {

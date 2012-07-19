@@ -1,3 +1,7 @@
+/* ______  _______ _______ _______ _______      _____ _____
+ * |     \ |______ |       |_____| |______        |     |  
+ * |_____/ |______ |______ |     | |            __|__ __|__
+ */
 package edu.njit.decaf2;
 
 import java.io.File;
@@ -15,11 +19,10 @@ import edu.njit.decaf2.generators.StateGenerator;
 import edu.njit.decaf2.generators.TreeGenerator;
 
 /**
- * ______  _______ _______ _______ _______      _____ _____
- * |     \ |______ |       |_____| |______        |     |  
- * |_____/ |______ |_____  |     | |            __|__ __|__
+ * DECAF 2 - Simulation
  *
  * @author Sashank Tadepalli
+ * @version 2.0
  *
  */
 public class Simulation extends DECAF {
@@ -81,7 +84,7 @@ public class Simulation extends DECAF {
 		System.out.println("Time to QG:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
 
 		if( decaf_debugVerbose )
-			System.out.println("Generated Trees:\t" + tg.getCache().size() + " (reused " + tg.getMisses() + ")");
+			System.out.println("Generated Trees:\t" + tg.getStateCache().size() + " (reused " + tg.getMisses() + ")");
 		
 		if( decaf_debugVerbose )
 			System.out.println(qg);

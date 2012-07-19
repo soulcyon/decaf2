@@ -1,3 +1,7 @@
+/* ______  _______ _______ _______ _______      _____ _____
+ * |     \ |______ |       |_____| |______        |     |  
+ * |_____/ |______ |______ |     | |            __|__ __|__
+ */
 package edu.njit.decaf2;
 
 import java.util.HashMap;
@@ -9,11 +13,10 @@ import org.xml.sax.helpers.DefaultHandler;
 import edu.njit.decaf2.data.FailureNode;
 
 /**
- * ______  _______ _______ _______ _______      _____ _____
- * |     \ |______ |       |_____| |______        |     |  
- * |_____/ |______ |_____  |     | |            __|__ __|__
+ * DECAF 2 - DECAF_SAXHandler
  *
  * @author Sashank Tadepalli
+ * @version 2.0
  *
  */
 public class DECAF_SAXHandler extends DefaultHandler {
