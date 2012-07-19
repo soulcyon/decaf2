@@ -1,14 +1,17 @@
+/* ______  _______ _______ _______ _______      _____ _____
+ * |     \ |______ |       |_____| |______        |     |  
+ * |_____/ |______ |______ |     | |            __|__ __|__
+ */
 package edu.njit.decaf2.test;
 
 import java.util.Arrays;
 import java.util.HashSet;
 
 /**
- * ______  _______ _______ _______ _______      _____ _____
- * |     \ |______ |       |_____| |______        |     |  
- * |_____/ |______ |_____  |     | |            __|__ __|__
+ * DECAF 2 - Test$XMLInitialization
  *
  * @author Sashank Tadepalli
+ * @version 2.0
  *
  */
 public class Test$XMLInitialization {

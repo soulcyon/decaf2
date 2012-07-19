@@ -1,18 +1,22 @@
+/* ______  _______ _______ _______ _______      _____ _____
+ * |     \ |______ |       |_____| |______        |     |  
+ * |_____/ |______ |______ |     | |            __|__ __|__
+ */
 package edu.njit.decaf2.data;
 
 import edu.njit.decaf2.DECAF;
 
 /**
- * ______  _______ _______ _______ _______      _____ _____
- * |     \ |______ |       |_____| |______        |     |  
- * |_____/ |______ |_____  |     | |            __|__ __|__
+ * DECAF 2 - FailureTree
  *
  * @author Sashank Tadepalli
+ * @version 2.0
  *
  */
 public class FailureTree extends DECAF {
 	private FailureNode						root;
 	private FailureTree[]					children;
+	private double							rate;
 	
 	/**
 	 * 
@@ -75,5 +79,19 @@ public class FailureTree extends DECAF {
 	 */
 	public boolean isLeaf(){
 		return children == null || children.length == 0;
+	}
+
+	/**
+	 * @return the rate
+	 */
+	public double getRate() {
+		return rate;
+	}
+
+	/**
+	 * @param rate the rate to set
+	 */
+	public void setRate(double rate) {
+		this.rate = rate;
 	}
 }

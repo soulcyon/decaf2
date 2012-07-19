@@ -1,14 +1,17 @@
+/* ______  _______ _______ _______ _______      _____ _____
+ * |     \ |______ |       |_____| |______        |     |  
+ * |_____/ |______ |______ |     | |            __|__ __|__
+ */
 package edu.njit.decaf2.generators;
 
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.data.State;
 
 /**
- * ______  _______ _______ _______ _______      _____ _____
- * |     \ |______ |       |_____| |______        |     |  
- * |_____/ |______ |_____  |     | |            __|__ __|__
+ * DECAF 2 - QMatrixGenerator
  *
  * @author Sashank Tadepalli
+ * @version 2.0
  *
  */
 public class QMatrixGenerator extends DECAF {

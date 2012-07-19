@@ -1,3 +1,7 @@
+/* ______  _______ _______ _______ _______      _____ _____
+ * |     \ |______ |       |_____| |______        |     |  
+ * |_____/ |______ |______ |     | |            __|__ __|__
+ */
 package edu.njit.decaf2.data;
 
 import java.util.HashMap;
@@ -6,11 +10,10 @@ import java.util.Set;
 import edu.njit.decaf2.DECAF;
 
 /**
- * ______  _______ _______ _______ _______      _____ _____
- * |     \ |______ |       |_____| |______        |     |  
- * |_____/ |______ |_____  |     | |            __|__ __|__
+ * DECAF 2 - State
  *
  * @author Sashank Tadepalli
+ * @version 2.0
  *
  */
 public class State extends DECAF {

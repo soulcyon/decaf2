@@ -1,3 +1,7 @@
+/* ______  _______ _______ _______ _______      _____ _____
+ * |     \ |______ |       |_____| |______        |     |  
+ * |_____/ |______ |______ |     | |            __|__ __|__
+ */
 package edu.njit.decaf2.test;
 
 import java.util.HashMap;
@@ -5,11 +9,10 @@ import java.util.HashMap;
 import edu.njit.decaf2.data.FailureNode;
 
 /**
- * ______  _______ _______ _______ _______      _____ _____
- * |     \ |______ |       |_____| |______        |     |  
- * |_____/ |______ |_____  |     | |            __|__ __|__
+ * DECAF 2 - Test$HashMaps
  *
  * @author Sashank Tadepalli
+ * @version 2.0
  *
  */
 public class Test$HashMaps {
