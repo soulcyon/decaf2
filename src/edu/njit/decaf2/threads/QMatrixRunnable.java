@@ -15,18 +15,22 @@ import edu.njit.decaf2.generators.QMatrixGenerator;
  *
  */
 public class QMatrixRunnable extends DECAF implements Runnable {
-	int i, j;
+	private State row;
+	private int i;
+	private int len;
+	private QMatrixGenerator qg;
 	
-	public QMatrixRunnable(int i, int j){
+	public QMatrixRunnable(State row, int i, int len, QMatrixGenerator qg){
+		this.qg = qg;
+		this.row = row;
 		this.i = i;
-		this.j = j;
-	}
-	
-	public void run(double[][] qMatrix, State[] transitionStates, QMatrixGenerator qg){
-		qMatrix[i][j] = qg.fillQMatrix(transitionStates[i], transitionStates[j]);
+		this.len = len;
 	}
 	
 	@Override
 	public void run(){
+		for( int j = i == 0 ? 1 : 0; j < len; j = j == i - 1 ? j + 2 : j + 1 ){
+			qg.getqMatrix()[i][j] = qg.fillQMatrix(qg.getTransitionStates()[i], qg.getTransitionStates()[j]);
+		}
 	}
 }

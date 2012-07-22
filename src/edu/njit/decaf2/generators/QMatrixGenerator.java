@@ -4,8 +4,6 @@
  */
 package edu.njit.decaf2.generators;
 
-import java.util.HashMap;
-
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.data.State;
 import edu.njit.decaf2.threads.QMatrixRunnable;
@@ -44,28 +42,33 @@ public class QMatrixGenerator extends DECAF {
 		//int keysLen = vectorKeys.length;
 		
 		setqMatrix(new double[statesLen][statesLen]);
-		
+
 		// Step 1: Iterate over matrix, ignore diagonal
 		for( int i = 0; i < statesLen; i++ ){
-			for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 ){
+			QMatrixRunnable worker = new QMatrixRunnable(transitionStates[i], i, statesLen, this);
+			Thread thread = new Thread(worker);
+			thread.start();
+			//for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 ){
 				//qMatrix[i][j] = fillQMatrix(transitionStates[i], transitionStates[j]);
-				QMatrixRunnable thread = new QMatrixRunnable(i, j);
-				thread.run(qMatrix, transitionStates, this);
-			}
+			//}
 		}
 		
-		// Step 2: Sum each row to fill in diagonal
-		for( int i = 0; i < statesLen; i++ ){
-			int sum = 0;
-			for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 ){
-				sum += qMatrix[i][j];
+		synchronized (qMatrix) {
+			// Step 2: Sum each row to fill in diagonal
+			for( int i = 0; i < statesLen; i++ ){
+				int sum = 0;
+				for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 ){
+					sum += qMatrix[i][j];
+				}
+				qMatrix[i][i] = sum;
 			}
-			qMatrix[i][i] = sum;
+			return qMatrix;
 		}
-		return qMatrix;
 	}
 	
 	/**
+	 * === NOTE ===
+	 * QMatrixRunnable will call this method, please use the refactoring tool in Eclipse to make any modifications.
 	 * 
 	 * @param from
 	 * @param to
@@ -74,8 +77,7 @@ public class QMatrixGenerator extends DECAF {
 	public double fillQMatrix(State from, State to){
 		boolean repairTransition = true;
 		boolean failedTransition = true;
-		boolean enviroTransition = false;
-		
+		boolean enviroTransition = false;		
 		String repair = null;
 		int fromDemand = from.getDemand();
 		int toDemand = to.getDemand();
