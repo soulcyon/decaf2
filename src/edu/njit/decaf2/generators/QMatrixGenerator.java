@@ -4,8 +4,11 @@
  */
 package edu.njit.decaf2.generators;
 
+import java.util.HashMap;
+
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.data.State;
+import edu.njit.decaf2.threads.QMatrixRunnable;
 
 /**
  * DECAF 2 - QMatrixGenerator
@@ -45,7 +48,9 @@ public class QMatrixGenerator extends DECAF {
 		// Step 1: Iterate over matrix, ignore diagonal
 		for( int i = 0; i < statesLen; i++ ){
 			for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 ){
-				qMatrix[i][j] = fillQMatrix(transitionStates[i], transitionStates[j]);
+				//qMatrix[i][j] = fillQMatrix(transitionStates[i], transitionStates[j]);
+				QMatrixRunnable thread = new QMatrixRunnable(i, j);
+				thread.run(qMatrix, transitionStates, this);
 			}
 		}
 		
@@ -66,36 +71,41 @@ public class QMatrixGenerator extends DECAF {
 	 * @param to
 	 * @return rate
 	 */
-	private double fillQMatrix(State from, State to){
-		boolean equality = true;
-		boolean gentrees = true;
-		String repair = null;
+	public double fillQMatrix(State from, State to){
+		boolean repairTransition = true;
+		boolean failedTransition = true;
+		boolean enviroTransition = false;
 		
-		if( from.getDemand() != to.getDemand() /*&& from.diff(to).sum() == 0*/ ){
-			for( int i = 0; i < vectorKeys.length; i++ )
-				if( from.getVector().get(vectorKeys[i]) != to.getVector().get(vectorKeys[i]) )
-					return 0.0;
-			return demandMatrix[from.getDemand()][to.getDemand()];
+		String repair = null;
+		int fromDemand = from.getDemand();
+		int toDemand = to.getDemand();
+		
+		if( fromDemand != toDemand /*&& from.diff(to).sum() == 0*/ ){
+			enviroTransition = true;
 		}
 		for( int i = 0; i < vectorKeys.length; i++ ){
 			int iFrom = from.getVector().get(vectorKeys[i]),
 				iTo = to.getVector().get(vectorKeys[i]);
-
-			if( repair == null && equality && iTo == iFrom - 1 ){
+			
+			if( enviroTransition && iFrom != iTo ){
+				return 0.0;
+			} else if( repair == null && repairTransition && iTo == iFrom - 1 ){
 				repair = vectorKeys[i];
 			} else if( iFrom != iTo ){
-				equality = false;
+				repairTransition = false;
 			}
 			if( iTo < iFrom ){
-				gentrees = false;
+				failedTransition = false;
 			}
 		}
-		if( gentrees ){
+		
+		if( enviroTransition )
+			return demandMatrix[fromDemand][toDemand];
+		if( failedTransition )
 			return tg.getFailureRate(from, to);
-		}
-		if( equality && repair != null ){
+			
+		if( repairTransition && repair != null )
 			return (double)from.getVector().get(repair) / (double)from.sum();
-		}
 		return 0.0;
 	}
 	
