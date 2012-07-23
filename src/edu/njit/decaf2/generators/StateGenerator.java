@@ -27,8 +27,8 @@ public class StateGenerator extends DECAF {
 	private State[]							transitionStates;
 	
 	public StateGenerator(HashMap<String, FailureNode> componentMap, double[][] demandMatrix){
-		setComponentMap(componentMap);
-		setDemandLevels(demandMatrix);
+		this.componentMap = componentMap;
+		this.demandMatrix = demandMatrix;
 	}
 	
 	/**

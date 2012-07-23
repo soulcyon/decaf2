@@ -23,38 +23,45 @@ public class QMatrixGenerator extends DECAF {
 	private double[][] 						demandMatrix;
 
 	/**
+	 * Sets {@link State} {@code transitionStates}, {@link String}[] {@code vectorKeys}, {@link Double}[][] 
+	 * {@code demandMatrix}
 	 * 
 	 * @param transitionStates
 	 * @param vectorKeys
 	 */
 	public QMatrixGenerator(State[] transitionStates, String[] vectorKeys, double[][] demandMatrix){
-		setTransitionStates(transitionStates);
-		setVectorKeys(vectorKeys);
-		setDemandLevels(demandMatrix);
+		this.transitionStates = transitionStates;
+		this.vectorKeys = vectorKeys;
+		this.demandMatrix = demandMatrix;
 	}
 	
 	/**
+	 * Algorithm 2.0 - Generating QMatrix via {@link QMatrixRunnable}
+	 * Refer to annotated source for details
 	 * 
-	 * @return
+	 * @return qMatrix
 	 */
 	public double[][] generateQMatrix(){
+		// Cache length of valid transition states
 		int statesLen = transitionStates.length;
-		//int keysLen = vectorKeys.length;
 		
-		setqMatrix(new double[statesLen][statesLen]);
+		// Initialize brand new qmatrix[][] array
+		this.qMatrix = new double[statesLen][statesLen];
 
-		// Step 1: Iterate over matrix, ignore diagonal
+		// Iterate over matrix, ignore diagonal
+		// This takes advantage of multi-threading to speed up calculations.  We could multi-thread the calculation of
+		// every cell, however to lower overhead and increase performance, we will only multi-thread the row 
+		// calculations.   See QMatrixRunnable for implementation details.
 		for( int i = 0; i < statesLen; i++ ){
 			QMatrixRunnable worker = new QMatrixRunnable(transitionStates[i], i, statesLen, this);
 			Thread thread = new Thread(worker);
 			thread.start();
-			//for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 ){
-				//qMatrix[i][j] = fillQMatrix(transitionStates[i], transitionStates[j]);
-			//}
 		}
 		
+		// To make sure that we return a completed matrix, we must use the synchronized keyword.   This will make sure 
+		// that all threads that will modify qMatrix are suspended/complete.  Once they are complete we can calculate 
+		// the diagonals and return the resulting qMatrix.
 		synchronized (qMatrix) {
-			// Step 2: Sum each row to fill in diagonal
 			for( int i = 0; i < statesLen; i++ ){
 				int sum = 0;
 				for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 ){
@@ -82,7 +89,7 @@ public class QMatrixGenerator extends DECAF {
 		int fromDemand = from.getDemand();
 		int toDemand = to.getDemand();
 		
-		if( fromDemand != toDemand /*&& from.diff(to).sum() == 0*/ ){
+		if( fromDemand != toDemand ){
 			enviroTransition = true;
 		}
 		for( int i = 0; i < vectorKeys.length; i++ ){
@@ -168,7 +175,6 @@ public class QMatrixGenerator extends DECAF {
 	}
 	
 	/**
-	 * 
 	 * @param tg
 	 */
 	public void setTreeGenerator(TreeGenerator tg){
