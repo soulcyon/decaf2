@@ -74,16 +74,15 @@ public class Simulation extends DECAF {
 		
 		String[] nodeKeyArray = new String[nodeMap.keySet().size()];
 		nodeMap.keySet().toArray(nodeKeyArray);
-		QMatrixGenerator qg = new QMatrixGenerator(transitionStates, nodeKeyArray, demandMatrix);
 		TreeGenerator tg = new TreeGenerator(nodeMap);
-		qg.setTreeGenerator(tg);
-		setQMatrix(qg.generateQMatrix());
+		QMatrixGenerator qg = new QMatrixGenerator(transitionStates, nodeKeyArray, demandMatrix, tg);
+		qMatrix = qg.generateQMatrix();
 
 		resultProcessing += System.nanoTime() - t;
 		System.out.println("Time to QG:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
 
-		if( DECAF.VerboseDebug )
-			System.out.println("Generated Trees:\t" + tg.getStateCache().size() + " (reused " + tg.getMisses() + ")");
+		//if( DECAF.VerboseDebug )
+			System.out.println("Generated Trees:\t" + tg.getCache().size() + " (reused " + tg.getMisses() + ")");
 		
 		if( DECAF.VerboseDebug )
 			System.out.println(qg);
@@ -100,15 +99,6 @@ public class Simulation extends DECAF {
 			debug_run();
 			return;
 		}
-		
-		loadSimulationData("data/input.xml");
-		StateGenerator sg = new StateGenerator(nodeMap, demandMatrix);
-		transitionStates = sg.generateStates();
-		
-		String[] nodeKeyArray = new String[nodeMap.keySet().size()];
-		nodeMap.keySet().toArray(nodeKeyArray);
-		QMatrixGenerator qg = new QMatrixGenerator(transitionStates, nodeKeyArray, demandMatrix);
-		setQMatrix(qg.generateQMatrix());
 	}
 	
 	/**

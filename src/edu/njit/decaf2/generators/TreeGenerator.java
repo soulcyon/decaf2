@@ -21,7 +21,7 @@ import edu.njit.decaf2.data.State;
  */
 public class TreeGenerator extends DECAF {
 	private HashSet<TreeNode>				treeCache = new HashSet<TreeNode>();
-	private HashMap<String, TreeNode> 		stateCache = new HashMap<String, TreeNode>();
+	private HashMap<State, TreeNode> 		stateCache = new HashMap<State, TreeNode>();
 	private HashMap<String, FailureNode>	nodeMap = new HashMap<String, FailureNode>();
 	private int								misses = 0;
 	
@@ -41,9 +41,10 @@ public class TreeGenerator extends DECAF {
 	 */
 	public double getFailureRate(State from, State to){
 		State diffState = from.diff(to);
-		if( stateCache.containsKey(diffState.toString()) ){
+
+		if( stateCache.containsKey(diffState) ){
 			misses++;
-			return stateCache.get(diffState.toString()).getRate();
+			return stateCache.get(diffState).getRate();
 		}
 
 		double failureRate = 0.0;
@@ -51,13 +52,21 @@ public class TreeGenerator extends DECAF {
 		for( String k : diffVector.keySet() ){
 			failureRate += buildTree(k, diffState);
 		}
+		stateCache.put(diffState, new TreeNode(new FailureNode("NULL", new double[]{0.0}), 0));
 		return failureRate;
 	}
 	
+	/**
+	 * 
+	 * @param root
+	 * @param transition
+	 * @return
+	 */
 	private double buildTree(String root, State transition){
-		TreeNode ft = new TreeNode(nodeMap.get(root), transition.getDemand());
-		stateCache.put(transition.toString(), ft);
-		return ft.getRate();
+		//TreeNode ft = new TreeNode(nodeMap.get(root), transition.getDemand());
+		//stateCache.put(transition.toString(), ft);
+		//return ft.getRate();
+		return 0.0;
 	}
 
 	/**
@@ -70,14 +79,7 @@ public class TreeGenerator extends DECAF {
 	/**
 	 * @return the cache
 	 */
-	public HashMap<String, TreeNode> getCache() {
-		return stateCache;
-	}
-	
-	/**
-	 * @return the stateCache
-	 */
-	public HashMap<String, TreeNode> getStateCache() {
+	public HashMap<State, TreeNode> getCache() {
 		return stateCache;
 	}
 
@@ -86,5 +88,12 @@ public class TreeGenerator extends DECAF {
 	 */
 	public int getMisses() {
 		return misses;
+	}
+
+	/**
+	 * @return the treeCache
+	 */
+	public HashSet<TreeNode> getTreeCache() {
+		return treeCache;
 	}
 }

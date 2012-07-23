@@ -41,7 +41,12 @@ public class QMatrixRunnable extends DECAF implements Runnable {
 	@Override
 	public void run(){
 		for( int j = i == 0 ? 1 : 0; j < len; j = j == i - 1 ? j + 2 : j + 1 ){
-			qg.getqMatrix()[i][j] = qg.fillQMatrix(qg.getTransitionStates()[i], qg.getTransitionStates()[j]);
+			double fillV = qg.fillQMatrix(row, qg.getTransitionStates()[j]);
+			if( Double.isNaN(fillV) ){
+				qg.getTodoFill().add(new int[]{i, j});
+			} else {
+				qg.getqMatrix()[i][j] = fillV;
+			}
 		}
 	}
 }
