@@ -19,14 +19,17 @@ public class TreeNode extends DECAF {
 	private TreeNode[]						children;
 	private double							rate;
 	private int								currentDemand;
-	
+
 	/**
+	 * Sets {@link FailureNode} {@code root} and {@link Integer} {@code currentDemand}
 	 * 
+	 * @param root
+	 * @param currentDemand
 	 */
 	public TreeNode(FailureNode root, int currentDemand){
-		setRoot(root);
-		setCurrentDemand(currentDemand);
-		setRate(root.getFailureRates()[currentDemand]);
+		this.currentNode = root;
+		this.currentDemand = currentDemand;
+		this.rate = root.getFailureRates()[currentDemand];
 	}
 	
 	/**
@@ -51,16 +54,18 @@ public class TreeNode extends DECAF {
 	}
 	
 	/**
+	 * Naive implementation of ArrayList method to addChild to array.
 	 * 
 	 * @param child
 	 */
 	public void addChild(FailureNode child){
+		// TODO Analyze performance
 		if( children == null )
 			children = new TreeNode[0];
 
 		TreeNode[] temp = new TreeNode[children.length + 1];
 		TreeNode subTree = new TreeNode(child, currentDemand);
-		subTree.setParentNode(this);
+		subTree.parentNode = this;
 		for( int i = 0; i < children.length; i++ ){
 			temp[i] = children[i];
 		}
@@ -68,8 +73,9 @@ public class TreeNode extends DECAF {
 	}
 	
 	/**
+	 * Returns true if this {@link TreeNode} is a leaf node.
 	 * 
-	 * @return
+	 * @return true/false
 	 */
 	public boolean isLeaf(){
 		return children == null || children.length == 0;
@@ -96,7 +102,7 @@ public class TreeNode extends DECAF {
 	 * @return the parentNode
 	 */
 	public FailureNode getParentNode() {
-		return parentNode.getRoot();
+		return parentNode.currentNode;
 	}
 
 	/**

@@ -23,9 +23,10 @@ public class FailureNode extends DECAF {
 	private HashMap<FailureNode, Double> 	cascadingFailures = new HashMap<FailureNode, Double>();
 
 	/**
+	 * Sets {@link String} {@code type} and {@link Double}[] {@code failureRates} array.
 	 * 
 	 * @param type
-	 * @param failureRate
+	 * @param failureRates
 	 */
 	public FailureNode(String type, double[] failureRates){
 		setType(type);
@@ -33,6 +34,8 @@ public class FailureNode extends DECAF {
 	}
 	
 	/**
+	 * Sets {@link Integer} {@code required}, {@link String} {@code type}, {@link Integer} {@code redundancy} and
+	 * {@link Double}[] {@code failureRates} array.
 	 * 
 	 * @param required
 	 * @param type
@@ -47,6 +50,7 @@ public class FailureNode extends DECAF {
 	}
 	
 	/**
+	 * Sets {@link String} {@code type}.
 	 * 
 	 * @param type
 	 */
@@ -125,6 +129,7 @@ public class FailureNode extends DECAF {
 	}
 	
 	/**
+	 * Adds a cascading {@link FailureNode} {@code failure} with {@link Double} {@code rate}.
 	 * 
 	 * @param type
 	 * @param rate
@@ -134,6 +139,7 @@ public class FailureNode extends DECAF {
 	}
 	
 	/**
+	 * Removes cascading {@link FailureNode} {@code failure}.
 	 * 
 	 * @param type
 	 */

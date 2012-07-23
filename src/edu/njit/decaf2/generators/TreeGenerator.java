@@ -26,6 +26,7 @@ public class TreeGenerator extends DECAF {
 	private int								misses = 0;
 	
 	/**
+	 * Sets {@link HashMap}<{@link String}, {@link FailureNode}> {@code nodeMap}
 	 * @param decaf_nodeMap
 	 */
 	public TreeGenerator(HashMap<String, FailureNode> nodeMap) {

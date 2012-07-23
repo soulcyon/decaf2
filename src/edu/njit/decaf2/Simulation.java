@@ -26,15 +26,14 @@ import edu.njit.decaf2.generators.TreeGenerator;
  *
  */
 public class Simulation extends DECAF {
-	private boolean 						decaf_debug;
-	private boolean							decaf_debugVerbose = true;
-	private State[] 						decaf_transitionStates;
-	private double[][] 						decaf_demandMatrix;
-	private HashMap<String, FailureNode>	decaf_nodeMap = new HashMap<String, FailureNode>();
-	private double[][]						decaf_qMatrix;
+	private boolean 						debug;
+	private State[] 						transitionStates;
+	private double[][] 						demandMatrix;
+	private HashMap<String, FailureNode>	nodeMap = new HashMap<String, FailureNode>();
+	private double[][]						qMatrix;
 	
 	/**
-	 * 
+	 * Run through console.  Initializes new instance of Simulation and runs appropriate algorithms.
 	 * @param args
 	 */
 	public static void main(String[] args){
@@ -44,10 +43,10 @@ public class Simulation extends DECAF {
 	}
 	
 	/**
-	 * 
+	 * Runs with CPU Time stopwatch.  Set DECAF.VerboseDebug = true for detailed statistics.
 	 */
 	private void debug_run(){
-		if( !decaf_debug ){
+		if( !debug ){
 			return;
 		}
 
@@ -59,11 +58,11 @@ public class Simulation extends DECAF {
 		System.out.println("Time to Load XML:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
 		
 		t = System.nanoTime();
-		StateGenerator sg = new StateGenerator(decaf_nodeMap, decaf_demandMatrix);
-		decaf_transitionStates = sg.generateStates();
+		StateGenerator sg = new StateGenerator(nodeMap, demandMatrix);
+		transitionStates = sg.generateStates();
 		
 		if( DECAF.VerboseDebug )
-			System.out.println(decaf_transitionStates.length);
+			System.out.println(transitionStates.length);
 		
 		resultProcessing += System.nanoTime() - t;
 		System.out.println("Time to SG:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
@@ -73,12 +72,12 @@ public class Simulation extends DECAF {
 		
 		t = System.nanoTime();
 		
-		String[] nodeKeyArray = new String[decaf_nodeMap.keySet().size()];
-		decaf_nodeMap.keySet().toArray(nodeKeyArray);
-		QMatrixGenerator qg = new QMatrixGenerator(decaf_transitionStates, nodeKeyArray, decaf_demandMatrix);
-		TreeGenerator tg = new TreeGenerator(decaf_nodeMap);
+		String[] nodeKeyArray = new String[nodeMap.keySet().size()];
+		nodeMap.keySet().toArray(nodeKeyArray);
+		QMatrixGenerator qg = new QMatrixGenerator(transitionStates, nodeKeyArray, demandMatrix);
+		TreeGenerator tg = new TreeGenerator(nodeMap);
 		qg.setTreeGenerator(tg);
-		setDecaf_qMatrix(qg.generateQMatrix());
+		setQMatrix(qg.generateQMatrix());
 
 		resultProcessing += System.nanoTime() - t;
 		System.out.println("Time to QG:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
@@ -93,22 +92,23 @@ public class Simulation extends DECAF {
 	}
 	
 	/**
-	 * 
+	 * ===Note===
+	 * Deprecated until debug_run is finalized.
 	 */
 	private void run(){
-		if( decaf_debug ){
+		if( debug ){
 			debug_run();
 			return;
 		}
 		
 		loadSimulationData("data/input.xml");
-		StateGenerator sg = new StateGenerator(decaf_nodeMap, decaf_demandMatrix);
-		decaf_transitionStates = sg.generateStates();
+		StateGenerator sg = new StateGenerator(nodeMap, demandMatrix);
+		transitionStates = sg.generateStates();
 		
-		String[] nodeKeyArray = new String[decaf_nodeMap.keySet().size()];
-		decaf_nodeMap.keySet().toArray(nodeKeyArray);
-		QMatrixGenerator qg = new QMatrixGenerator(decaf_transitionStates, nodeKeyArray, decaf_demandMatrix);
-		setDecaf_qMatrix(qg.generateQMatrix());
+		String[] nodeKeyArray = new String[nodeMap.keySet().size()];
+		nodeMap.keySet().toArray(nodeKeyArray);
+		QMatrixGenerator qg = new QMatrixGenerator(transitionStates, nodeKeyArray, demandMatrix);
+		setQMatrix(qg.generateQMatrix());
 	}
 	
 	/**
@@ -123,8 +123,8 @@ public class Simulation extends DECAF {
 			SAXParser so = spf.newSAXParser();
 			so.parse(xmlFile, DECAF_SAXHandler.getInstance());
 			
-			decaf_demandMatrix = DECAF_SAXHandler.getDemand();
-			decaf_nodeMap = DECAF_SAXHandler.getNodeMap();
+			demandMatrix = DECAF_SAXHandler.getDemand();
+			nodeMap = DECAF_SAXHandler.getNodeMap();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -132,23 +132,23 @@ public class Simulation extends DECAF {
 	}
 	
 	/**
-	 * @param decaf_debug the decaf_debug to set
+	 * @param debug the debug to set
 	 */
-	public void setDebug(boolean decaf_debug) {
-		this.decaf_debug = decaf_debug;
+	public void setDebug(boolean debug) {
+		this.debug = debug;
 	}
 
 	/**
-	 * @return the decaf_qMatrix
+	 * @return the qMatrix
 	 */
-	public double[][] getDecaf_qMatrix() {
-		return decaf_qMatrix;
+	public double[][] getQMatrix() {
+		return qMatrix;
 	}
 
 	/**
-	 * @param decaf_qMatrix the decaf_qMatrix to set
+	 * @param qMatrix the qMatrix to set
 	 */
-	public void setDecaf_qMatrix(double[][] decaf_qMatrix) {
-		this.decaf_qMatrix = decaf_qMatrix;
+	public void setQMatrix(double[][] qMatrix) {
+		this.qMatrix = qMatrix;
 	}
 }

@@ -19,12 +19,12 @@ import edu.njit.decaf2.DECAF;
 public class State extends DECAF {
 	private HashMap<String, Integer> 		vector;
 	private int 							demand = -1;
-	
+
 	/**
 	 * 
 	 */
 	public State(){
-		setVector(new HashMap<String, Integer>());
+		vector = new HashMap<String, Integer>();
 	}
 	
 	/**
@@ -35,12 +35,12 @@ public class State extends DECAF {
 	 */
 	public State(Set<String> components, String states, int demand){
 		int i = 0;
-		setVector(new HashMap<String, Integer>());
+		vector = new HashMap<String, Integer>();
 		for( String k : components){
 			vector.put(k, Integer.parseInt(states.substring(i, i + 1)));
 			i++;
 		}
-		setDemand(demand);
+		this.demand = demand;
 	}
 	
 	/**
@@ -57,7 +57,7 @@ public class State extends DECAF {
 	 * @param vector
 	 */
 	public State(HashMap<String, Integer> vector){
-		setVector(vector);
+		this.vector = vector;
 	}
 	
 	/**
@@ -66,7 +66,7 @@ public class State extends DECAF {
 	 * @param state
 	 */
 	public State(String type, int state){
-		setVector(new HashMap<String, Integer>());
+		vector = new HashMap<String, Integer>();
 		vector.put(type, state);
 	}
 	
