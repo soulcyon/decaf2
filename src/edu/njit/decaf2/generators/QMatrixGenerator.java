@@ -4,6 +4,9 @@
  */
 package edu.njit.decaf2.generators;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.data.State;
 import edu.njit.decaf2.threads.QMatrixRunnable;
@@ -17,6 +20,9 @@ import edu.njit.decaf2.threads.QMatrixRunnable;
  */
 public class QMatrixGenerator extends DECAF {
 	private TreeGenerator					tg;
+	private ArrayList<Thread>					threads = new ArrayList<Thread>();
+	private ArrayList<int[]>				todoFill = new ArrayList<int[]>();
+
 	private State[] 						transitionStates;
 	private String[] 						vectorKeys;
 	private double[][]						qMatrix;
@@ -29,10 +35,11 @@ public class QMatrixGenerator extends DECAF {
 	 * @param transitionStates
 	 * @param vectorKeys
 	 */
-	public QMatrixGenerator(State[] transitionStates, String[] vectorKeys, double[][] demandMatrix){
-		this.transitionStates = transitionStates;
-		this.vectorKeys = vectorKeys;
-		this.demandMatrix = demandMatrix;
+	public QMatrixGenerator(State[] ts, String[] vk, double[][] dm, TreeGenerator t){
+		transitionStates = ts;
+		vectorKeys = vk;
+		demandMatrix = dm;
+		tg = t;
 	}
 	
 	/**
@@ -42,35 +49,53 @@ public class QMatrixGenerator extends DECAF {
 	 * @return qMatrix
 	 */
 	public double[][] generateQMatrix(){
-		// Cache length of valid transition states
+		// Cache the length of valid transition states
 		int statesLen = transitionStates.length;
 		
-		// Initialize brand new qmatrix[][] array
+		// Initialize brand new qMatrix[][] array
 		this.qMatrix = new double[statesLen][statesLen];
 
 		// Iterate over matrix, ignore diagonal
 		// This takes advantage of multi-threading to speed up calculations.  We could multi-thread the calculation of
 		// every cell, however to lower overhead and increase performance, we will only multi-thread the row 
-		// calculations.   See QMatrixRunnable for implementation details.
+		// calculations.  See QMatrixRunnable for implementation details.
 		for( int i = 0; i < statesLen; i++ ){
 			QMatrixRunnable worker = new QMatrixRunnable(transitionStates[i], i, statesLen, this);
 			Thread thread = new Thread(worker);
+			threads.add(thread);
 			thread.start();
 		}
 		
-		// To make sure that we return a completed matrix, we must use the synchronized keyword.   This will make sure 
-		// that all threads that will modify qMatrix are suspended/complete.  Once they are complete we can calculate 
-		// the diagonals and return the resulting qMatrix.
-		synchronized (qMatrix) {
-			for( int i = 0; i < statesLen; i++ ){
-				int sum = 0;
-				for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 ){
-					sum += qMatrix[i][j];
-				}
-				qMatrix[i][i] = sum;
-			}
-			return qMatrix;
+		// Make sure all threads are complete before proceeding
+		int running = 0;
+		do {
+			running = 0;
+			for (Thread thread : threads)
+				if (thread.isAlive())
+					running++;
+		} while (running > 0);
+		
+		// Generate trees as required
+		Iterator<int[]> tfd = todoFill.iterator();
+		while( tfd.hasNext() ){
+			int[] next = tfd.next();
+			
+			if( next == null )
+				continue;
+			
+			// Run TreeGenerator
+			tg.getFailureRate(transitionStates[next[0]], transitionStates[next[1]]);
 		}
+		
+		// Add up diagonals
+		for( int i = 0; i < statesLen; i++ ){
+			int sum = 0;
+			for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 ){
+				sum += qMatrix[i][j];
+			}
+			qMatrix[i][i] = sum;
+		}
+		return qMatrix;
 	}
 	
 	/**
@@ -111,7 +136,7 @@ public class QMatrixGenerator extends DECAF {
 		if( enviroTransition )
 			return demandMatrix[fromDemand][toDemand];
 		if( failedTransition )
-			return tg.getFailureRate(from, to);
+			return Double.NaN;
 			
 		if( repairTransition && repair != null )
 			return (double)from.getVector().get(repair) / (double)from.sum();
@@ -175,10 +200,17 @@ public class QMatrixGenerator extends DECAF {
 	}
 	
 	/**
-	 * @param tg
+	 * @return the todoFill
 	 */
-	public void setTreeGenerator(TreeGenerator tg){
-		this.tg = tg;
+	public ArrayList<int[]> getTodoFill() {
+		return todoFill;
+	}
+
+	/**
+	 * @param todoFill the todoFill to set
+	 */
+	public void setTodoFill(ArrayList<int[]> todoFill) {
+		this.todoFill = todoFill;
 	}
 	
 	@Override
