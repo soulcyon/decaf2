@@ -4,10 +4,8 @@
  */
 package edu.njit.decaf2.generators;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Vector;
 
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.data.FailureNode;
@@ -21,8 +19,8 @@ import edu.njit.decaf2.data.State;
  *
  */
 public class StateGenerator extends DECAF {
-	private Vector<FailureNode> 			componentList = new Vector<FailureNode>();
-	private HashMap<String, FailureNode> 	componentMap = new HashMap<String, FailureNode>();
+	private ArrayList<FailureNode> 			componentList = new ArrayList<FailureNode>();
+	private HashMap<String, FailureNode> 	componentMap;
 	private double[][]						demandMatrix;
 	private State[]							transitionStates;
 	
@@ -32,83 +30,96 @@ public class StateGenerator extends DECAF {
 	}
 	
 	/**
-	 * Pushes combinations to the {@code states} array
+	 * 
+	 * @return transitionStates
 	 */
 	public State[] generateStates(){
-		HashSet<String> list = new HashSet<String>();
+		// comb will push resulting combinations into this list
+		ArrayList<String> list = new ArrayList<String>();
+		
+		// Convert HashMap componentMap to ArrayList for comb
 		for( String k : componentMap.keySet() ){
 			componentList.add(componentMap.get(k));
 		}
 		
-		findCombinations(componentMap.size(), list);
+		// Go!
+		combStates(0, "", list);
 		
-		String[] result = new String[list.size()];
+		// Performance enhancement - use toArray rather than creating a new variable for toArray(<T>)
+		Object[] result = list.toArray();
 		transitionStates = new State[result.length * demandMatrix.length];
-		Arrays.sort((result = list.toArray(result)));
 		
+		// Iterate over combinations and add demand changes
 		for( int i = 0, m = 0; i < result.length; i++ ){
 			for( int j = 0; j < demandMatrix.length; j++, m++ ){
-				transitionStates[m] = new State(componentMap.keySet(), result[i], j);
+				transitionStates[m] = new State(componentMap.keySet(), (String)result[i], j);
 			}
 		}
 		return transitionStates;
 	}
 	
-	private void findCombinations(int len, HashSet<String> list){
-		findCombinations(len, componentList.get(0).getRedundancy(), 0, "", list);
-	}
-	
-	private void findCombinations(int len, int max, int curr, String pref, HashSet<String> list){
-		if( pref.length() == len ){
-			list.add(pref);
-		}
-		if( curr >= len ){
-			return;
-		}
-		for( int i = 0; i < componentList.get(curr).getRedundancy() + 1; i++ ){
-			findCombinations(len, i, curr + 1, pref + i, list);
-		}
+	/**
+	 * Generates all possible combinations of Transition-States
+	 * Minimal overhead, for every change between components there will be one extra String generated.
+	 * 
+	 * Complexity - O( Maximum Redundancy ^ Number of components )
+	 * 
+	 * Because of the high complexity at this stage in the algorithm, the whole Simulation has a practical limit of 
+	 * about 10 - 20 components with less than 3 redundancy.  Matrices created this large will takes hours or days to
+	 * iterate.   This is before even thinking about the N^3 complexity of Matrix Inversion and Multiplication.
+	 * 
+	 * @param x
+	 * @param str
+	 * @param list
+	 */
+	private void combStates(int x, String str, ArrayList<String> list){
+		if( str.length() == componentList.size() ) list.add(str);
+		if( x >= componentList.size() ) return;
+		
+		for( int i = 0; i <= componentList.get(x).getRedundancy(); i++ ){
+			combStates(x + 1, str + i, list);
+		}		
 	}
 
 	/**
 	 * @return the componentMap
 	 */
-	public HashMap<String, FailureNode> getComponentMap() {
+	public HashMap<String, FailureNode> getComponentMap(){
 		return componentMap;
 	}
 	
 	/**
 	 * @param componentMap the componentMap to set
 	 */
-	public void setComponentMap(HashMap<String, FailureNode> componentMap) {
+	public void setComponentMap(HashMap<String, FailureNode> componentMap){
 		this.componentMap = componentMap;
 	}
 	
 	/**
 	 * @return the demandLevels
 	 */
-	public double[][] getDemandLevels() {
+	public double[][] getDemandLevels(){
 		return demandMatrix;
 	}
 	
 	/**
 	 * @param demandLevels the demandLevels to set
 	 */
-	public void setDemandLevels(double[][] demandLevels) {
+	public void setDemandLevels(double[][] demandLevels){
 		this.demandMatrix = demandLevels;
 	}
 
 	/**
 	 * @return the transitionStates
 	 */
-	public State[] getTransitionStates() {
+	public State[] getTransitionStates(){
 		return transitionStates;
 	}
 
 	/**
 	 * @param transitionStates the transitionStates to set
 	 */
-	public void setTransitionStates(State[] transitionStates) {
+	public void setTransitionStates(State[] transitionStates){
 		this.transitionStates = transitionStates;
 	}
 	
