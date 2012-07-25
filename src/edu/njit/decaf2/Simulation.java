@@ -15,6 +15,7 @@ import com.ctc.wstx.sax.WstxSAXParserFactory;
 import edu.njit.decaf2.data.FailureNode;
 import edu.njit.decaf2.data.State;
 import edu.njit.decaf2.generators.QMatrixGenerator;
+import edu.njit.decaf2.generators.QMatrixGeneratorUnthreaded;
 import edu.njit.decaf2.generators.StateGenerator;
 import edu.njit.decaf2.generators.TreeGenerator;
 
@@ -115,7 +116,7 @@ public class Simulation extends DECAF {
 			
 			demandMatrix = DECAF_SAXHandler.getDemand();
 			nodeMap = DECAF_SAXHandler.getNodeMap();
-		} catch (Exception e) {
+		} catch (Exception e){
 			e.printStackTrace();
 			System.exit(1);
 		}
@@ -124,21 +125,21 @@ public class Simulation extends DECAF {
 	/**
 	 * @param debug the debug to set
 	 */
-	public void setDebug(boolean debug) {
+	public void setDebug(boolean debug){
 		this.debug = debug;
 	}
 
 	/**
 	 * @return the qMatrix
 	 */
-	public double[][] getQMatrix() {
+	public double[][] getQMatrix(){
 		return qMatrix;
 	}
 
 	/**
 	 * @param qMatrix the qMatrix to set
 	 */
-	public void setQMatrix(double[][] qMatrix) {
+	public void setQMatrix(double[][] qMatrix){
 		this.qMatrix = qMatrix;
 	}
 }

@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sim-test>
 <debug>on</debug>
-<system-up-expr><![CDATA[(A >= 1) and (B >=1) ]]></system-up-expr>
+<system-up-expr><![CDATA[(A >= 1) and (B >= 1) and (C >= 1) and (D >= 1) and (E >= 1) and (F >= 1)]]></system-up-expr>    
 <demand-info>
     <demand-levels>2</demand-levels>
 	<!-- demand change rate 1/12 -->
     <change-rate from="0">
-        <to level="1">0.01</to>
+        <to level="1">0.5</to>
     </change-rate>
     <change-rate from="1">
-        <to level="0">0.01</to>
+        <to level="0">0.5</to>
     </change-rate>
 </demand-info>
 <component-info>
@@ -18,15 +18,16 @@
             <redundancy>2</redundancy>
             <required>1</required>
             <cascade-failure>
-                <triggers-failure type="B">0.2</triggers-failure>
+                <triggers-failure type="C">0.2</triggers-failure>
+				<triggers-failure type="D">0.1</triggers-failure>
             </cascade-failure>
             <demand demandID="0">
-                <failure-rate>0.01</failure-rate>
-                <repair-rate>1</repair-rate>
+                <failure-rate>0.001</failure-rate>
+                <repair-rate>8</repair-rate>
             </demand>
             <demand demandID="1">
-                <failure-rate>0.03</failure-rate>
-                <repair-rate>1</repair-rate>
+                <failure-rate>0.0005</failure-rate>
+                <repair-rate>8</repair-rate>
             </demand>
     </component>
     <component>
@@ -34,17 +35,79 @@
             <redundancy>2</redundancy>
             <required>1</required>
             <cascade-failure>
-                <triggers-failure type="A">0.3</triggers-failure>
+                <triggers-failure type="D">0.2</triggers-failure>
+				<triggers-failure type="C">0.1</triggers-failure>
             </cascade-failure>
             <demand demandID="0">
-                <failure-rate>0.02</failure-rate>
-                <repair-rate>1</repair-rate>
+                <failure-rate>0.001</failure-rate>
+                <repair-rate>8</repair-rate>
             </demand>
             <demand demandID="1">
-                <failure-rate>0.04</failure-rate>
-                <repair-rate>1</repair-rate>
+                <failure-rate>0.0005</failure-rate>
+                <repair-rate>8</repair-rate>
+            </demand>
+    </component>	
+    <component>
+            <type>C</type>
+            <redundancy>2</redundancy>
+            <required>1</required>
+            <cascade-failure>
+                <triggers-failure type="A">0.1</triggers-failure>
+				<triggers-failure type="E">0.2</triggers-failure>
+            </cascade-failure>
+            <demand demandID="0">
+                <failure-rate>0.004</failure-rate>
+                <repair-rate>8</repair-rate>
+            </demand>
+            <demand demandID="1">
+                <failure-rate>0.002</failure-rate>
+                <repair-rate>8</repair-rate>
+            </demand>
+    </component>	
+    <component>
+            <type>D</type>
+            <redundancy>3</redundancy>
+            <required>1</required>
+            <cascade-failure>
+                <triggers-failure type="B">0.1</triggers-failure>
+				<triggers-failure type="F">0.2</triggers-failure>
+            </cascade-failure>
+            <demand demandID="0">
+                <failure-rate>0.004</failure-rate>
+                <repair-rate>8</repair-rate>
+            </demand>
+            <demand demandID="1">
+                <failure-rate>0.002</failure-rate>
+                <repair-rate>8</repair-rate>
+            </demand>
+    </component>	
+    <component>
+            <type>E</type>
+            <redundancy>2</redundancy>
+            <required>1</required>
+            <cascade-failure/>
+            <demand demandID="0">
+                <failure-rate>0.006</failure-rate>
+                <repair-rate>8</repair-rate>
+            </demand>
+            <demand demandID="1">
+                <failure-rate>0.003</failure-rate>
+                <repair-rate>8</repair-rate>
             </demand>
     </component>
+    <component>
+            <type>F</type>
+            <redundancy>2</redundancy>
+            <required>1</required>
+            <cascade-failure/>
+            <demand demandID="0">
+                <failure-rate>0.006</failure-rate>
+                <repair-rate>8</repair-rate>
+            </demand>
+            <demand demandID="1">
+                <failure-rate>0.003</failure-rate>
+                <repair-rate>8</repair-rate>
+            </demand>
+    </component>	
 </component-info>
 </sim-test>
-

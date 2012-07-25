@@ -6,7 +6,6 @@ package edu.njit.decaf2.generators;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.concurrent.ConcurrentHashMap;
 
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.data.FailureNode;
@@ -22,7 +21,7 @@ import edu.njit.decaf2.data.State;
  */
 public class TreeGenerator extends DECAF {
 	private HashSet<TreeNode>				treeCache = new HashSet<TreeNode>();
-	private ConcurrentHashMap<State, TreeNode> 		stateCache = new ConcurrentHashMap<State, TreeNode>();
+	private HashMap<State, TreeNode> 		stateCache = new HashMap<State, TreeNode>();
 	private HashMap<String, FailureNode>	nodeMap = new HashMap<String, FailureNode>();
 	private int								misses = 0;
 	
@@ -80,7 +79,7 @@ public class TreeGenerator extends DECAF {
 	/**
 	 * @return the cache
 	 */
-	public ConcurrentHashMap<State, TreeNode> getCache(){
+	public HashMap<State, TreeNode> getCache(){
 		return stateCache;
 	}
 

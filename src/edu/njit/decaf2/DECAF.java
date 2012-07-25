@@ -4,6 +4,8 @@
  */
 package edu.njit.decaf2;
 
+import java.util.concurrent.ForkJoinPool;
+
 /**
  * DECAF 2 - DECAF
  *
@@ -12,8 +14,9 @@ package edu.njit.decaf2;
  *
  */
 public class DECAF {
-	public static boolean ForceStateDemandValidate = false;
-	public static boolean VerboseDebug = false;
+	public static boolean 					ForceStateDemandValidate = false;
+	public static boolean 					VerboseDebug = false;
+	public static ForkJoinPool 				threadPool = new ForkJoinPool();
 	
 	/**
 	 * Utility function to pretty-print error messages thrown by sub-classes.
