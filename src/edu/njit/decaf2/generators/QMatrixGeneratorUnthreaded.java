@@ -9,8 +9,6 @@ import java.util.Iterator;
 
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.data.State;
-import edu.njit.decaf2.threads.QMatrixFillStatesAction;
-import edu.njit.decaf2.threads.QMatrixSumDiagonalsAction;
 
 /**
  * DECAF 2 - QMatrixGenerator
@@ -19,9 +17,9 @@ import edu.njit.decaf2.threads.QMatrixSumDiagonalsAction;
  * @version 2.0
  *
  */
-public class QMatrixGenerator extends DECAF {
+public class QMatrixGeneratorUnthreaded extends DECAF {
 	private TreeGenerator					tg;
-	private Object[]						threads;
+	private ArrayList<Thread>				threads = new ArrayList<Thread>();
 	private ArrayList<int[]>				todoFill = new ArrayList<int[]>();
 
 	private State[] 						transitionStates;
@@ -36,7 +34,7 @@ public class QMatrixGenerator extends DECAF {
 	 * @param transitionStates
 	 * @param vectorKeys
 	 */
-	public QMatrixGenerator(State[] ts, String[] vk, double[][] dm, TreeGenerator t){
+	public QMatrixGeneratorUnthreaded(State[] ts, String[] vk, double[][] dm, TreeGenerator t){
 		transitionStates = ts;
 		vectorKeys = vk;
 		demandMatrix = dm;
@@ -60,11 +58,28 @@ public class QMatrixGenerator extends DECAF {
 		// This takes advantage of multi-threading to speed up calculations.  We could multi-thread the calculation of
 		// every cell, however to lower overhead and increase performance, we will only multi-thread the row 
 		// calculations.  See QMatrixRunnable for implementation details.
-		qMatrix = threadPool.invoke(new QMatrixFillStatesAction(transitionStates, qMatrix, this));
+		for( int i = 0; i < statesLen; i++ ){
+			for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 ){
+				double fillV = fillQMatrix(transitionStates[i], transitionStates[j]);
+				if( Double.isNaN(fillV) ){
+					todoFill.add(new int[]{i, j});
+				} else {
+					qMatrix[i][j] = fillV;
+				}
+			}
+		}
+		
+		// Make sure all threads are complete before proceeding
+		int running = 0;
+		do {
+			running = 0;
+			for (Thread thread : threads)
+				if (thread.isAlive())
+					running++;
+		} while (running > 0);
 		
 		// Generate trees as required
 		Iterator<int[]> tfd = todoFill.iterator();
-		System.out.println(todoFill.size());
 		while( tfd.hasNext() ){
 			int[] next = tfd.next();
 			
@@ -76,7 +91,13 @@ public class QMatrixGenerator extends DECAF {
 		}
 		
 		// Add up diagonals
-		qMatrix = threadPool.invoke(new QMatrixSumDiagonalsAction(qMatrix));
+		for( int i = 0; i < statesLen; i++ ){
+			int sum = 0;
+			for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 ){
+				sum += qMatrix[i][j];
+			}
+			qMatrix[i][i] = sum;
+		}
 		return qMatrix;
 	}
 	
