@@ -19,7 +19,6 @@ import edu.njit.decaf2.data.State;
  */
 public class QMatrixGeneratorUnthreaded extends DECAF {
 	private TreeGenerator					tg;
-	private ArrayList<Thread>				threads = new ArrayList<Thread>();
 	private ArrayList<int[]>				todoFill = new ArrayList<int[]>();
 
 	private State[] 						transitionStates;
@@ -68,15 +67,6 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 				}
 			}
 		}
-		
-		// Make sure all threads are complete before proceeding
-		int running = 0;
-		do {
-			running = 0;
-			for (Thread thread : threads)
-				if (thread.isAlive())
-					running++;
-		} while (running > 0);
 		
 		// Generate trees as required
 		Iterator<int[]> tfd = todoFill.iterator();
