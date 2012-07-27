@@ -7,6 +7,7 @@ package edu.njit.decaf2.threads;
 import java.util.ArrayList;
 import java.util.concurrent.RecursiveTask;
 
+import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.data.State;
 import edu.njit.decaf2.generators.QMatrixGenerator;
 
@@ -58,14 +59,10 @@ public class QMatrixFillStatesAction extends RecursiveTask<double[][]> {
 			}
 			return matrix;
 		}
-		ArrayList<RecursiveTask<double[][]>> forks = new ArrayList<>();
+
 		for( int i = 0; i < matrix.length; i++ ){
 			QMatrixFillStatesAction r = new QMatrixFillStatesAction(ts, new double[][]{matrix[i]}, qg, i);
-			forks.add(r);
-			r.fork();
-		}
-		for( int i = 0; i < matrix.length; i++ ){
-			matrix[i] = forks.get(i).join()[0];
+			invokeAll(r);
 		}
 		return matrix;
 	}

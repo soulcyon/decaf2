@@ -62,13 +62,13 @@ public class Simulation extends DECAF {
 		StateGenerator sg = new StateGenerator(nodeMap, demandMatrix);
 		transitionStates = sg.generateStates();
 		
-		if( DECAF.VerboseDebug )
+		if( verboseDebug )
 			System.out.println(transitionStates.length);
 		
 		resultProcessing += System.nanoTime() - t;
 		System.out.println("Time to SG:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
 
-		if( DECAF.VerboseDebug )
+		if( verboseDebug )
 			System.out.println(sg);
 		
 		t = System.nanoTime();
@@ -78,15 +78,18 @@ public class Simulation extends DECAF {
 		TreeGenerator tg = new TreeGenerator(nodeMap);
 		QMatrixGenerator qg = new QMatrixGenerator(transitionStates, nodeKeyArray, demandMatrix, tg);
 		qMatrix = qg.generateQMatrix();
-
+		
 		resultProcessing += System.nanoTime() - t;
 		System.out.println("Time to QG:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
 
-		//if( DECAF.VerboseDebug )
-			System.out.println("Generated Trees:\t" + tg.getCache().size() + " (reused " + tg.getMisses() + ")");
+		if( verboseDebug )
+			System.out.println("Generated States:\t" + tg.getCache().size() + " (reused " + tg.getMisses() + ")");
 		
-		if( DECAF.VerboseDebug )
+		if( verboseDebug )
 			System.out.println(qg);
+
+		if( verboseDebug )
+			System.out.println(sg);
 		
 		System.out.println("Total CPU Time:\t"+ resultProcessing/1000.0/1000.0/1000.0);
 	}
@@ -107,7 +110,7 @@ public class Simulation extends DECAF {
 	 * 
 	 * @param filename Path to XML configuration file
 	 */
-	private void loadSimulationData(String filename){
+	public void loadSimulationData(String filename){
 		try {
 			File xmlFile = new File(filename);
 			SAXParserFactory spf = new WstxSAXParserFactory();

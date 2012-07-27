@@ -14,8 +14,9 @@ import java.util.concurrent.ForkJoinPool;
  *
  */
 public class DECAF {
-	public static boolean 					ForceStateDemandValidate = false;
-	public static boolean 					VerboseDebug = false;
+	public static boolean 					forceStateDemandValidate = false;
+	public static boolean 					verboseDebug = true;
+	public static boolean 					enableThreading = false;
 	public static ForkJoinPool 				threadPool = new ForkJoinPool();
 	
 	/**
