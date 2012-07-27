@@ -7,6 +7,8 @@ package edu.njit.decaf2.threads;
 import java.util.ArrayList;
 import java.util.concurrent.RecursiveTask;
 
+import edu.njit.decaf2.DECAF;
+
 /**
  * DECAF 2 - QMatrixSumDiagonalsAction
  * 
@@ -37,14 +39,10 @@ public class QMatrixSumDiagonalsAction extends RecursiveTask<double[][]> {
 			}
 			return arr;
 		}
-		ArrayList<RecursiveTask<double[][]>> forks = new ArrayList<>();
+
 		for( int i = 0; i < arr.length; i++ ){
 			QMatrixSumDiagonalsAction row = new QMatrixSumDiagonalsAction(new double[][]{arr[i]});
-			forks.add(row);
-			row.fork();
-		}
-		for( int i = 0; i < arr.length; i++ ){
-			arr[i][i] = forks.get(i).join()[0][0];
+			invokeAll(row);
 		}
 		return arr;
 	}
