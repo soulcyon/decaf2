@@ -20,7 +20,7 @@ public class FailureNode extends DECAF {
 	private int 							required;
 	private int 							redundancy;
 	private double[]						failureRates;
-	private HashMap<FailureNode, Double> 	cascadingFailures = new HashMap<FailureNode, Double>();
+	private HashMap<String, Double> 		cascadingFailures = new HashMap<String, Double>();
 
 	/**
 	 * Sets {@link String} {@code type} and {@link Double}[] {@code failureRates} array.
@@ -117,14 +117,14 @@ public class FailureNode extends DECAF {
 	/**
 	 * @return the cascadingFailures
 	 */
-	public HashMap<FailureNode, Double> getCascadingFailures() {
+	public HashMap<String, Double> getCascadingFailures() {
 		return cascadingFailures;
 	}
 	
 	/**
 	 * @param cascadingFailures the cascadingFailures to set
 	 */
-	public void setCascadingFailures(HashMap<FailureNode, Double> cascadingFailures) {
+	public void setCascadingFailures(HashMap<String, Double> cascadingFailures) {
 		this.cascadingFailures = cascadingFailures;
 	}
 	
@@ -134,8 +134,8 @@ public class FailureNode extends DECAF {
 	 * @param type
 	 * @param rate
 	 */
-	public void addCascadingFailure(FailureNode type, double rate) {
-		cascadingFailures.put(type, rate);
+	public void addCascadingFailure(FailureNode node, double rate) {
+		cascadingFailures.put(node.getType(), rate);
 	}
 	
 	/**
@@ -150,8 +150,8 @@ public class FailureNode extends DECAF {
 	@Override
 	public String toString(){
 		String cascadePrint = "--Causes to fail (" + cascadingFailures.size() + ") ";
-		for( FailureNode k : cascadingFailures.keySet() ){
-			cascadePrint += "\n\t\t\t" + k.type + " @ " + cascadingFailures.get(k);
+		for( String k : cascadingFailures.keySet() ){
+			cascadePrint += "\n\t\t\t" + k + " @ " + cascadingFailures.get(k);
 		}
 		return error("--FailureNode \t\t" + type + " @ " + failureRates +
 				"\n--Required \t\t" + required + "\n--Redundancy \t\t" + redundancy
@@ -165,11 +165,8 @@ public class FailureNode extends DECAF {
 				new Integer(redundancy).hashCode() + 
 				new Integer(required).hashCode();
 		
-		for( FailureNode k : cascadingFailures.keySet() ){
-			result += k.type.hashCode() +
-				k.failureRates.hashCode() +
-				new Integer(k.redundancy).hashCode() + 
-				new Integer(k.required).hashCode();
+		for( String k : cascadingFailures.keySet() ){
+			result += k.hashCode() + new Double(cascadingFailures.get(k)).hashCode();
 		}
 		return new Integer(result).hashCode();
 	}
@@ -185,7 +182,7 @@ public class FailureNode extends DECAF {
 			failureRates != other.failureRates ||
 			cascadingFailures.size() != other.cascadingFailures.size() )
 			return false;
-		for( FailureNode k : cascadingFailures.keySet() ){
+		for( String k : cascadingFailures.keySet() ){
 			if( !other.cascadingFailures.containsKey(k) ||
 				cascadingFailures.get(k) != other.cascadingFailures.get(k) ){
 				return false;

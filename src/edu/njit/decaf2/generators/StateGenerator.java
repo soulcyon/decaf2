@@ -20,6 +20,7 @@ import edu.njit.decaf2.data.State;
  */
 public class StateGenerator extends DECAF {
 	private ArrayList<FailureNode> 			componentList = new ArrayList<FailureNode>();
+	private int 							compLen;
 	private HashMap<String, FailureNode> 	componentMap;
 	private double[][]						demandMatrix;
 	private State[]							transitionStates;
@@ -41,6 +42,7 @@ public class StateGenerator extends DECAF {
 		for( String k : componentMap.keySet() ){
 			componentList.add(componentMap.get(k));
 		}
+		compLen = componentList.size();
 		
 		// Go!
 		combStates(0, "", list);
@@ -73,7 +75,9 @@ public class StateGenerator extends DECAF {
 	 * @param list
 	 */
 	private void combStates(int x, String str, ArrayList<String> list){
-		if( str.length() == componentList.size() ) list.add(str);
+		if( str.length() == compLen ) {
+			list.add(str);
+		}
 		if( x >= componentList.size() ) return;
 		
 		for( int i = 0; i <= componentList.get(x).getRedundancy(); i++ ){

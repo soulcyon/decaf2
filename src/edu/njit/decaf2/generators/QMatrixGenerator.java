@@ -21,7 +21,6 @@ import edu.njit.decaf2.threads.QMatrixSumDiagonalsAction;
  */
 public class QMatrixGenerator extends DECAF {
 	private TreeGenerator					tg;
-	private Object[]						threads;
 	private ArrayList<int[]>				todoFill = new ArrayList<int[]>();
 
 	private State[] 						transitionStates;
@@ -64,7 +63,7 @@ public class QMatrixGenerator extends DECAF {
 		
 		// Generate trees as required
 		Iterator<int[]> tfd = todoFill.iterator();
-		System.out.println(todoFill.size());
+
 		while( tfd.hasNext() ){
 			int[] next = tfd.next();
 			

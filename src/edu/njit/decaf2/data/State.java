@@ -191,7 +191,7 @@ public class State extends DECAF {
 		
 		State other = (State) o;
 		
-		if( DECAF.ForceStateDemandValidate && demand != other.demand )
+		if( DECAF.forceStateDemandValidate && demand != other.demand )
 			return false;
 		
 		for( String k : vector.keySet() ){
