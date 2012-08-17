@@ -6,10 +6,6 @@ package edu.njit.decaf2.generators;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
-
-import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
-
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.data.FailureNode;
 import edu.njit.decaf2.data.TreeNode;
