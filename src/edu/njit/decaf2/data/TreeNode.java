@@ -4,6 +4,9 @@
  */
 package edu.njit.decaf2.data;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import edu.njit.decaf2.DECAF;
 
 /**
@@ -33,6 +36,19 @@ public class TreeNode extends DECAF {
 	}
 	
 	/**
+	 * Sets {@link FailureNode} {@code root}
+	 * This constructor makes demand independent trees
+	 * set rate will be used later for n lambda
+	 * @param root
+	 * @param currentDemand
+	 */
+	public TreeNode(FailureNode root){
+		this.currentNode = root;
+		this.rate = 0.0;
+	}
+	
+	
+	/**
 	 * @return the root
 	 */
 	public FailureNode getRoot() {
@@ -54,22 +70,38 @@ public class TreeNode extends DECAF {
 	}
 	
 	/**
+	 * clears out the children
+	 */
+	public void clearChildren() {
+		children = new TreeNode[0];
+	}
+	
+	/**
 	 * Naive implementation of ArrayList method to addChild to array.
 	 * 
 	 * @param child
 	 */
 	public void addChild(FailureNode child){
 		// TODO Analyze performance
-		if( children == null )
+		
+		/*if( children == null )
 			children = new TreeNode[0];
 
 		TreeNode[] temp = new TreeNode[children.length + 1];
-		TreeNode subTree = new TreeNode(child, currentDemand);
-		subTree.parentNode = this;
+		TreeNode childNode = new TreeNode(child, currentDemand);
+		childNode.parentNode = this;
 		for( int i = 0; i < children.length; i++ ){
 			temp[i] = children[i];
 		}
-		temp[temp.length - 1] = subTree;
+		temp[temp.length - 1] = childNode;
+		*/
+		
+		ArrayList<TreeNode> listOfChildren = new ArrayList<TreeNode>(Arrays.asList(children));
+		TreeNode childNode = new TreeNode(child, currentDemand);
+		childNode.parentNode = this;
+		listOfChildren.add(childNode);
+		children = (TreeNode[]) listOfChildren.toArray();
+
 	}
 	
 	/**
@@ -124,5 +156,12 @@ public class TreeNode extends DECAF {
 	 */
 	public void setCurrentDemand(int currentDemand) {
 		this.currentDemand = currentDemand;
+	}
+	
+	/**
+	 * @return the FailureNode in this TreeNode
+	 */
+	public FailureNode getFailureNode() {
+		return currentNode;
 	}
 }

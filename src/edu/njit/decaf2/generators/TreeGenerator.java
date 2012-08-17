@@ -6,6 +6,9 @@ package edu.njit.decaf2.generators;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
+
+import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
 
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.data.FailureNode;
@@ -15,7 +18,7 @@ import edu.njit.decaf2.data.State;
 /**
  * DECAF 2 - TreeGenerator
  *
- * @author Sashank Tadepalli
+ * @author Sashank Tadepalli, Mihir Sanghavi
  * @version 2.0
  *
  */
@@ -62,10 +65,57 @@ public class TreeGenerator extends DECAF {
 	 * @param transition
 	 * @return
 	 */
-	private double buildTree(String root, State transition){
-		//TreeNode ft = new TreeNode(nodeMap.get(root), transition.getDemand());
-		//stateCache.put(transition.toString(), ft);
-		//return ft.getRate();
+	private double buildTree(String root, State failureTransition) {		
+		
+		TreeNode ft = new TreeNode(nodeMap.get(root));
+		
+		// TODO n lambda calculations for all demand levels
+		
+		buildLargerTree(ft, failureTransition);
+		
+		return 0.0;
+	}
+	
+	/**
+	 * 
+	 * @param root
+	 * @param transition
+	 * @return
+	 */
+	
+	private double buildLargerTree(TreeNode curr, State failureTransition) {		
+		
+		if(curr.isLeaf()) {
+			
+			 HashMap<String, Double> gamma = curr.getFailureNode().getCascadingFailures();
+			 
+			 // build power set of gamma components
+			 for (int g = (int) Math.pow(2, gamma.size()) - 1; g > 0; g--) {
+				 
+				 String gInBinary = Integer.toBinaryString(g);
+				 curr.clearChildren();
+				 
+				 // binary enumeration will toggle inclusion of a component in a subset 
+				 for (int b = 0; b < gInBinary.length(); b++) {
+					 
+					 String[] entries = (String[]) gamma.keySet().toArray();
+					 
+						if (gInBinary.charAt(b) == '1') {
+							TreeNode child = new TreeNode(new FailureNode(entries[b]));
+							curr.addChild(child.getFailureNode());
+							// TODO update failure transition by adding 1 in place of the component type just added 
+							buildLargerTree(child, failureTransition);
+						}
+				 }
+			 }
+		}
+		
+		else {
+			for(TreeNode child : curr.getChildren()) {
+				buildLargerTree(child, failureTransition);
+			}
+		}
+			
 		return 0.0;
 	}
 
