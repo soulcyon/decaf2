@@ -19,7 +19,7 @@ import edu.njit.decaf2.DECAF;
 public class TreeNode extends DECAF {
 	private TreeNode						parentNode;
 	private FailureNode						currentNode;
-	private TreeNode[]						children;
+	private TreeNode[]						children = new TreeNode[0];
 	private double							rate;
 	private int								currentDemand;
 

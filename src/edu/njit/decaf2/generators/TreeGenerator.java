@@ -67,7 +67,7 @@ public class TreeGenerator extends DECAF {
 		
 		// TODO n lambda calculations for all demand levels
 		
-		buildLargerTree(ft, failureTransition);
+		buildLargerTree(ft, failureTransition, 1.0);
 		
 		return 0.0;
 	}
@@ -76,12 +76,15 @@ public class TreeGenerator extends DECAF {
 	 * 
 	 * @param root
 	 * @param transition
+	 * @param rate
 	 * @return
 	 */
 	
-	private double buildLargerTree(TreeNode curr, State failureTransition) {		
+	private double buildLargerTree(TreeNode curr, State failureTransition, double rate) {		
 		
 		if(curr.isLeaf()) {
+			
+			// TODO populate Q with current Tree
 			
 			 HashMap<String, Double> gamma = curr.getFailureNode().getCascadingFailures();
 			 
@@ -90,29 +93,28 @@ public class TreeGenerator extends DECAF {
 				 
 				 String gInBinary = Integer.toBinaryString(g);
 				 curr.clearChildren();
-				 
+	
 				 // binary enumeration will toggle inclusion of a component in a subset 
 				 for (int b = 0; b < gInBinary.length(); b++) {
 					 
 					 String[] entries = (String[]) gamma.keySet().toArray();
 					 
-						if (gInBinary.charAt(b) == '1') {
+						if (gInBinary.charAt(b) == '1' && failureTransition.getComponentCount(entries[b]) < nodeMap.get(entries[b]).getRedundancy()) {
 							TreeNode child = new TreeNode(new FailureNode(entries[b]));
 							curr.addChild(child.getFailureNode());
-							// TODO update failure transition by adding 1 in place of the component type just added 
-							buildLargerTree(child, failureTransition);
+							rate *= curr.getFailureNode().getRate(child.getFailureNode().getType());
+							
+							// builds a new failureTransition that applies to tree
+							failureTransition.incrementComponentCount(child.getFailureNode());
 						}
 				 }
 			 }
 		}
-		
-		else {
-			for(TreeNode child : curr.getChildren()) {
-				buildLargerTree(child, failureTransition);
-			}
+		for(TreeNode child : curr.getChildren()) {
+			buildLargerTree(child, failureTransition, rate);
 		}
 			
-		return 0.0;
+		return rate;
 	}
 
 	/**

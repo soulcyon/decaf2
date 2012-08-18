@@ -129,6 +129,22 @@ public class State extends DECAF {
 		}
 		return result;
 	}
+	
+	public double getComponentCount(String type){
+		return vector.get(type);
+	}
+
+	public void incrementComponentCount(String type) {
+		vector.put(type, vector.get(type) + 1);
+	}
+	
+	public void incrementComponentCount(FailureNode node) {
+		vector.put(node.getType(), vector.get(node.getType()) + 1);
+	}
+
+	public void updateComponentCount(String type, int count) {
+		vector.put(type, count);
+	}
 
 	/**
 	 * @return the vector
