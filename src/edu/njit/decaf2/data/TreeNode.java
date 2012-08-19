@@ -20,7 +20,7 @@ public class TreeNode extends DECAF {
 	private TreeNode						parentNode;
 	private FailureNode						currentNode;
 	private TreeNode[]						children = new TreeNode[0];
-	private double							rate;
+	private double							rate = 1.0;
 	private int								currentDemand;
 
 	/**
@@ -100,8 +100,7 @@ public class TreeNode extends DECAF {
 		TreeNode childNode = new TreeNode(child, currentDemand);
 		childNode.parentNode = this;
 		listOfChildren.add(childNode);
-		children = (TreeNode[]) listOfChildren.toArray();
-
+		listOfChildren.toArray(children);
 	}
 	
 	/**
@@ -124,10 +123,10 @@ public class TreeNode extends DECAF {
 	 * @param rate the rate to set
 	 */
 	public void setRate(double rate) {
+		this.rate *= rate;
 		if( this.parentNode == null ) return;
 		
 		this.parentNode.setRate(rate);
-		this.rate = rate;
 	}
 
 	/**

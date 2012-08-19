@@ -18,7 +18,7 @@ import edu.njit.decaf2.data.State;
  *
  */
 public class QMatrixGeneratorUnthreaded extends DECAF {
-	private TreeGenerator					tg;
+	private TreeGeneratorUnthreaded					tg;
 	private ArrayList<int[]>				todoFill = new ArrayList<int[]>();
 
 	private State[] 						transitionStates;
@@ -33,7 +33,7 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 	 * @param transitionStates
 	 * @param vectorKeys
 	 */
-	public QMatrixGeneratorUnthreaded(State[] ts, String[] vk, double[][] dm, TreeGenerator t){
+	public QMatrixGeneratorUnthreaded(State[] ts, String[] vk, double[][] dm, TreeGeneratorUnthreaded t){
 		transitionStates = ts;
 		vectorKeys = vk;
 		demandMatrix = dm;
@@ -54,9 +54,6 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 		this.qMatrix = new double[statesLen][statesLen];
 
 		// Iterate over matrix, ignore diagonal
-		// This takes advantage of multi-threading to speed up calculations.  We could multi-thread the calculation of
-		// every cell, however to lower overhead and increase performance, we will only multi-thread the row 
-		// calculations.  See QMatrixRunnable for implementation details.
 		for( int i = 0; i < statesLen; i++ ){
 			for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 ){
 				double fillV = fillQMatrix(transitionStates[i], transitionStates[j]);
@@ -77,7 +74,7 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 				continue;
 			
 			// Run TreeGenerator
-			tg.getFailureRate(transitionStates[next[0]], transitionStates[next[1]]);
+			qMatrix[next[0]][next[1]] = tg.getFailureRate(transitionStates[next[0]], transitionStates[next[1]]);
 		}
 		
 		// Add up diagonals

@@ -6,7 +6,6 @@ package edu.njit.decaf2.generators;
 
 import java.util.HashMap;
 import java.util.HashSet;
-
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.data.FailureNode;
 import edu.njit.decaf2.data.TreeNode;
@@ -15,7 +14,7 @@ import edu.njit.decaf2.data.State;
 /**
  * DECAF 2 - TreeGenerator
  *
- * @author Sashank Tadepalli
+ * @author Sashank Tadepalli, Mihir Sanghavi
  * @version 2.0
  *
  */
@@ -52,7 +51,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 		for( String k : diffVector.keySet() ){
 			failureRate += buildTree(k, diffState);
 		}
-		stateCache.put(diffState, new TreeNode(new FailureNode("NULL", new double[]{0.0}), 0));
+		//stateCache.put(diffState, new TreeNode(new FailureNode("NULL", new double[]{0.0}), 0));
 		return failureRate;
 	}
 	
@@ -62,11 +61,45 @@ public class TreeGeneratorUnthreaded extends DECAF {
 	 * @param transition
 	 * @return
 	 */
-	private double buildTree(String root, State transition){
-		//TreeNode ft = new TreeNode(nodeMap.get(root), transition.getDemand());
-		//stateCache.put(transition.toString(), ft);
-		//return ft.getRate();
-		return 0.0;
+	private double buildTree(String root, State failureTransition) {
+		TreeNode ft = new TreeNode(nodeMap.get(root), failureTransition.getDemand());
+		buildChildrenNodes(ft, failureTransition, 1.0);
+		return ft.getRate();
+	}
+	
+	/**
+	 * 
+	 * @param root
+	 * @param transition
+	 * @param rate
+	 * @return
+	 */
+	
+	private void buildChildrenNodes(TreeNode curr, State failureTransition, double rate) {
+		HashMap<String, Double> gamma = curr.getFailureNode().getCascadingFailures();
+		int gammaLength = gamma.size();
+
+		for( int g = gammaLength * gammaLength - 1; g > 0; g-- ){
+			String gInBinary = Integer.toString(g, 2);
+			for( int b = 0; b < gInBinary.length(); b++ ){
+				String[] entries = new String[gammaLength];
+				gamma.keySet().toArray(entries);
+				 
+				if( gInBinary.charAt(b) == '0' ) continue;
+				
+				FailureNode failedComponent = nodeMap.get(entries[b]);
+				if( failureTransition.getComponentCount(entries[b]) < failedComponent.getRedundancy() ){
+					curr.addChild(failedComponent);
+					curr.setRate(curr.getFailureNode().getRate(entries[b]));
+					failureTransition.incrementComponentCount(failedComponent);
+				} else {
+					stateCache.put(failureTransition, curr);
+				}
+			}
+		}
+		for(TreeNode child : curr.getChildren()) {
+			buildChildrenNodes(child, failureTransition, rate);
+		}
 	}
 
 	/**

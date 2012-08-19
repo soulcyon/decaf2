@@ -5,6 +5,7 @@
 package edu.njit.decaf2;
 
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -30,7 +31,7 @@ public class DECAF_SAXHandler extends DefaultHandler {
 	 * Resulting data
 	 */
 	private double[][] 						demandMatrix;
-	private HashMap<String, FailureNode>	nodeCache = new HashMap<String, FailureNode>();
+	private ConcurrentHashMap<String, FailureNode>	nodeCache = new ConcurrentHashMap<String, FailureNode>();
 	
 	/*
 	 * SAX Flags
@@ -80,9 +81,10 @@ public class DECAF_SAXHandler extends DefaultHandler {
 				currentCascadingType = attr.getValue("type");
 			} else {
 				grabCascading = false;
+				currentCascadingType = null;
 			}
 		}
-		
+
 		if( grabDemandInfo ){
 			if( tag.equalsIgnoreCase("demand-levels") ){
 				grabDemandLevels = true;
@@ -105,9 +107,8 @@ public class DECAF_SAXHandler extends DefaultHandler {
 				grabCompRedundancy = true;
 			} else if( tag.equalsIgnoreCase("required") ){
 				grabCompRequired = true;
-			} else if( tag.equalsIgnoreCase("cascade-failures") ){
+			} else if( tag.equalsIgnoreCase("cascade-failure") ){
 				grabCascading = true;
-				cascadingCache.clear();
 			} else if( tag.equalsIgnoreCase("demand") ){
 				grabCompDemand = true;
 				currentDemand = Integer.parseInt(attr.getValue("demandID"));
@@ -138,7 +139,7 @@ public class DECAF_SAXHandler extends DefaultHandler {
 			for( String key : nodeCache.keySet() ){
 				FailureNode temp = nodeCache.get(key);
 				for( String casKey : cascadingCache.keySet() ){
-					if( casKey.startsWith(key) ){
+					if( casKey.startsWith(key) && casKey.indexOf(":") > 0 ){
 						temp.addCascadingFailure(nodeCache.get(casKey.split(":")[1]), cascadingCache.get(casKey));
 					}
 				}
@@ -148,9 +149,10 @@ public class DECAF_SAXHandler extends DefaultHandler {
 		
 		if( grabComponent && tag.equalsIgnoreCase("component") ){
 			FailureNode temp = new FailureNode(currentRequired, currentType, currentRedundancy, currentFailureRates);
-			for( String key : cascadingCache.keySet() ){
+			String[] entries = new String[cascadingCache.size()];
+			cascadingCache.keySet().toArray(entries);
+			for( String key : entries ){
 				cascadingCache.put(currentType + ":" + key, cascadingCache.get(key));
-				cascadingCache.remove(key);
 			}
 			nodeCache.put(currentType, temp);
 			grabComponent = false;
@@ -185,6 +187,7 @@ public class DECAF_SAXHandler extends DefaultHandler {
 	
 	public void characters(char a[], int b, int c) throws SAXException {
 		String res = new String(a, b, c);
+		
 		if( grabDemandChangeRate ){
 			demandMatrix[currentDemandChangeFrom][currentDemandChangeTo] = Double.parseDouble(res);
 			grabDemandChangeRate = false;
@@ -212,12 +215,11 @@ public class DECAF_SAXHandler extends DefaultHandler {
 			grabDemandLevels = false;
 		}
 		
-		if( grabCompDemand && grabCompDemandRate ){
+		if( grabCompDemand && grabCompDemandRate && res.trim().length() > 0 ){
 			currentFailureRates[currentDemand] = Double.parseDouble(res);
 			grabCompDemandRate = false;
 		}
-		
-		if( grabCascading && currentCascadingType != null ){
+		if( grabCascading && currentCascadingType != null && res.trim().length() > 0 ){
 			cascadingCache.put(currentCascadingType, Double.parseDouble(res));
 			grabCascading = false;
 		}
@@ -228,6 +230,10 @@ public class DECAF_SAXHandler extends DefaultHandler {
 	}
 	
 	public static HashMap<String, FailureNode> getNodeMap(){
-		return instance.nodeCache;
+		HashMap<String, FailureNode> temp = new HashMap<String, FailureNode>();
+		for( String k : instance.nodeCache.keySet() ){
+			temp.put(k, instance.nodeCache.get(k));
+		}
+		return temp;
 	}
 }
