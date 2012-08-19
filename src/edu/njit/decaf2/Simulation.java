@@ -17,7 +17,7 @@ import edu.njit.decaf2.data.State;
 import edu.njit.decaf2.generators.QMatrixGenerator;
 import edu.njit.decaf2.generators.QMatrixGeneratorUnthreaded;
 import edu.njit.decaf2.generators.StateGenerator;
-import edu.njit.decaf2.generators.TreeGenerator;
+import edu.njit.decaf2.generators.TreeGeneratorUnthreaded;
 
 /**
  * DECAF 2 - Simulation
@@ -54,7 +54,7 @@ public class Simulation extends DECAF {
 		double resultProcessing = 0.0;
 		double t = System.nanoTime();
 		loadSimulationData("data/input.xml");
-		
+
 		resultProcessing += System.nanoTime() - t;
 		System.out.println("Time to Load XML:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
 		
@@ -75,8 +75,8 @@ public class Simulation extends DECAF {
 		
 		String[] nodeKeyArray = new String[nodeMap.keySet().size()];
 		nodeMap.keySet().toArray(nodeKeyArray);
-		TreeGenerator tg = new TreeGenerator(nodeMap);
-		QMatrixGenerator qg = new QMatrixGenerator(transitionStates, nodeKeyArray, demandMatrix, tg);
+		TreeGeneratorUnthreaded tg = new TreeGeneratorUnthreaded(nodeMap);
+		QMatrixGeneratorUnthreaded qg = new QMatrixGeneratorUnthreaded(transitionStates, nodeKeyArray, demandMatrix, tg);
 		qMatrix = qg.generateQMatrix();
 		
 		resultProcessing += System.nanoTime() - t;

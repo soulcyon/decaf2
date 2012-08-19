@@ -6,6 +6,7 @@ package edu.njit.decaf2.generators;
 
 import java.util.HashMap;
 import java.util.HashSet;
+
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.data.FailureNode;
 import edu.njit.decaf2.data.TreeNode;
@@ -14,7 +15,7 @@ import edu.njit.decaf2.data.State;
 /**
  * DECAF 2 - TreeGenerator
  *
- * @author Sashank Tadepalli, Mihir Sanghavi
+ * @author Sashank Tadepalli
  * @version 2.0
  *
  */
@@ -61,60 +62,11 @@ public class TreeGenerator extends DECAF {
 	 * @param transition
 	 * @return
 	 */
-	private double buildTree(String root, State failureTransition) {		
-		
-		TreeNode ft = new TreeNode(nodeMap.get(root));
-		
-		// TODO n lambda calculations for all demand levels
-		
-		buildLargerTree(ft, failureTransition, 1.0);
-		
+	private double buildTree(String root, State transition){
+		//TreeNode ft = new TreeNode(nodeMap.get(root), transition.getDemand());
+		//stateCache.put(transition.toString(), ft);
+		//return ft.getRate();
 		return 0.0;
-	}
-	
-	/**
-	 * 
-	 * @param root
-	 * @param transition
-	 * @param rate
-	 * @return
-	 */
-	
-	private double buildLargerTree(TreeNode curr, State failureTransition, double rate) {		
-		
-		if(curr.isLeaf()) {
-			
-			// TODO populate Q with current Tree
-			
-			 HashMap<String, Double> gamma = curr.getFailureNode().getCascadingFailures();
-			 
-			 // build power set of gamma components
-			 for (int g = (int) Math.pow(2, gamma.size()) - 1; g > 0; g--) {
-				 
-				 String gInBinary = Integer.toBinaryString(g);
-				 curr.clearChildren();
-	
-				 // binary enumeration will toggle inclusion of a component in a subset 
-				 for (int b = 0; b < gInBinary.length(); b++) {
-					 
-					 String[] entries = (String[]) gamma.keySet().toArray();
-					 
-						if (gInBinary.charAt(b) == '1' && failureTransition.getComponentCount(entries[b]) < nodeMap.get(entries[b]).getRedundancy()) {
-							TreeNode child = new TreeNode(new FailureNode(entries[b]));
-							curr.addChild(child.getFailureNode());
-							rate *= curr.getFailureNode().getRate(child.getFailureNode().getType());
-							
-							// builds a new failureTransition that applies to tree
-							failureTransition.incrementComponentCount(child.getFailureNode());
-						}
-				 }
-			 }
-		}
-		for(TreeNode child : curr.getChildren()) {
-			buildLargerTree(child, failureTransition, rate);
-		}
-			
-		return rate;
 	}
 
 	/**

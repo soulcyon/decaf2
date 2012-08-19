@@ -130,7 +130,7 @@ public class State extends DECAF {
 		return result;
 	}
 	
-	public double getComponentCount(String type){
+	public int getComponentCount(String type){
 		return vector.get(type);
 	}
 

@@ -147,6 +147,10 @@ public class FailureNode extends DECAF {
 		cascadingFailures.remove(type);
 	}
 	
+	public double getRate(String type2) {
+		return cascadingFailures.get(type2);
+	}
+	
 	@Override
 	public String toString(){
 		String cascadePrint = "--Causes to fail (" + cascadingFailures.size() + ") ";
