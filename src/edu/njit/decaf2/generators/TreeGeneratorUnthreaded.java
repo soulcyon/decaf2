@@ -94,6 +94,8 @@ public class TreeGeneratorUnthreaded extends DECAF {
 	 */
 	private void buildChildrenNodes(TreeNode curr, State failureTransition, double rate) {
 		
+		System.out.println(failureTransition);	
+		
 		for( int f = 0; f < states.length; f++ ){
 			FailureNode currFailureNode = curr.getFailureNode();
 			State from = states[f];
@@ -115,8 +117,10 @@ public class TreeGeneratorUnthreaded extends DECAF {
 		int gammaLength = gamma.size();
 
 		for( int g = (int)Math.pow(2, gammaLength) - 1; g > 0; g-- ){
+			
 			String gInBinary = Integer.toBinaryString(g);
 			curr.clearChildren();
+			
 			for( int b = 0; b < gInBinary.length(); b++ ) {
 				String[] entries = new String[gammaLength];
 				entries = gamma.keySet().toArray(entries);
@@ -130,6 +134,11 @@ public class TreeGeneratorUnthreaded extends DECAF {
 					rate*= curr.getFailureNode().getRate(entries[b]);
 					failureTransition.incrementComponentCount(failedComponent);
 				}
+			}
+			
+			for(TreeNode child : curr.getChildren()) {
+				System.out.println(failureTransition + ":" + child);
+				buildChildrenNodes(child, failureTransition, rate);
 			}
 		}
 		for(TreeNode child : curr.getChildren()) {
