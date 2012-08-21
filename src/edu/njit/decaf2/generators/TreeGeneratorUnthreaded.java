@@ -101,7 +101,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			if( to == null || !validState(to) )
 				continue;
 			
-			// r *= n * lambda 
+			// n * lambda 
 			int n = currFailureNode.getRedundancy() - 
 					  from.getComponentCount(currFailureNode.getType());
 			rate *= currFailureNode.getFailureRates()[from.getDemand()] * n;
@@ -126,7 +126,8 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				FailureNode failedComponent = nodeMap.get(entries[b]);
 				if( failureTransition.getComponentCount(entries[b]) < failedComponent.getRedundancy() ){
 					curr.addChild(failedComponent);
-					curr.setRate(curr.getFailureNode().getRate(entries[b]));
+					// phi
+					rate*= curr.getFailureNode().getRate(entries[b]);
 					failureTransition.incrementComponentCount(failedComponent);
 				}
 			}
