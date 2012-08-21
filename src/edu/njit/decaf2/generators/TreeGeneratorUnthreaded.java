@@ -120,6 +120,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			
 			String gInBinary = Integer.toBinaryString(g);
 			curr.clearChildren();
+			State  tempFailureTransition = failureTransition; 
 			
 			for( int b = 0; b < gInBinary.length(); b++ ) {
 				String[] entries = new String[gammaLength];
@@ -132,13 +133,13 @@ public class TreeGeneratorUnthreaded extends DECAF {
 					curr.addChild(failedComponent);
 					// phi
 					rate*= curr.getFailureNode().getRate(entries[b]);
-					failureTransition.incrementComponentCount(failedComponent);
+					 tempFailureTransition.incrementComponentCount(failedComponent);
 				}
 			}
 			
 			for(TreeNode child : curr.getChildren()) {
-				System.out.println(failureTransition + ":" + child);
-				buildChildrenNodes(child, failureTransition, rate);
+				System.out.println(tempFailureTransition + ":" + child);
+				buildChildrenNodes(child, tempFailureTransition, rate);
 			}
 		}
 		for(TreeNode child : curr.getChildren()) {
