@@ -133,7 +133,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 					curr.addChild(failedComponent);
 					// phi
 					rate*= curr.getFailureNode().getRate(entries[b]);
-					 tempFailureTransition.incrementComponentCount(failedComponent);
+					tempFailureTransition.incrementComponentCount(failedComponent);
 				}
 			}
 			
