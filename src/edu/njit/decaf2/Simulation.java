@@ -28,7 +28,7 @@ import edu.njit.decaf2.generators.TreeGeneratorUnthreaded;
  */
 public class Simulation extends DECAF {
 	private boolean 						debug;
-	private State[] 						transitionStates;
+	private State[] 						states;
 	private double[][] 						demandMatrix;
 	private HashMap<String, FailureNode>	nodeMap = new HashMap<String, FailureNode>();
 	private double[][]						qMatrix;
@@ -60,10 +60,10 @@ public class Simulation extends DECAF {
 		
 		t = System.nanoTime();
 		StateGenerator sg = new StateGenerator(nodeMap, demandMatrix);
-		transitionStates = sg.generateStates();
+		states = sg.generateStates();
 		
 		if( verboseDebug )
-			System.out.println(transitionStates.length);
+			System.out.println(states.length);
 		
 		resultProcessing += System.nanoTime() - t;
 		System.out.println("Time to SG:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
@@ -76,7 +76,7 @@ public class Simulation extends DECAF {
 		String[] nodeKeyArray = new String[nodeMap.keySet().size()];
 		nodeMap.keySet().toArray(nodeKeyArray);
 		TreeGeneratorUnthreaded tg = new TreeGeneratorUnthreaded(nodeMap);
-		QMatrixGeneratorUnthreaded qg = new QMatrixGeneratorUnthreaded(transitionStates, nodeKeyArray, demandMatrix, tg);
+		QMatrixGeneratorUnthreaded qg = new QMatrixGeneratorUnthreaded(states, nodeKeyArray, demandMatrix, tg);
 		qMatrix = qg.generateQMatrix();
 		
 		resultProcessing += System.nanoTime() - t;

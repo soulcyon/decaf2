@@ -21,7 +21,7 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 	private TreeGeneratorUnthreaded					tg;
 	private ArrayList<int[]>				todoFill = new ArrayList<int[]>();
 
-	private State[] 						transitionStates;
+	private State[] 						states;
 	private String[] 						vectorKeys;
 	private double[][]						qMatrix;
 	private double[][] 						demandMatrix;
@@ -30,11 +30,11 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 	 * Sets {@link State} {@code transitionStates}, {@link String}[] {@code vectorKeys}, {@link Double}[][] 
 	 * {@code demandMatrix}
 	 * 
-	 * @param transitionStates
+	 * @param states
 	 * @param vectorKeys
 	 */
 	public QMatrixGeneratorUnthreaded(State[] ts, String[] vk, double[][] dm, TreeGeneratorUnthreaded t){
-		transitionStates = ts;
+		states = ts;
 		vectorKeys = vk;
 		demandMatrix = dm;
 		tg = t;
@@ -48,7 +48,7 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 	 */
 	public double[][] generateQMatrix(){
 		// Cache the length of valid transition states
-		int statesLen = transitionStates.length;
+		int statesLen = states.length;
 		
 		// Initialize brand new qMatrix[][] array
 		this.qMatrix = new double[statesLen][statesLen];
@@ -56,7 +56,7 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 		// Iterate over matrix, ignore diagonal
 		for( int i = 0; i < statesLen; i++ ){
 			for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 ){
-				double fillV = fillQMatrix(transitionStates[i], transitionStates[j]);
+				double fillV = fillQMatrix(states[i], states[j]);
 				if( Double.isNaN(fillV) ){
 					todoFill.add(new int[]{i, j});
 				} else {
@@ -74,7 +74,7 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 				continue;
 			
 			// Run TreeGenerator
-			qMatrix[next[0]][next[1]] = tg.getFailureRate(transitionStates[next[0]], transitionStates[next[1]]);
+			qMatrix[next[0]][next[1]] = tg.getFailureRate(states, next[0], next[1]);
 		}
 		
 		// Add up diagonals
@@ -136,15 +136,15 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 	/**
 	 * @return the transitionStates
 	 */
-	public State[] getTransitionStates(){
-		return transitionStates;
+	public State[] getStates(){
+		return states;
 	}
 	
 	/**
 	 * @param transitionStates the transitionStates to set
 	 */
-	public void setTransitionStates(State[] transitionStates){
-		this.transitionStates = transitionStates;
+	public void setStates(State[] transitionStates){
+		this.states = transitionStates;
 	}
 	
 	/**
@@ -205,7 +205,7 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 	
 	@Override
 	public String toString(){
-		int statesLen = transitionStates.length;
+		int statesLen = states.length;
 		String result = "";
 		for( int i = 0; i < statesLen; i++ ){
 			for( int j = 0; j < statesLen; j++ ){
