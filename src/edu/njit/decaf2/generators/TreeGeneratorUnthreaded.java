@@ -120,7 +120,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			
 			String gInBinary = Integer.toBinaryString(g);
 			curr.clearChildren();
-			State  tempFailureTransition = failureTransition; 
+			State tempFailureTransition = failureTransition; 
 			
 			for( int b = 0; b < gInBinary.length(); b++ ) {
 				String[] entries = new String[gammaLength];
