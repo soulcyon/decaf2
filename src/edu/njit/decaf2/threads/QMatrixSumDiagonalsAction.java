@@ -4,10 +4,7 @@
  */
 package edu.njit.decaf2.threads;
 
-import java.util.ArrayList;
 import java.util.concurrent.RecursiveTask;
-
-import edu.njit.decaf2.DECAF;
 
 /**
  * DECAF 2 - QMatrixSumDiagonalsAction

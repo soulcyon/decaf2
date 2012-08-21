@@ -4,11 +4,8 @@
  */
 package edu.njit.decaf2.test;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-
 import edu.njit.decaf2.data.FailureNode;
-import edu.njit.decaf2.data.State;
 
 /**
  * DECAF 2 - Test$TreeGens
@@ -52,7 +49,7 @@ public class Test$TreeGens {
 			stateCounter.put(c, 0);
 		}
 		for( Object k : stateCache.keySet() ){
-			System.out.println(":");
+			System.out.println(k + ":" + stateCache.get(k));
 		}
 		System.out.println("Test A1: " + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
 	}

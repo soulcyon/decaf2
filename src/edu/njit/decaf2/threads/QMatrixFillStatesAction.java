@@ -4,10 +4,7 @@
  */
 package edu.njit.decaf2.threads;
 
-import java.util.ArrayList;
 import java.util.concurrent.RecursiveTask;
-
-import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.data.State;
 import edu.njit.decaf2.generators.QMatrixGenerator;
 

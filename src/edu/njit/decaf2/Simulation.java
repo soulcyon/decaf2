@@ -14,7 +14,6 @@ import com.ctc.wstx.sax.WstxSAXParserFactory;
 
 import edu.njit.decaf2.data.FailureNode;
 import edu.njit.decaf2.data.State;
-import edu.njit.decaf2.generators.QMatrixGenerator;
 import edu.njit.decaf2.generators.QMatrixGeneratorUnthreaded;
 import edu.njit.decaf2.generators.StateGenerator;
 import edu.njit.decaf2.generators.TreeGeneratorUnthreaded;
