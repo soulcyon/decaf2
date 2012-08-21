@@ -18,7 +18,8 @@ import edu.njit.decaf2.data.State;
  *
  */
 public class QMatrixGeneratorUnthreaded extends DECAF {
-	private TreeGeneratorUnthreaded					tg;
+	
+	private TreeGeneratorUnthreaded			tg;
 	private ArrayList<int[]>				todoFill = new ArrayList<int[]>();
 
 	private State[] 						states;

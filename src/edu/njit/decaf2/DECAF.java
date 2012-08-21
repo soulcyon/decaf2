@@ -26,6 +26,6 @@ public class DECAF {
 	 * @return {@link String}
 	 */
 	public String error(String message){
-		return "[DECAF." + this.getClass().getSimpleName() + "::\n" + message + "]\n";
+		return "\n[DECAF." + this.getClass().getSimpleName() + "::\n" + message + "]\n";
 	}
 }
