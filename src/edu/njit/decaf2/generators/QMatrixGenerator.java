@@ -71,7 +71,7 @@ public class QMatrixGenerator extends DECAF {
 				continue;
 			
 			// Run TreeGenerator
-			tg.getFailureRate(transitionStates[next[0]], transitionStates[next[1]]);
+			tg.getFailureRate(transitionStates, next[0], next[1]);
 		}
 		
 		// Add up diagonals

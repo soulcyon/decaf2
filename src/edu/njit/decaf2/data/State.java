@@ -70,6 +70,11 @@ public class State extends DECAF {
 		vector.put(type, state);
 	}
 	
+	public State(HashMap<String, Integer> vector, int demand) {
+		this.vector = vector;
+		this.demand = demand;
+	}
+
 	/**
 	 * 
 	 * @param type
@@ -117,12 +122,28 @@ public class State extends DECAF {
 	
 	/**
 	 * 
+	 * @param b
 	 * @return
 	 */
-	public int sum(){
+	public State add(State b){
+		if( b.demand != demand )
+			return null;
+		
+		HashMap<String, Integer> temp = new HashMap<String, Integer>();
+		for( String k : vector.keySet() ){
+			temp.put(k, getComponentCount(k) + b.getComponentCount(k));
+		}
+		return new State(temp, demand);
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public int sum() {
 		if( demand == -1 )
 			return 0;
-		
+
 		int result = 0;
 		for( String k : vector.keySet() ){
 			result += vector.get(k);
@@ -130,18 +151,36 @@ public class State extends DECAF {
 		return result;
 	}
 	
+	/**
+	 * 
+	 * @param type
+	 * @return
+	 */
 	public int getComponentCount(String type){
 		return vector.get(type);
 	}
 
+	/**
+	 * 
+	 * @param type
+	 */
 	public void incrementComponentCount(String type) {
 		vector.put(type, vector.get(type) + 1);
 	}
 	
+	/**
+	 * 
+	 * @param node
+	 */
 	public void incrementComponentCount(FailureNode node) {
 		vector.put(node.getType(), vector.get(node.getType()) + 1);
 	}
 
+	/**
+	 * 
+	 * @param type
+	 * @param count
+	 */
 	public void updateComponentCount(String type, int count) {
 		vector.put(type, count);
 	}

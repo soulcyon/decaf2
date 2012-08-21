@@ -18,6 +18,7 @@ import edu.njit.decaf2.DECAF;
  */
 public class TreeNode extends DECAF {
 	private TreeNode						parentNode;
+	private TreeNode						rootNode;
 	private FailureNode						currentNode;
 	private TreeNode[]						children = new TreeNode[0];
 	private double							rate = 1.0;
@@ -46,22 +47,7 @@ public class TreeNode extends DECAF {
 		this.currentNode = root;
 		this.rate = 0.0;
 	}
-	
-	
-	/**
-	 * @return the root
-	 */
-	public FailureNode getRoot() {
-		return currentNode;
-	}
-	
-	/**
-	 * @param root the root to set
-	 */
-	public void setRoot(FailureNode root) {
-		this.currentNode = root;
-	}
-	
+
 	/**
 	 * @return the children
 	 */
@@ -99,8 +85,9 @@ public class TreeNode extends DECAF {
 		ArrayList<TreeNode> listOfChildren = new ArrayList<TreeNode>(Arrays.asList(children));
 		TreeNode childNode = new TreeNode(child, currentDemand);
 		childNode.parentNode = this;
+		childNode.rootNode = this.rootNode;
 		listOfChildren.add(childNode);
-		listOfChildren.toArray(children);
+		children = listOfChildren.toArray(children);
 	}
 	
 	/**
@@ -162,5 +149,39 @@ public class TreeNode extends DECAF {
 	 */
 	public FailureNode getFailureNode() {
 		return currentNode;
+	}
+
+	public FailureNode getRoot(){
+		return rootNode.getFailureNode();
+	}
+	
+	public void makeRoot() {
+		rootNode = this;
+	}
+	/*
+	A -> B -> A -> B
+	A
+	|  B
+	|  |  A
+	|  |  |  B
+	*/
+			
+	@Override
+	public String toString(){
+		String result = this.rootNode.getFailureNode().getType();
+		for( TreeNode t : this.rootNode.children ){
+			result += "\n|  " + t.getFailureNode().getType();
+			result += toString(t, "|  ");
+		}
+		return result;
+	}
+	
+	private String toString(TreeNode curr, String prefix){
+		String result = "";
+		for( TreeNode t : curr.children ){
+			result += "\n" + prefix + t.getFailureNode().getType();
+			result += toString(t, "|  " + prefix);
+		}
+		return result;
 	}
 }
