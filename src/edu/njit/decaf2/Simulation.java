@@ -56,17 +56,17 @@ public class Simulation extends DECAF {
 		loadSimulationData("data/input.xml");
 
 		resultProcessing += System.nanoTime() - t;
-		System.out.println("Time to Load XML:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
+		System.out.println("Time to Load XML: " + (System.nanoTime() - t)/1000.0/1000.0/1000.0 + " secs");
 		
 		t = System.nanoTime();
 		StateGenerator sg = new StateGenerator(nodeMap, demandMatrix);
 		states = sg.generateStates();
 		
 		if( verboseDebug )
-			System.out.println(states.length);
+			System.out.println("\nNo. of states in SG: " + states.length + "\n");
 		
 		resultProcessing += System.nanoTime() - t;
-		System.out.println("Time to SG:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
+		System.out.println("Time to generate states with SG: " + (System.nanoTime() - t)/1000.0/1000.0/1000.0 + " secs\n");
 
 		if( verboseDebug )
 			System.out.println(sg);
@@ -91,7 +91,7 @@ public class Simulation extends DECAF {
 		if( verboseDebug )
 			System.out.println(sg);
 		
-		System.out.println("Total CPU Time:\t"+ resultProcessing/1000.0/1000.0/1000.0);
+		System.out.println("Total CPU Time:\t"+ resultProcessing/1000.0/1000.0/1000.0 + " secs");
 	}
 	
 	/**
