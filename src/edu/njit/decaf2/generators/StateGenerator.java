@@ -133,6 +133,6 @@ public class StateGenerator extends DECAF {
 		for( int i = 0; i < transitionStates.length; i++ ){
 			sgString += transitionStates[i].toLine() + "\t";
 		}
-		return error(sgString + "\n");
+		return error(sgString);
 	}
 }

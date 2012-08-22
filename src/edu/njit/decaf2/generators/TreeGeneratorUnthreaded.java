@@ -4,6 +4,7 @@
  */
 package edu.njit.decaf2.generators;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -20,11 +21,14 @@ import edu.njit.decaf2.data.TreeNode;
  *
  */
 public class TreeGeneratorUnthreaded extends DECAF {
+	
 	private HashSet<TreeNode>				treeCache = new HashSet<TreeNode>();
 	private HashMap<State, TreeNode> 		stateCache = new HashMap<State, TreeNode>();
 	private HashMap<String, FailureNode>	nodeMap = new HashMap<String, FailureNode>();
 	private State[]							states;
 	private int								misses = 0;
+
+	private QMatrixGeneratorUnthreaded      qt;
 	
 	/**
 	 * Sets {@link HashMap}<{@link String}, {@link FailureNode}> {@code nodeMap}
@@ -60,22 +64,15 @@ public class TreeGeneratorUnthreaded extends DECAF {
 	
 	/**
 	 * 
-	 * @param root
-	 * @param transition
-	 * @return
+	 * @param statesCopy
 	 */
-	/**
-	 * @param root
-	 * @param failureTransition
-	 * @return
-	 */
-	public void buildTree(State[] ss) {
-		states = ss;
+	
+	public void buildTree(State[] statesCopy) {
+		states = statesCopy;
 		for(String root : nodeMap.keySet()) {
 			TreeNode ft = new TreeNode(nodeMap.get(root));
 			ft.makeRoot();
 			State initFailureTransition = (State) states[0].clone();
-			System.out.println(initFailureTransition);
 			initFailureTransition.incrementComponentCount(nodeMap.get(root));
 			buildChildrenNodes(ft, initFailureTransition, 1.0);
 		}
@@ -85,7 +82,6 @@ public class TreeGeneratorUnthreaded extends DECAF {
 	 * 
 	 * @param s
 	 * @return
-	 */
 	private boolean validState(State s){
 		HashMap<String, Integer> temp = s.getVector();
 		for( String k : temp.keySet() ){
@@ -93,7 +89,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				return false;
 		}
 		return true;
-	}
+	}*/
 	
 	/**
 	 * Builds a larger tree by attaching nodes.
@@ -107,12 +103,16 @@ public class TreeGeneratorUnthreaded extends DECAF {
 		// print trees
 		System.out.println("curr:\n" + curr + "\n\n");
 		
-		for( int f = 0; f < states.length; f++ ){
+		ArrayList<String> likeTransitions =  QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
+		
+		for( String transition : likeTransitions ){
+			
+			String[] fromAndTo = transition.split(",");
+			
+			int f = Integer.parseInt(fromAndTo[0]);
+			int t = Integer.parseInt(fromAndTo[1]);
 			
 			State from = states[f];
-			State to = from.add(failureTransition);
-			if( to == null || !validState(to) )
-				continue;
 			
 			FailureNode root = curr.getRoot();
 			
@@ -121,7 +121,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 					  from.getComponentCount(root.getType());
 			rate *= root.getFailureRates()[from.getDemand()] * n;
 			
-			// TODO Add rate to transition in Q
+			QMatrixGeneratorUnthreaded.setValue(QMatrixGeneratorUnthreaded.getValue(f, t) + rate, f, t);
 		}
 		
 		HashMap<String, Double> gamma = curr.getFailureNode().getCascadingFailures();
