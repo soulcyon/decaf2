@@ -20,14 +20,15 @@ import edu.njit.decaf2.data.State;
  */
 public class QMatrixGeneratorUnthreaded extends DECAF {
 	
-	private TreeGeneratorUnthreaded			tg;
-	private ArrayList<int[]>				todoFill = new ArrayList<int[]>();
-
-	private State[] 						states;
-	private String[] 						vectorKeys;
-	private double[][]						qMatrix;
-	private double[][] 						demandMatrix;
-
+	private TreeGeneratorUnthreaded			  	tg;
+	private ArrayList<int[]>				  	todoFill = new ArrayList<int[]>();
+	private State[] 						  	states;
+	private String[] 						  	vectorKeys;
+	private double[][] 						  	demandMatrix;
+	
+	static HashMap<State, ArrayList<String>> 	likeTransitionMap;
+	static double[][]						  	qMatrix;
+	
 	/**
 	 * Sets {@link State} {@code transitionStates}, {@link String}[] {@code vectorKeys}, {@link Double}[][] 
 	 * {@code demandMatrix}
@@ -53,14 +54,18 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 		int statesLen = states.length;
 		
 		// Initialize brand new qMatrix[][] array
-		this.qMatrix = new double[statesLen][statesLen];
+		QMatrixGeneratorUnthreaded.qMatrix = new double[statesLen][statesLen];
 		
-		HashMap<State, ArrayList<String>> likeTransitionMap = new HashMap<State, ArrayList<String>>();
+		likeTransitionMap = new HashMap<State, ArrayList<String>>();
 
 		// Iterate over matrix, ignore diagonal
 		for( int i = 0; i < statesLen; i++ ){
-			for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 ){
+			//for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 ){
+			for( int j = 0; j < statesLen; j++){
+				
+				if(j == i) continue;
 				double fillV = fillQMatrix(states[i], states[j]);
+				
 				if( Double.isNaN(fillV) ){
 					State differenceState = states[i].diff(states[j]);
 					String str = i + "," + j;
@@ -91,7 +96,7 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 			// TODO Calculate state differences and populate LikeTransitionMapper
 			// Run TreeGenerator
 			qMatrix[next[0]][next[1]] = tg.getFailureRate(states, next[0], next[1]);
-		}*/
+		}
 		
 		// Add up diagonals
 		for( int i = 0; i < statesLen; i++ ){
@@ -100,10 +105,29 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 				sum += qMatrix[i][j];
 			}
 			qMatrix[i][i] = sum;
+		}*/
+		
+		//diagonal entries = negative of the sum of row entries
+		for( int i = 0; i < statesLen; i++ ){
+			int sum = 0;
+			for( int j = 0 ; j < statesLen; j++ ){
+				sum += qMatrix[i][j];
+			}
+			qMatrix[i][i] = -sum;
 		}
+		
 		return qMatrix;
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
+	
+	public HashMap<State, ArrayList<String>> getLikeTransitionMap() {
+		return likeTransitionMap;
+	}
+
 	/**
 	 * === NOTE ===
 	 * QMatrixRunnable will call this method, please use the refactoring tool in Eclipse to make any modifications.
@@ -188,7 +212,28 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 	 * @param qMatrix the qMatrix to set
 	 */
 	public void setqMatrix(double[][] qMatrix){
-		this.qMatrix = qMatrix;
+		QMatrixGeneratorUnthreaded.qMatrix = qMatrix;
+	}
+	
+	/**
+	 * 
+	 * @param value
+	 * @param i
+	 * @param j
+	 */
+	static void setValue(double value, int i, int j) {
+		qMatrix[i][j] = value;
+	}
+	
+	/**
+	 *  
+	 * @param i
+	 * @param j
+	 * @return
+	 */
+
+	static double getValue(int i, int j) {
+		return qMatrix[i][j];
 	}
 
 	/**

@@ -158,8 +158,9 @@ public class TreeNode extends DECAF {
 	public void makeRoot() {
 		rootNode = this;
 	}
-	/*
-	A -> B -> A -> B
+	
+	/* 
+	A -> B -> A -> B (read parent -> child)
 	A
 	|  B
 	|  |  A
