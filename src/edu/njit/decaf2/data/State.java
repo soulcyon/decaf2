@@ -231,6 +231,12 @@ public class State extends DECAF {
 		return result + demand + ")";
 	}
 	
+	public State clone(){
+		State result = new State();
+		result.demand = demand - 0;
+		result.vector = (HashMap<String, Integer>) vector.clone();
+		return result;
+	}
 	@Override
 	public int hashCode() {
 		int result = new Integer(demand).hashCode();

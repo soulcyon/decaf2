@@ -20,7 +20,7 @@ import edu.njit.decaf2.threads.QMatrixSumDiagonalsAction;
  *
  */
 public class QMatrixGenerator extends DECAF {
-	private TreeGeneratorUnthreaded					tg;
+	private TreeGeneratorUnthreaded			tg;
 	private ArrayList<int[]>				todoFill = new ArrayList<int[]>();
 
 	private State[] 						transitionStates;
@@ -71,7 +71,7 @@ public class QMatrixGenerator extends DECAF {
 				continue;
 			
 			// Run TreeGenerator
-			tg.getFailureRate(transitionStates, next[0], next[1]);
+			//tg.getFailureRate(transitionStates, next[0], next[1]);
 		}
 		
 		// Add up diagonals
@@ -195,12 +195,12 @@ public class QMatrixGenerator extends DECAF {
 	}
 	
 	@Override
-	public String toString(){
+	public String toString() {
 		int statesLen = transitionStates.length;
 		String result = "";
 		for( int i = 0; i < statesLen; i++ ){
 			for( int j = 0; j < statesLen; j++ ){
-				result += "(" + qMatrix[i][j] + ")" + "\t";
+				result += qMatrix[i][j] + "@(" + i + "," + j + "); ";
 			}
 			result += "\n";
 		}

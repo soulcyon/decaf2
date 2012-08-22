@@ -39,7 +39,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 	 * @param from
 	 * @param to
 	 * @return rate
-	 */
+	 *
 	public double getFailureRate(State[] ss, int from, int to){
 		states = ss;
 		State diffState = states[from].diff(states[to]);
@@ -56,7 +56,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 		}
 		//stateCache.put(diffState, new TreeNode(new FailureNode("NULL", new double[]{0.0}), 0));
 		return failureRate;
-	}
+	}*/
 	
 	/**
 	 * 
@@ -64,11 +64,21 @@ public class TreeGeneratorUnthreaded extends DECAF {
 	 * @param transition
 	 * @return
 	 */
-	private double buildTree(String root, State failureTransition) {
-		TreeNode ft = new TreeNode(nodeMap.get(root), failureTransition.getDemand());
-		ft.makeRoot();
-		buildChildrenNodes(ft, failureTransition, 1.0);
-		return ft.getRate();
+	/**
+	 * @param root
+	 * @param failureTransition
+	 * @return
+	 */
+	public void buildTree(State[] ss) {
+		states = ss;
+		for(String root : nodeMap.keySet()) {
+			TreeNode ft = new TreeNode(nodeMap.get(root));
+			ft.makeRoot();
+			State initFailureTransition = (State) states[0].clone();
+			System.out.println(initFailureTransition);
+			initFailureTransition.incrementComponentCount(nodeMap.get(root));
+			buildChildrenNodes(ft, initFailureTransition, 1.0);
+		}
 	}
 	
 	/**
@@ -94,8 +104,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 	 */
 	private void buildChildrenNodes(TreeNode curr, State failureTransition, double rate) {
 		
-		System.out.println(failureTransition);	
-		
+		System.out.println("curr:\n" + curr + "\n\n");
 		for( int f = 0; f < states.length; f++ ){
 			FailureNode currFailureNode = curr.getFailureNode();
 			State from = states[f];
@@ -109,16 +118,14 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			rate *= currFailureNode.getFailureRates()[from.getDemand()] * n;
 			
 			// TODO Add rate to transition in Q
-			System.out.println(curr);
-			System.out.println("");
 		}
 		
 		HashMap<String, Double> gamma = curr.getFailureNode().getCascadingFailures();
 		int gammaLength = gamma.size();
-
 		for( int g = (int)Math.pow(2, gammaLength) - 1; g > 0; g-- ){
 			
-			String gInBinary = Integer.toBinaryString(g);
+			String gInBinary = String.format("%" + gammaLength + "s", Integer.toBinaryString(g)).replace(' ', '0'); // padding 0's
+			
 			curr.clearChildren();
 			State tempFailureTransition = failureTransition; 
 			
@@ -130,6 +137,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				
 				FailureNode failedComponent = nodeMap.get(entries[b]);
 				if( failureTransition.getComponentCount(entries[b]) < failedComponent.getRedundancy() ){
+					System.out.println("Adding child " + failedComponent.getType() + " to parent " + curr.getFailureNode().getType());
 					curr.addChild(failedComponent);
 					// phi
 					rate*= curr.getFailureNode().getRate(entries[b]);
@@ -138,13 +146,8 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			}
 			
 			for(TreeNode child : curr.getChildren()) {
-				System.out.println(tempFailureTransition + ":" + child);
 				buildChildrenNodes(child, tempFailureTransition, rate);
 			}
-		}
-		for(TreeNode child : curr.getChildren()) {
-			System.out.println(failureTransition + ":" + child);
-			buildChildrenNodes(child, failureTransition, rate);
 		}
 	}
 

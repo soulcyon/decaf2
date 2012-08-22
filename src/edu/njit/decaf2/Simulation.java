@@ -55,17 +55,17 @@ public class Simulation extends DECAF {
 		loadSimulationData("data/input.xml");
 
 		resultProcessing += System.nanoTime() - t;
-		System.out.println("Time to Load XML: " + (System.nanoTime() - t)/1000.0/1000.0/1000.0 + " secs");
+		System.out.println("LoadXML Time: " + (System.nanoTime() - t)/1000.0/1000.0/1000.0 + " secs");
 		
 		t = System.nanoTime();
 		StateGenerator sg = new StateGenerator(nodeMap, demandMatrix);
 		states = sg.generateStates();
 		
 		if( verboseDebug )
-			System.out.println("\nNo. of states in SG: " + states.length + "\n");
+			System.out.println("\nStates Count: " + states.length + "\n");
 		
 		resultProcessing += System.nanoTime() - t;
-		System.out.println("Time to generate states with SG: " + (System.nanoTime() - t)/1000.0/1000.0/1000.0 + " secs\n");
+		System.out.println("StateGenerator Time: " + (System.nanoTime() - t)/1000.0/1000.0/1000.0 + " secs\n");
 
 		if( verboseDebug )
 			System.out.println(sg);
@@ -74,15 +74,17 @@ public class Simulation extends DECAF {
 		
 		String[] nodeKeyArray = new String[nodeMap.keySet().size()];
 		nodeMap.keySet().toArray(nodeKeyArray);
+		System.out.println(nodeMap);
+		
 		TreeGeneratorUnthreaded tg = new TreeGeneratorUnthreaded(nodeMap);
 		QMatrixGeneratorUnthreaded qg = new QMatrixGeneratorUnthreaded(states, nodeKeyArray, demandMatrix, tg);
 		qMatrix = qg.generateQMatrix();
 		
 		resultProcessing += System.nanoTime() - t;
-		System.out.println("Time to QG:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
+		System.out.println("QMatrixGenerator Time:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
 
 		if( verboseDebug )
-			System.out.println("Generated States:\t" + tg.getCache().size() + " (reused " + tg.getMisses() + ")");
+			System.out.println("Generated Failure Transitions:\t" + tg.getCache().size() + " (reused " + tg.getMisses() + ")");
 		
 		if( verboseDebug )
 			System.out.println(qg);
