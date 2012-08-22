@@ -231,6 +231,7 @@ public class State extends DECAF {
 		return result + demand + ")";
 	}
 	
+	@SuppressWarnings("unchecked")
 	public State clone(){
 		State result = new State();
 		result.demand = demand - 0;
