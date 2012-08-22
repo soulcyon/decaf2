@@ -14,7 +14,7 @@ import edu.njit.decaf2.data.State;
 /**
  * DECAF 2 - QMatrixGenerator
  *
- * @author Sashank Tadepalli
+ * @author Sashank Tadepalli, Mihir Sanghavi
  * @version 2.0
  *
  */
