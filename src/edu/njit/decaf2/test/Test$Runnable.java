@@ -23,5 +23,6 @@ public class Test$Runnable implements Runnable {
 		for (long i = 1; i < countUntil; i++) {
 			sum += i;
 		}
+		System.out.println(sum);
 	}
 }

@@ -104,18 +104,22 @@ public class TreeGeneratorUnthreaded extends DECAF {
 	 */
 	private void buildChildrenNodes(TreeNode curr, State failureTransition, double rate) {
 		
+		// print trees
 		System.out.println("curr:\n" + curr + "\n\n");
+		
 		for( int f = 0; f < states.length; f++ ){
-			FailureNode currFailureNode = curr.getFailureNode();
+			
 			State from = states[f];
 			State to = from.add(failureTransition);
 			if( to == null || !validState(to) )
 				continue;
 			
-			// n * lambda 
-			int n = currFailureNode.getRedundancy() - 
-					  from.getComponentCount(currFailureNode.getType());
-			rate *= currFailureNode.getFailureRates()[from.getDemand()] * n;
+			FailureNode root = curr.getRoot();
+			
+			// n * lambda for root of tree
+			int n = root.getRedundancy() - 
+					  from.getComponentCount(root.getType());
+			rate *= root.getFailureRates()[from.getDemand()] * n;
 			
 			// TODO Add rate to transition in Q
 		}
@@ -130,18 +134,27 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			State tempFailureTransition = failureTransition; 
 			
 			for( int b = 0; b < gInBinary.length(); b++ ) {
-				String[] entries = new String[gammaLength];
-				entries = gamma.keySet().toArray(entries);
-				 
-				if( gInBinary.charAt(b) == '0' ) continue;
 				
-				FailureNode failedComponent = nodeMap.get(entries[b]);
-				if( failureTransition.getComponentCount(entries[b]) < failedComponent.getRedundancy() ){
-					System.out.println("Adding child " + failedComponent.getType() + " to parent " + curr.getFailureNode().getType());
-					curr.addChild(failedComponent);
-					// phi
-					rate*= curr.getFailureNode().getRate(entries[b]);
-					tempFailureTransition.incrementComponentCount(failedComponent);
+				String[] entriesInGamma = new String[gammaLength];
+				entriesInGamma = gamma.keySet().toArray(entriesInGamma);
+				FailureNode triggerComponent = nodeMap.get(entriesInGamma[b]);
+				
+				if( failureTransition.getComponentCount(entriesInGamma[b]) < triggerComponent.getRedundancy() ) {
+				
+					// adding probability i.e. "Φ" of a node failure because it failed due to parent
+					if( gInBinary.charAt(b) == '1' )  {
+						//System.out.println("Adding child " + triggerComponent.getType() + " to parent " + curr.getFailureNode().getType());
+						curr.addChild(triggerComponent);
+						tempFailureTransition.incrementComponentCount(triggerComponent);
+						// phi
+						rate*= curr.getFailureNode().getRate(entriesInGamma[b]);
+					}
+					
+					// adding complement probability i.e. "1-Φ' of a node because it could have failed but did not fail
+					else if (gInBinary.charAt(b) == '0') {
+						// 1 - phi
+						rate*= (1 - curr.getFailureNode().getRate(entriesInGamma[b]));
+					}
 				}
 			}
 			

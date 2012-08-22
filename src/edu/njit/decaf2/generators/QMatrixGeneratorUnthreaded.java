@@ -6,7 +6,7 @@ package edu.njit.decaf2.generators;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+//import java.util.Iterator;
 
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.data.State;

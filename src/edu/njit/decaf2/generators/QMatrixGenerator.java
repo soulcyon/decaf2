@@ -5,7 +5,7 @@
 package edu.njit.decaf2.generators;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+//import java.util.Iterator;
 
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.data.State;
@@ -62,7 +62,7 @@ public class QMatrixGenerator extends DECAF {
 		qMatrix = threadPool.invoke(new QMatrixFillStatesAction(transitionStates, qMatrix, this));
 		
 		// Generate trees as required
-		Iterator<int[]> tfd = todoFill.iterator();
+		/*Iterator<int[]> tfd = todoFill.iterator();
 
 		while( tfd.hasNext() ){
 			int[] next = tfd.next();
@@ -72,7 +72,9 @@ public class QMatrixGenerator extends DECAF {
 			
 			// Run TreeGenerator
 			//tg.getFailureRate(transitionStates, next[0], next[1]);
-		}
+		}*/
+		
+	    tg.buildTree(transitionStates);
 		
 		// Add up diagonals
 		qMatrix = threadPool.invoke(new QMatrixSumDiagonalsAction(qMatrix));
