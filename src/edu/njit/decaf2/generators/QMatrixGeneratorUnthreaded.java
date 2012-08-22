@@ -5,6 +5,7 @@
 package edu.njit.decaf2.generators;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import edu.njit.decaf2.DECAF;
@@ -53,12 +54,23 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 		
 		// Initialize brand new qMatrix[][] array
 		this.qMatrix = new double[statesLen][statesLen];
+		
+		HashMap<State, ArrayList<String>> likeTransitionMap = new HashMap<State, ArrayList<String>>();
 
 		// Iterate over matrix, ignore diagonal
 		for( int i = 0; i < statesLen; i++ ){
 			for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 ){
 				double fillV = fillQMatrix(states[i], states[j]);
 				if( Double.isNaN(fillV) ){
+					State differenceState = states[i].diff(states[j]);
+					String str = i + "," + j;
+					if( likeTransitionMap.containsKey(differenceState) ){
+						likeTransitionMap.get(differenceState).add(str);
+					} else {
+						ArrayList<String> temp = new ArrayList<String>();
+						temp.add(str);
+						likeTransitionMap.put(differenceState, temp);
+					}
 					todoFill.add(new int[]{i, j});
 				} else {
 					qMatrix[i][j] = fillV;
@@ -67,16 +79,19 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 		}
 		
 		// Generate trees as required
-		Iterator<int[]> tfd = todoFill.iterator();
+		tg.buildTree(states);
+		
+		/*Iterator<int[]> tfd = todoFill.iterator();
 		while( tfd.hasNext() ){
 			int[] next = tfd.next();
 			
 			if( next == null )
 				continue;
 			
+			// TODO Calculate state differences and populate LikeTransitionMapper
 			// Run TreeGenerator
 			qMatrix[next[0]][next[1]] = tg.getFailureRate(states, next[0], next[1]);
-		}
+		}*/
 		
 		// Add up diagonals
 		for( int i = 0; i < statesLen; i++ ){

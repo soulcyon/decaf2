@@ -62,7 +62,7 @@ public class TreeGenerator extends DECAF {
 	 * @param transition
 	 * @return
 	 */
-	private double buildTree(String root, State transition){
+	private double buildTree(String root, State transition) {
 		//TreeNode ft = new TreeNode(nodeMap.get(root), transition.getDemand());
 		//stateCache.put(transition.toString(), ft);
 		//return ft.getRate();

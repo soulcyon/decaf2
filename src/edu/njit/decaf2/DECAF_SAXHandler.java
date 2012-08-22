@@ -4,7 +4,9 @@
  */
 package edu.njit.decaf2;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.xml.sax.Attributes;
@@ -52,7 +54,7 @@ public class DECAF_SAXHandler extends DefaultHandler {
 	/*
 	 * Temporary caches of data
 	 */
-	private HashMap<String, Double>			cascadingCache = new HashMap<String, Double>();
+	private HashMap<String, List<String>>	cascadingCache = new HashMap<String, List<String>>();
 	private int								currentDemand;
 	private String 							currentType;
 	private int 							currentRequired;
@@ -139,9 +141,10 @@ public class DECAF_SAXHandler extends DefaultHandler {
 			for( String key : nodeCache.keySet() ){
 				FailureNode temp = nodeCache.get(key);
 				for( String casKey : cascadingCache.keySet() ){
-					if( casKey.startsWith(key) && casKey.indexOf(":") > 0 ){
-						temp.addCascadingFailure(nodeCache.get(casKey.split(":")[1]), cascadingCache.get(casKey));
-					}
+					List<String> gamma = cascadingCache.get(casKey);
+					for( String k : gamma )
+						if( !k.startsWith(key) )
+							temp.addCascadingFailure(nodeCache.get(k.split(":")[0]), Double.parseDouble(k.split(":")[1]));
 				}
 			}
 			grabComponentInfo = false;
@@ -149,11 +152,6 @@ public class DECAF_SAXHandler extends DefaultHandler {
 		
 		if( grabComponent && tag.equalsIgnoreCase("component") ){
 			FailureNode temp = new FailureNode(currentRequired, currentType, currentRedundancy, currentFailureRates);
-			String[] entries = new String[cascadingCache.size()];
-			cascadingCache.keySet().toArray(entries);
-			for( String key : entries ){
-				cascadingCache.put(currentType + ":" + key, cascadingCache.get(key));
-			}
 			nodeCache.put(currentType, temp);
 			grabComponent = false;
 		}
@@ -195,6 +193,7 @@ public class DECAF_SAXHandler extends DefaultHandler {
 		
 		if( grabCompType ){
 			currentType = res;
+			cascadingCache.put(currentType, new ArrayList<String>());
 			grabCompType = false;
 		}
 		
@@ -220,7 +219,7 @@ public class DECAF_SAXHandler extends DefaultHandler {
 			grabCompDemandRate = false;
 		}
 		if( grabCascading && currentCascadingType != null && res.trim().length() > 0 ){
-			cascadingCache.put(currentCascadingType, Double.parseDouble(res));
+			cascadingCache.get(currentType).add(currentCascadingType + ":" + res);
 			grabCascading = false;
 		}
 	}

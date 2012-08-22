@@ -171,7 +171,7 @@ public class TreeNode extends DECAF {
 		String result = this.rootNode.getFailureNode().getType();
 		for( TreeNode t : this.rootNode.children ){
 			result += "\n|  " + t.getFailureNode().getType();
-			result += toString(t, "|  ");
+			result += toString(t, "|  |  ");
 		}
 		return result;
 	}
@@ -184,4 +184,5 @@ public class TreeNode extends DECAF {
 		}
 		return result;
 	}
+	
 }
