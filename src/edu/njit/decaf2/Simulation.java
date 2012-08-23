@@ -84,6 +84,8 @@ public class Simulation extends DECAF {
 		
 		qMatrix = QMatrixGeneratorUnthreaded.generateQMatrix();
 		
+		System.out.println(QMatrixGeneratorUnthreaded.printQMatrix());
+		
 		resultProcessing += System.nanoTime() - t;
 		System.out.println("QMatrixGenerator Time:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
 

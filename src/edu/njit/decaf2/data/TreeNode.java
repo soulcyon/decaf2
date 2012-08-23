@@ -175,12 +175,10 @@ public class TreeNode extends DECAF {
 	
 	public void putComplementPhi(String type, String parent){
 		if( !rootNode.phiMap.containsKey(type) ){
-			System.out.println("DOESNT EXIST @ " + type + " => " + parent);
 			LinkedList<String> temp = new LinkedList<String>();
 			rootNode.phiMap.put(type, temp);
 		}
 		rootNode.phiMap.get(type).add(parent);
-		System.out.println(rootNode.phiMap.size());
 	}
 	
 	/* 

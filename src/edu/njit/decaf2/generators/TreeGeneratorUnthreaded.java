@@ -64,6 +64,10 @@ public class TreeGeneratorUnthreaded extends DECAF {
 		
 		HashMap<String, Double> gamma = curr.getFailureNode().getCascadingFailures();
 		int gammaLength = gamma.size();
+		
+		if( gammaLength == 0 )
+			return;
+		
 		for( int g = (int)Math.pow(2, gammaLength) - 1; g >= 0; g-- ){
 			
 			String gInBinary = String.format("%" + gammaLength + "s", Integer.toBinaryString(g)).replace(' ', '0');
@@ -97,8 +101,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 					FailureNode root = curr.getRoot();
 					
 					// n * lambda for root of tree
-					int n = root.getRedundancy() - 
-							  from.getComponentCount(root.getType());
+					int n = root.getRedundancy() - from.getComponentCount(root.getType());
 					subRate *= root.getFailureRates()[from.getDemand()] * n;
 					for( String k : Simulation.nodeMap.keySet() ){
 						int maximumComplementPhi = Simulation.nodeMap.get(k).getRedundancy() - to.getComponentCount(k),
