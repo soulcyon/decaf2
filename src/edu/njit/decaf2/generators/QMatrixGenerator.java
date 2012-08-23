@@ -72,12 +72,12 @@ public class QMatrixGenerator extends DECAF {
 			
 			// Run TreeGenerator
 			//tg.getFailureRate(transitionStates, next[0], next[1]);
-		}*/
+		}
 		
 	    tg.buildTree(transitionStates);
 		
 		// Add up diagonals
-		qMatrix = threadPool.invoke(new QMatrixSumDiagonalsAction(qMatrix));
+		qMatrix = threadPool.invoke(new QMatrixSumDiagonalsAction(qMatrix));*/
 		return qMatrix;
 	}
 	

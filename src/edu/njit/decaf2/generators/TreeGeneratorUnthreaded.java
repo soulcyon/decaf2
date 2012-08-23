@@ -6,9 +6,9 @@ package edu.njit.decaf2.generators;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 
 import edu.njit.decaf2.DECAF;
+import edu.njit.decaf2.Simulation;
 import edu.njit.decaf2.data.FailureNode;
 import edu.njit.decaf2.data.State;
 import edu.njit.decaf2.data.TreeNode;
@@ -21,59 +21,16 @@ import edu.njit.decaf2.data.TreeNode;
  *
  */
 public class TreeGeneratorUnthreaded extends DECAF {
-	
-	private HashSet<TreeNode>				treeCache = new HashSet<TreeNode>();
-	private HashMap<State, TreeNode> 		stateCache = new HashMap<State, TreeNode>();
-	private HashMap<String, FailureNode>	nodeMap = new HashMap<String, FailureNode>();
-	private State[]							states;
-	private int								misses = 0;
-
-	private QMatrixGeneratorUnthreaded      qt;
-	
-	/**
-	 * Sets {@link HashMap}<{@link String}, {@link FailureNode}> {@code nodeMap}
-	 * @param decaf_nodeMap
-	 */
-	public TreeGeneratorUnthreaded(HashMap<String, FailureNode> nodeMap){
-		this.nodeMap = nodeMap;
-	}
-
-	/**
-	 * 
-	 * @param from
-	 * @param to
-	 * @return rate
-	 *
-	public double getFailureRate(State[] ss, int from, int to){
-		states = ss;
-		State diffState = states[from].diff(states[to]);
-
-		if( stateCache.containsKey(diffState) ){
-			misses++;
-			return stateCache.get(diffState).getRate();
-		}
-
-		double failureRate = 0.0;
-		HashMap<String, Integer> diffVector = diffState.getVector();
-		for( String k : diffVector.keySet() ){
-			failureRate += buildTree(k, diffState);
-		}
-		//stateCache.put(diffState, new TreeNode(new FailureNode("NULL", new double[]{0.0}), 0));
-		return failureRate;
-	}*/
-	
 	/**
 	 * 
 	 * @param statesCopy
 	 */
-	
-	public void buildTree(State[] statesCopy) {
-		states = statesCopy;
-		for(String root : nodeMap.keySet()) {
-			TreeNode ft = new TreeNode(nodeMap.get(root));
+	public static void buildTree() {
+		for(String root : Simulation.nodeMap.keySet()) {
+			TreeNode ft = new TreeNode(Simulation.nodeMap.get(root));
 			ft.makeRoot();
-			State initFailureTransition = (State) states[0].clone();
-			initFailureTransition.incrementComponentCount(nodeMap.get(root));
+			State initFailureTransition = (State)Simulation.states[0].clone();
+			initFailureTransition.incrementComponentCount(Simulation.nodeMap.get(root));
 			buildChildrenNodes(ft, initFailureTransition, 1.0);
 		}
 	}
@@ -98,12 +55,12 @@ public class TreeGeneratorUnthreaded extends DECAF {
 	 * @param rate
 	 * @return
 	 */
-	private void buildChildrenNodes(TreeNode curr, State failureTransition, double rate) {
+	private static void buildChildrenNodes(TreeNode curr, State failureTransition, double rate) {
 		
 		// print trees
 		System.out.println("curr:\n" + curr + "\n\n");
 		
-		ArrayList<String> likeTransitions =  QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
+		ArrayList<String> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
 		
 		for( String transition : likeTransitions ){
 			
@@ -112,7 +69,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			int f = Integer.parseInt(fromAndTo[0]);
 			int t = Integer.parseInt(fromAndTo[1]);
 			
-			State from = states[f];
+			State from = Simulation.states[f];
 			
 			FailureNode root = curr.getRoot();
 			
@@ -121,7 +78,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 					  from.getComponentCount(root.getType());
 			rate *= root.getFailureRates()[from.getDemand()] * n;
 			
-			QMatrixGeneratorUnthreaded.setValue(QMatrixGeneratorUnthreaded.getValue(f, t) + rate, f, t);
+			Simulation.qMatrix[f][t] = Simulation.qMatrix[f][t] + rate;
 		}
 		
 		HashMap<String, Double> gamma = curr.getFailureNode().getCascadingFailures();
@@ -137,11 +94,11 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				
 				String[] entriesInGamma = new String[gammaLength];
 				entriesInGamma = gamma.keySet().toArray(entriesInGamma);
-				FailureNode triggerComponent = nodeMap.get(entriesInGamma[b]);
+				FailureNode triggerComponent = Simulation.nodeMap.get(entriesInGamma[b]);
 				
 				if( failureTransition.getComponentCount(entriesInGamma[b]) < triggerComponent.getRedundancy() ) {
 				
-					// adding probability i.e. "Î¦" of a node failure because it failed due to parent
+					// adding probability i.e. "¦" of a node failure because it failed due to parent
 					if( gInBinary.charAt(b) == '1' )  {
 						//System.out.println("Adding child " + triggerComponent.getType() + " to parent " + curr.getFailureNode().getType());
 						curr.addChild(triggerComponent);
@@ -162,33 +119,5 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				buildChildrenNodes(child, tempFailureTransition, rate);
 			}
 		}
-	}
-
-	/**
-	 * @return the nodeM
-	 */
-	public HashMap<String, FailureNode> getNodeMap(){
-		return nodeMap;
-	}
-	
-	/**
-	 * @return the cache
-	 */
-	public HashMap<State, TreeNode> getCache(){
-		return stateCache;
-	}
-
-	/**
-	 * @return the misses
-	 */
-	public int getMisses(){
-		return misses;
-	}
-
-	/**
-	 * @return the treeCache
-	 */
-	public HashSet<TreeNode> getTreeCache(){
-		return treeCache;
 	}
 }
