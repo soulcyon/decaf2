@@ -138,14 +138,12 @@ public class DECAF_SAXHandler extends DefaultHandler {
 		}
 		
 		if( grabComponentInfo && tag.equalsIgnoreCase("component-info") ){
-			for( String key : nodeCache.keySet() ){
-				FailureNode temp = nodeCache.get(key);
-				for( String casKey : cascadingCache.keySet() ){
-					List<String> gamma = cascadingCache.get(casKey);
-					System.out.println(casKey + ":" + gamma.size());
-					for( String k : gamma )
-						if( !k.startsWith(key) )
-							temp.addCascadingFailure(nodeCache.get(k.split(":")[0]), Double.parseDouble(k.split(":")[1]));
+			for( String casKey : cascadingCache.keySet() ){
+				FailureNode temp = nodeCache.get(casKey);
+				List<String> gamma = cascadingCache.get(casKey);
+				for( String k : gamma ){
+					System.out.println(temp + " => " + k + "," + casKey + "," + gamma.size());
+					temp.addCascadingFailure(nodeCache.get(k.split(":")[0]), Double.parseDouble(k.split(":")[1]));
 				}
 			}
 			grabComponentInfo = false;
@@ -221,7 +219,6 @@ public class DECAF_SAXHandler extends DefaultHandler {
 		}
 		if( grabCascading && currentCascadingType != null && res.trim().length() > 0 ){
 			cascadingCache.get(currentType).add(currentCascadingType + ":" + res);
-			grabCascading = false;
 		}
 	}
 	

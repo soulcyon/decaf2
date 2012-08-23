@@ -55,8 +55,7 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 
 		// Iterate over matrix, ignore diagonal
 		for( int i = 0; i < statesLen; i++ ){
-			//for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 ){
-			for( int j = 0; j < statesLen; j++){
+			for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 ){
 				
 				if(j == i) continue;
 				double fillV = fillQMatrix(Simulation.states[i], Simulation.states[j]);
@@ -81,34 +80,12 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 		// Generate trees as required
 		TreeGeneratorUnthreaded.buildTree();
 		
-		/*Iterator<int[]> tfd = todoFill.iterator();
-		while( tfd.hasNext() ){
-			int[] next = tfd.next();
-			
-			if( next == null )
-				continue;
-			
-			// TODO Calculate state differences and populate LikeTransitionMapper
-			// Run TreeGenerator
-			qMatrix[next[0]][next[1]] = tg.getFailureRate(states, next[0], next[1]);
-		}
-		
-		// Add up diagonals
+		// Fill diagonals with negative row sum
 		for( int i = 0; i < statesLen; i++ ){
-			int sum = 0;
-			for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 ){
-				sum += qMatrix[i][j];
-			}
-			qMatrix[i][i] = sum;
-		}*/
-		
-		//diagonal entries = negative of the sum of row entries
-		for( int i = 0; i < statesLen; i++ ){
-			int sum = 0;
-			for( int j = 0 ; j < statesLen; j++ ){
+			double sum = 0.0;
+			for( int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1 )
 				sum += Simulation.qMatrix[i][j];
-			}
-			Simulation.qMatrix[i][i] = -sum;
+			Simulation.qMatrix[i][i] = 0.0 - sum;
 		}
 		
 		return Simulation.qMatrix;
@@ -168,8 +145,7 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 		return 0.0;
 	}
 	
-	@Override
-	public String toString(){
+	public static String printQMatrix(){
 		int statesLen = Simulation.states.length;
 		String result = "";
 		for( int i = 0; i < statesLen; i++ ){
@@ -178,6 +154,6 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 			}
 			result += "\n";
 		}
-		return error(result);
+		return DECAF.error(result);
 	}
 }
