@@ -20,9 +20,7 @@ import edu.njit.decaf2.threads.QMatrixSumDiagonalsAction;
  *
  */
 public class QMatrixGenerator extends DECAF {
-	private TreeGeneratorUnthreaded			tg;
 	private ArrayList<int[]>				todoFill = new ArrayList<int[]>();
-
 	private State[] 						transitionStates;
 	private String[] 						vectorKeys;
 	private double[][]						qMatrix;
@@ -39,7 +37,6 @@ public class QMatrixGenerator extends DECAF {
 		transitionStates = ts;
 		vectorKeys = vk;
 		demandMatrix = dm;
-		tg = t;
 	}
 	
 	/**

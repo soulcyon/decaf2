@@ -62,30 +62,11 @@ public class TreeGeneratorUnthreaded extends DECAF {
 		
 		ArrayList<String> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
 		
-		for( String transition : likeTransitions ){
-			
-			String[] fromAndTo = transition.split(",");
-			
-			int f = Integer.parseInt(fromAndTo[0]);
-			int t = Integer.parseInt(fromAndTo[1]);
-			
-			State from = Simulation.states[f];
-			
-			FailureNode root = curr.getRoot();
-			
-			// n * lambda for root of tree
-			int n = root.getRedundancy() - 
-					  from.getComponentCount(root.getType());
-			rate *= root.getFailureRates()[from.getDemand()] * n;
-			
-			Simulation.qMatrix[f][t] = Simulation.qMatrix[f][t] + rate;
-		}
-		
 		HashMap<String, Double> gamma = curr.getFailureNode().getCascadingFailures();
 		int gammaLength = gamma.size();
-		for( int g = (int)Math.pow(2, gammaLength) - 1; g > 0; g-- ){
+		for( int g = (int)Math.pow(2, gammaLength) - 1; g >= 0; g-- ){
 			
-			String gInBinary = String.format("%" + gammaLength + "s", Integer.toBinaryString(g)).replace(' ', '0'); // padding 0's
+			String gInBinary = String.format("%" + gammaLength + "s", Integer.toBinaryString(g)).replace(' ', '0');
 			
 			curr.clearChildren();
 			State tempFailureTransition = failureTransition; 
@@ -96,22 +77,38 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				entriesInGamma = gamma.keySet().toArray(entriesInGamma);
 				FailureNode triggerComponent = Simulation.nodeMap.get(entriesInGamma[b]);
 				
-				if( failureTransition.getComponentCount(entriesInGamma[b]) < triggerComponent.getRedundancy() ) {
+				if (gInBinary.charAt(b) == '0') {
+					curr.putComplementPhi(entriesInGamma[b], curr.getFailureNode().getType());
+				} else if( failureTransition.getComponentCount(entriesInGamma[b]) < triggerComponent.getRedundancy() ) {
+					curr.addChild(triggerComponent);
+					tempFailureTransition.incrementComponentCount(triggerComponent);
+					rate *= curr.getFailureNode().getRate(entriesInGamma[b]);
+				}
 				
-					// adding probability i.e. "¦" of a node failure because it failed due to parent
-					if( gInBinary.charAt(b) == '1' )  {
-						//System.out.println("Adding child " + triggerComponent.getType() + " to parent " + curr.getFailureNode().getType());
-						curr.addChild(triggerComponent);
-						tempFailureTransition.incrementComponentCount(triggerComponent);
-						// phi
-						rate*= curr.getFailureNode().getRate(entriesInGamma[b]);
-					}
+				for( String transition : likeTransitions ){
+					String[] fromAndTo = transition.split(",");
+					double subRate = 1.0;
+					int f = Integer.parseInt(fromAndTo[0]);
+					int t = Integer.parseInt(fromAndTo[1]);
 					
-					// adding complement probability i.e. "1-Î¦' of a node because it could have failed but did not fail
-					else if (gInBinary.charAt(b) == '0') {
-						// 1 - phi
-						rate*= (1 - curr.getFailureNode().getRate(entriesInGamma[b]));
+					State from = Simulation.states[f];
+					State to = Simulation.states[t];
+					
+					FailureNode root = curr.getRoot();
+					
+					// n * lambda for root of tree
+					int n = root.getRedundancy() - 
+							  from.getComponentCount(root.getType());
+					subRate *= root.getFailureRates()[from.getDemand()] * n;
+					for( String k : Simulation.nodeMap.keySet() ){
+						int maximumComplementPhi = Simulation.nodeMap.get(k).getRedundancy() - to.getComponentCount(k),
+							supportedComplementPhi = curr.getPhiCount(k) - maximumComplementPhi;
+						for( int i = 0; i < supportedComplementPhi; i++ ){
+							subRate *= 1 - Simulation.nodeMap.get(curr.getFIFOComplementPhi(k)).getRate(k);
+							//System.out.println("Parent " + curr.getFIFOComplementPhi(k) + ", Child " + k + " => " + subRate);
+						}
 					}
+					Simulation.qMatrix[f][t] += subRate;
 				}
 			}
 			
