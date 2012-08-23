@@ -70,6 +70,11 @@ public class State extends DECAF {
 		vector.put(type, state);
 	}
 	
+	/**
+	 * 
+	 * @param vector
+	 * @param demand
+	 */
 	public State(HashMap<String, Integer> vector, int demand) {
 		this.vector = vector;
 		this.demand = demand;

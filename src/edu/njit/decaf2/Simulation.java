@@ -26,11 +26,11 @@ import edu.njit.decaf2.generators.TreeGeneratorUnthreaded;
  *
  */
 public class Simulation extends DECAF {
-	private boolean 						debug;
-	private State[] 						states;
-	private double[][] 						demandMatrix;
-	private HashMap<String, FailureNode>	nodeMap = new HashMap<String, FailureNode>();
-	private double[][]						qMatrix;
+	private boolean debug;
+	public static State[] states;
+	public static double[][] demandMatrix;
+	public static HashMap<String, FailureNode> nodeMap = new HashMap<String, FailureNode>();
+	public static double[][] qMatrix;
 	
 	/**
 	 * Run through console.  Initializes new instance of Simulation and runs appropriate algorithms.
@@ -55,18 +55,24 @@ public class Simulation extends DECAF {
 		loadSimulationData("data/input.xml");
 
 		resultProcessing += System.nanoTime() - t;
-		System.out.println("LoadXML Time: " + (System.nanoTime() - t)/1000.0/1000.0/1000.0 + " secs");
+		
+		if( verboseDebug )
+			System.out.println("LoadXML Time: " + (System.nanoTime() - t)/1000.0/1000.0/1000.0 + " secs");
 		
 		t = System.nanoTime();
 		StateGenerator sg = new StateGenerator(nodeMap, demandMatrix);
 		states = sg.generateStates();
+
+		resultProcessing += System.nanoTime() - t;
 		
+		if( verboseDebug )
+			System.out.println("StateGenerator Time: " + (System.nanoTime() - t)/1000.0/1000.0/1000.0 + " secs\n");
+
 		if( verboseDebug )
 			System.out.println("\nStates Count: " + states.length + "\n");
 		
-		resultProcessing += System.nanoTime() - t;
-		System.out.println("StateGenerator Time: " + (System.nanoTime() - t)/1000.0/1000.0/1000.0 + " secs\n");
-
+		QMatrixGeneratorUnthreaded.init();
+		
 		if( verboseDebug )
 			System.out.println(sg);
 		
@@ -76,22 +82,11 @@ public class Simulation extends DECAF {
 		nodeMap.keySet().toArray(nodeKeyArray);
 		System.out.println(nodeMap);
 		
-		TreeGeneratorUnthreaded tg = new TreeGeneratorUnthreaded(nodeMap);
-		QMatrixGeneratorUnthreaded qg = new QMatrixGeneratorUnthreaded(states, nodeKeyArray, demandMatrix, tg);
-		qMatrix = qg.generateQMatrix();
+		qMatrix = QMatrixGeneratorUnthreaded.generateQMatrix();
 		
 		resultProcessing += System.nanoTime() - t;
 		System.out.println("QMatrixGenerator Time:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
 
-		if( verboseDebug )
-			System.out.println("Generated Failure Transitions:\t" + tg.getCache().size() + " (reused " + tg.getMisses() + ")");
-		
-		if( verboseDebug )
-			System.out.println(qg);
-
-		if( verboseDebug )
-			System.out.println(sg);
-		
 		System.out.println("Total CPU Time:\t"+ resultProcessing/1000.0/1000.0/1000.0 + " secs");
 	}
 	

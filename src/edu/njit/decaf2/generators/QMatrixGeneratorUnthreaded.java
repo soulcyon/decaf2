@@ -9,6 +9,7 @@ import java.util.HashMap;
 //import java.util.Iterator;
 
 import edu.njit.decaf2.DECAF;
+import edu.njit.decaf2.Simulation;
 import edu.njit.decaf2.data.State;
 
 /**
@@ -20,14 +21,9 @@ import edu.njit.decaf2.data.State;
  */
 public class QMatrixGeneratorUnthreaded extends DECAF {
 	
-	private TreeGeneratorUnthreaded			  	tg;
-	private ArrayList<int[]>				  	todoFill = new ArrayList<int[]>();
-	private State[] 						  	states;
-	private String[] 						  	vectorKeys;
-	private double[][] 						  	demandMatrix;
-	
-	static HashMap<State, ArrayList<String>> 	likeTransitionMap;
-	static double[][]						  	qMatrix;
+	private static ArrayList<int[]>	todoFill;
+	private static String[] vectorKeys;
+	public static HashMap<State, ArrayList<String>> likeTransitionMap;
 	
 	/**
 	 * Sets {@link State} {@code transitionStates}, {@link String}[] {@code vectorKeys}, {@link Double}[][] 
@@ -36,11 +32,10 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 	 * @param states
 	 * @param vectorKeys
 	 */
-	public QMatrixGeneratorUnthreaded(State[] ts, String[] vk, double[][] dm, TreeGeneratorUnthreaded t){
-		states = ts;
-		vectorKeys = vk;
-		demandMatrix = dm;
-		tg = t;
+	public static void init(){
+		todoFill = new ArrayList<int[]>();
+		vectorKeys = new String[Simulation.nodeMap.size()];
+		vectorKeys = Simulation.nodeMap.keySet().toArray(vectorKeys);
 	}
 	
 	/**
@@ -49,12 +44,12 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 	 * 
 	 * @return qMatrix
 	 */
-	public double[][] generateQMatrix(){
+	public static double[][] generateQMatrix(){
 		// Cache the length of valid transition states
-		int statesLen = states.length;
+		int statesLen = Simulation.states.length;
 		
 		// Initialize brand new qMatrix[][] array
-		QMatrixGeneratorUnthreaded.qMatrix = new double[statesLen][statesLen];
+		Simulation.qMatrix = new double[statesLen][statesLen];
 		
 		likeTransitionMap = new HashMap<State, ArrayList<String>>();
 
@@ -64,10 +59,10 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 			for( int j = 0; j < statesLen; j++){
 				
 				if(j == i) continue;
-				double fillV = fillQMatrix(states[i], states[j]);
+				double fillV = fillQMatrix(Simulation.states[i], Simulation.states[j]);
 				
 				if( Double.isNaN(fillV) ){
-					State differenceState = states[i].diff(states[j]);
+					State differenceState = Simulation.states[i].diff(Simulation.states[j]);
 					String str = i + "," + j;
 					if( likeTransitionMap.containsKey(differenceState) ){
 						likeTransitionMap.get(differenceState).add(str);
@@ -78,13 +73,13 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 					}
 					todoFill.add(new int[]{i, j});
 				} else {
-					qMatrix[i][j] = fillV;
+					Simulation.qMatrix[i][j] = fillV;
 				}
 			}
 		}
 		
 		// Generate trees as required
-		tg.buildTree(states);
+		TreeGeneratorUnthreaded.buildTree();
 		
 		/*Iterator<int[]> tfd = todoFill.iterator();
 		while( tfd.hasNext() ){
@@ -111,12 +106,12 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 		for( int i = 0; i < statesLen; i++ ){
 			int sum = 0;
 			for( int j = 0 ; j < statesLen; j++ ){
-				sum += qMatrix[i][j];
+				sum += Simulation.qMatrix[i][j];
 			}
-			qMatrix[i][i] = -sum;
+			Simulation.qMatrix[i][i] = -sum;
 		}
 		
-		return qMatrix;
+		return Simulation.qMatrix;
 	}
 	
 	/**
@@ -136,7 +131,7 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 	 * @param to
 	 * @return rate
 	 */
-	public double fillQMatrix(State from, State to){
+	public static double fillQMatrix(State from, State to){
 		boolean repairTransition = true;
 		boolean failedTransition = true;
 		boolean enviroTransition = false;		
@@ -164,7 +159,7 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 		}
 		
 		if( enviroTransition )
-			return demandMatrix[fromDemand][toDemand];
+			return Simulation.demandMatrix[fromDemand][toDemand];
 		if( failedTransition )
 			return Double.NaN;
 			
@@ -173,104 +168,13 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 		return 0.0;
 	}
 	
-	/**
-	 * @return the transitionStates
-	 */
-	public State[] getStates(){
-		return states;
-	}
-	
-	/**
-	 * @param transitionStates the transitionStates to set
-	 */
-	public void setStates(State[] transitionStates){
-		this.states = transitionStates;
-	}
-	
-	/**
-	 * @return the vectorKeys
-	 */
-	public String[] getVectorKeys(){
-		return vectorKeys;
-	}
-	
-	/**
-	 * @param vectorKeys the vectorKeys to set
-	 */
-	public void setVectorKeys(String[] vectorKeys){
-		this.vectorKeys = vectorKeys;
-	}
-	
-	/**
-	 * @return the qMatrix
-	 */
-	public double[][] getqMatrix(){
-		return qMatrix;
-	}
-
-	/**
-	 * @param qMatrix the qMatrix to set
-	 */
-	public void setqMatrix(double[][] qMatrix){
-		QMatrixGeneratorUnthreaded.qMatrix = qMatrix;
-	}
-	
-	/**
-	 * 
-	 * @param value
-	 * @param i
-	 * @param j
-	 */
-	static void setValue(double value, int i, int j) {
-		qMatrix[i][j] = value;
-	}
-	
-	/**
-	 *  
-	 * @param i
-	 * @param j
-	 * @return
-	 */
-
-	static double getValue(int i, int j) {
-		return qMatrix[i][j];
-	}
-
-	/**
-	 * @return the demandLevels
-	 */
-	public double[][] getDemandLevels(){
-		return demandMatrix;
-	}
-
-	/**
-	 * @param demandLevels the demandLevels to set
-	 */
-	public void setDemandLevels(double[][] demandLevels){
-		this.demandMatrix = demandLevels;
-	}
-	
-	/**
-	 * @return the todoFill
-	 */
-	public ArrayList<int[]> getTodoFill(){
-		return todoFill;
-	}
-
-	/**
-	 * @param todoFill the todoFill to set
-	 */
-	public void setTodoFill(ArrayList<int[]> todoFill){
-		this.todoFill = todoFill;
-	}
-	
 	@Override
 	public String toString(){
-		int statesLen = states.length;
+		int statesLen = Simulation.states.length;
 		String result = "";
 		for( int i = 0; i < statesLen; i++ ){
 			for( int j = 0; j < statesLen; j++ ){
-				result += qMatrix[i][j] + "@(" + i + "," + j + "); ";
+				result += Simulation.qMatrix[i][j] + "@(" + i + "," + j + "); ";
 			}
 			result += "\n";
 		}
