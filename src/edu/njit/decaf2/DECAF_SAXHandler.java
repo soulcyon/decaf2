@@ -142,6 +142,7 @@ public class DECAF_SAXHandler extends DefaultHandler {
 				FailureNode temp = nodeCache.get(key);
 				for( String casKey : cascadingCache.keySet() ){
 					List<String> gamma = cascadingCache.get(casKey);
+					System.out.println(casKey + ":" + gamma.size());
 					for( String k : gamma )
 						if( !k.startsWith(key) )
 							temp.addCascadingFailure(nodeCache.get(k.split(":")[0]), Double.parseDouble(k.split(":")[1]));
