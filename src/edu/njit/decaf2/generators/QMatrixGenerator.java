@@ -199,7 +199,8 @@ public class QMatrixGenerator extends DECAF {
 		String result = "";
 		for( int i = 0; i < statesLen; i++ ){
 			for( int j = 0; j < statesLen; j++ ){
-				result += qMatrix[i][j] + "@(" + i + "," + j + "); ";
+				if(qMatrix[i][j] > 0)
+					result += qMatrix[i][j] + "@(" + i + "," + j + "); ";
 			}
 			result += "\n";
 		}

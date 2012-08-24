@@ -157,7 +157,11 @@ public class FailureNode extends DECAF {
 		for( String k : cascadingFailures.keySet() ){
 			cascadePrint += "\n\t\t\t" + k + " @ " + cascadingFailures.get(k);
 		}
-		return error("--FailureNode \t\t" + type + " @ " + failureRates +
+		String failurePrint = "";
+		for(int i = 0; i < failureRates.length; i++){
+			failurePrint += ", " + failureRates[i];
+		}
+		return error("--FailureNode \t\t" + type + " @ " + failurePrint.substring(2) +
 				"\n--Required \t\t" + required + "\n--Redundancy \t\t" + redundancy
 				+ "\n" + cascadePrint);
 	}

@@ -142,7 +142,6 @@ public class DECAF_SAXHandler extends DefaultHandler {
 				FailureNode temp = nodeCache.get(casKey);
 				List<String> gamma = cascadingCache.get(casKey);
 				for( String k : gamma ){
-					System.out.println(temp + " => " + k + "," + casKey + "," + gamma.size());
 					temp.addCascadingFailure(nodeCache.get(k.split(":")[0]), Double.parseDouble(k.split(":")[1]));
 				}
 			}
@@ -150,9 +149,10 @@ public class DECAF_SAXHandler extends DefaultHandler {
 		}
 		
 		if( grabComponent && tag.equalsIgnoreCase("component") ){
-			FailureNode temp = new FailureNode(currentRequired, currentType, currentRedundancy, currentFailureRates);
+			FailureNode temp = new FailureNode(currentRequired, currentType, currentRedundancy, currentFailureRates.clone());
 			nodeCache.put(currentType, temp);
 			grabComponent = false;
+			grabDemandLevels = false;
 		}
 		
 		if( grabCompType && tag.equalsIgnoreCase("type") ){
