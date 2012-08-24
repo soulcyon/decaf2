@@ -161,17 +161,20 @@ public class TreeNode extends DECAF {
 	public void makeRoot() {
 		rootNode = this;
 	}
+
+	public HashMap<String, LinkedList<String>> getPhiMap() {
+		return phiMap;
+	}
+
+	public void setPhiMap(HashMap<String, LinkedList<String>> phiMap) {
+		this.phiMap = phiMap;
+	}
 	
 	public Integer getPhiCount(String type){
 		if( rootNode.phiMap.containsKey(type) )
 			return rootNode.phiMap.get(type).size();
 		return 0;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public String getFIFOComplementPhi(String type){
-		return ((LinkedList<String>)rootNode.phiMap.get(type).clone()).pollFirst();
-	}
+	}	
 	
 	public void putComplementPhi(String type, String parent){
 		if( !rootNode.phiMap.containsKey(type) ){

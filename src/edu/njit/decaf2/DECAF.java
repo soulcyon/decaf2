@@ -26,6 +26,6 @@ public class DECAF {
 	 * @return {@link String}
 	 */
 	public static String error(String message){
-		return "\n[DECAF." + "::\n" + message + "]\n";
+		return "\n[DECAF" + "::\n" + message + "]\n";
 	}
 }

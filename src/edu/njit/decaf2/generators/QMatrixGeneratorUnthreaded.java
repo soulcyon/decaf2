@@ -150,7 +150,8 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 		String result = "";
 		for( int i = 0; i < statesLen; i++ ){
 			for( int j = 0; j < statesLen; j++ ){
-				result += Simulation.qMatrix[i][j] + "@(" + i + "," + j + "); ";
+				if(Simulation.qMatrix[i][j] != 0.0)
+					result += Simulation.qMatrix[i][j] + "@(" + i + "," + j + "); ";
 			}
 			result += "\n";
 		}

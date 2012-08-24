@@ -80,7 +80,7 @@ public class Simulation extends DECAF {
 		
 		String[] nodeKeyArray = new String[nodeMap.keySet().size()];
 		nodeMap.keySet().toArray(nodeKeyArray);
-		System.out.println(nodeMap);
+		//System.out.println(nodeMap);
 		
 		qMatrix = QMatrixGeneratorUnthreaded.generateQMatrix();
 		
