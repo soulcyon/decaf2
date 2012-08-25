@@ -49,7 +49,6 @@ public class Simulation extends DECAF {
 		if( !debug ){
 			return;
 		}
-
 		double resultProcessing = 0.0;
 		double t = System.nanoTime();
 		loadSimulationData("data/input.xml");

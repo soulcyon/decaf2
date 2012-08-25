@@ -6,8 +6,6 @@ package edu.njit.decaf2.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
 
 import edu.njit.decaf2.DECAF;
 
@@ -23,7 +21,6 @@ public class TreeNode extends DECAF {
 	private TreeNode						rootNode;
 	private FailureNode						currentNode;
 	private TreeNode[]						children = new TreeNode[0];
-	private HashMap<String, LinkedList<String>>	phiMap = new HashMap<String, LinkedList<String>>();
 	private double							rate = 1.0;
 	private int								currentDemand;
 
@@ -160,28 +157,6 @@ public class TreeNode extends DECAF {
 	
 	public void makeRoot() {
 		rootNode = this;
-	}
-
-	public HashMap<String, LinkedList<String>> getPhiMap() {
-		return phiMap;
-	}
-
-	public void setPhiMap(HashMap<String, LinkedList<String>> phiMap) {
-		this.phiMap = phiMap;
-	}
-	
-	public Integer getPhiCount(String type){
-		if( rootNode.phiMap.containsKey(type) )
-			return rootNode.phiMap.get(type).size();
-		return 0;
-	}	
-	
-	public void putComplementPhi(String type, String parent){
-		if( !rootNode.phiMap.containsKey(type) ){
-			LinkedList<String> temp = new LinkedList<String>();
-			rootNode.phiMap.put(type, temp);
-		}
-		rootNode.phiMap.get(type).add(parent);
 	}
 	
 	/* 

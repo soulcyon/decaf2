@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.data.State;
 import edu.njit.decaf2.threads.QMatrixFillStatesAction;
-import edu.njit.decaf2.threads.QMatrixSumDiagonalsAction;
 
 /**
  * DECAF 2 - QMatrixGenerator
