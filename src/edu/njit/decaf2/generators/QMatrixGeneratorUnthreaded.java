@@ -78,7 +78,7 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 		}
 		
 		// Generate trees as required
-		TreeGeneratorUnthreaded.buildTree();
+		TreeGeneratorUnthreaded.initSubTrees();
 		
 		// Fill diagonals with negative row sum
 		for( int i = 0; i < statesLen; i++ ){
