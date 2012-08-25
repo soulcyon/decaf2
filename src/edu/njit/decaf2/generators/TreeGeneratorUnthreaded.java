@@ -9,6 +9,7 @@ import java.util.HashMap;
 
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.Simulation;
+import edu.njit.decaf2.data.ComplementPhi;
 import edu.njit.decaf2.data.FailureNode;
 import edu.njit.decaf2.data.State;
 import edu.njit.decaf2.data.TreeNode;
@@ -21,11 +22,18 @@ import edu.njit.decaf2.data.TreeNode;
  *
  */
 public class TreeGeneratorUnthreaded extends DECAF {
+	public static HashMap<String, ComplementPhi> complementPhiMap = new HashMap<String, ComplementPhi>();
 	/**
 	 * 
 	 * @param statesCopy
 	 */
 	public static void buildTree() {
+		// Populate phiMap
+		for( String root : Simulation.nodeMap.keySet() ){
+			complementPhiMap.put(root, new ComplementPhi(root));
+		}
+		
+		// 
 		for(String root : Simulation.nodeMap.keySet()) {
 			TreeNode ft = new TreeNode(Simulation.nodeMap.get(root));
 			ft.makeRoot();
@@ -36,19 +44,6 @@ public class TreeGeneratorUnthreaded extends DECAF {
 	}
 	
 	/**
-	 * 
-	 * @param s
-	 * @return
-	private boolean validState(State s){
-		HashMap<String, Integer> temp = s.getVector();
-		for( String k : temp.keySet() ){
-			if( temp.get(k) > nodeMap.get(k).getRedundancy() )
-				return false;
-		}
-		return true;
-	}*/
-	
-	/**
 	 * Builds a larger tree by attaching nodes.
 	 * @param root
 	 * @param transition
@@ -56,14 +51,14 @@ public class TreeGeneratorUnthreaded extends DECAF {
 	 * @return
 	 */
 	private static void buildChildrenNodes(TreeNode curr, State failureTransition, double subTreeRate) {
-		
+
 		ArrayList<String> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
-		
-		// build a larger tree
+		System.out.println(curr + "\n\n");
+
 		HashMap<String, Double> gamma = curr.getFailureNode().getCascadingFailures();
 		int gammaLength = gamma.size();
 		
-		// tree cannot be grown
+		// Tree cannot be grown
 		if( gammaLength == 0 )
 			return;
 		
@@ -74,7 +69,6 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			curr.clearChildren();
 			State tempFailureTransition = failureTransition; 
 			
-			//System.out.println("GIB:" + gInBinary);
 			for( int b = 0; b < gInBinary.length(); b++ ) {
 				
 				String[] entriesInGamma = new String[gammaLength];
@@ -82,9 +76,10 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				FailureNode triggerComponent = Simulation.nodeMap.get(entriesInGamma[b]);
 				
 				if (gInBinary.charAt(b) == '0') {
-					curr.putComplementPhi(entriesInGamma[b], curr.getFailureNode().getType());
+					complementPhiMap.get(entriesInGamma[b]).addParent(curr.getFailureNode().getType());
 					//System.out.println("count:" + curr.getPhiCount(entriesInGamma[b]));
 				} else if( failureTransition.getComponentCount(entriesInGamma[b]) < triggerComponent.getRedundancy() ) {
+					complementPhiMap.get(entriesInGamma[b]).removeTopParent();
 					curr.addChild(triggerComponent);
 					tempFailureTransition.incrementComponentCount(triggerComponent);
 					subTreeRate *= curr.getFailureNode().getRate(entriesInGamma[b]);
@@ -92,7 +87,9 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			}
 			
 			for( String transition : likeTransitions ){
-				
+				for( String k : complementPhiMap.keySet() ){
+					complementPhiMap.get(k).reset();
+				}
 				double superRate = 1.0;
 				
 				String[] fromAndTo = transition.split(",");
@@ -108,29 +105,25 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				int n = root.getRedundancy() - from.getComponentCount(root.getType());
 				double lambda = root.getFailureRates()[from.getDemand()];
 				superRate = n * lambda;
+				System.out.println("n * lambda = " + (n * lambda));
 				
 				for( String k : Simulation.nodeMap.keySet() ){
-					
-					//the same type can never be added as a child so 1 - does not apply because there was no choice made 
+					// The same type can never be added as a child so 1 - does not apply because there was no choice made 
 					if(curr.getFailureNode().getType() == k)
 						continue;
 					
 					int maximumComplementPhi = Simulation.nodeMap.get(k).getRedundancy() - to.getComponentCount(k),
-						supportedComplementPhi = maximumComplementPhi - curr.getPhiCount(k);
-					for( int i = 0; i < supportedComplementPhi; i++ ){
-						superRate *= 1 - Simulation.nodeMap.get(curr.getFIFOComplementPhi(k)).getRate(k);
-						//System.out.println("Parent " + curr.getFIFOComplementPhi(k) + ", Child " + k + " => " + subRate);
+						neededComplementPhi = Math.min(maximumComplementPhi, complementPhiMap.get(k).size());
+					
+					for( int i = 0; i < neededComplementPhi; i++ ){
+						double temp = 0.0;
+						System.out.println("1 - phi: " +  (1 - (temp = Simulation.nodeMap.get(complementPhiMap.get(k).getTopParent()).getRate(k))));
+						superRate *= 1 - temp;
 					}
 				}
+				System.out.println(f + ", " + t + " => " + subTreeRate + " _ " + superRate + "\n");
 				Simulation.qMatrix[f][t] += subTreeRate * superRate;
 				
-				if(verboseDebug) {
-					System.out.println("Tree: \n" + curr + "\n");
-					System.out.println(from.toLine() + " => " + to.toLine());
-					System.out.println("n = " + n);
-					System.out.println("lambda = " + lambda);
-					System.out.println("complement-rate = " + superRate);
-				}
 				
 			}
 			
