@@ -26,29 +26,24 @@ public class TreeGeneratorUnthreaded extends DECAF {
 	 * @param statesCopy
 	 */
 	
-	public static void buildTree() {
+	public static void initSubTrees() {
 		
-		// calculations for nodes that could have failed but did not fail
-		HashMap<String, ArrayList<String>> complementMap = new HashMap<String, ArrayList<String>>();
-		
-		for(String root : Simulation.nodeMap.keySet()) {
-			
-			ArrayList<String> couldHaveCausedToFail = new ArrayList<String>();
-			
-			for(String k : Simulation.nodeMap.keySet()) {
-				complementMap.put(k, new ArrayList<String>());
-			}
-			
-			couldHaveCausedToFail.add("|");
-			complementMap.put(root, couldHaveCausedToFail);
+		for(String root : Simulation.nodeMap.keySet()) {	
 			
 			TreeNode ft = new TreeNode(Simulation.nodeMap.get(root));
 			ft.makeRoot();
 			
+			HashMap <String, ArrayList<String>> breadthFirstHistory = new HashMap<String, ArrayList<String>>();
+			
+			for(String k : Simulation.nodeMap.keySet())
+				breadthFirstHistory.put(k, new ArrayList<String>());
+			
+			breadthFirstHistory.get(root).add("|");
+			
 			State initFailureTransition = (State)Simulation.states[0].clone();
 			initFailureTransition.incrementComponentCount(Simulation.nodeMap.get(root));
 			
-			buildChildrenNodes(ft, initFailureTransition, 1.0, complementMap);
+			buildSubTree(ft, initFailureTransition, 1.0, breadthFirstHistory);
 		}
 	}
 	
@@ -59,33 +54,25 @@ public class TreeGeneratorUnthreaded extends DECAF {
 	 * @param rate
 	 * @return
 	 */
-	private static void buildChildrenNodes(TreeNode curr, State failureTransition, double subTreeRateExcludingRoot, 
-			HashMap<String, ArrayList<String>> complementMap) {
-
-		HashMap<String, ArrayList<String>> complementMapCopy = new HashMap<String, ArrayList<String>>();
-		complementMapCopy.putAll(complementMap);
-		
-		ArrayList<String> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
-		
-		if(verboseDebug) {
-			System.out.println(curr);
-			System.out.println(complementMapCopy);
-			System.out.println("\n\n");
-		}
+	private static void buildSubTree(TreeNode curr, State failureTransition, double subTreeRateExcludingRoot, 
+		HashMap<String, ArrayList<String>> breadthfirstHistory) {
 
 		HashMap<String, Double> gamma = curr.getFailureNode().getCascadingFailures();
 		int gammaLength = gamma.size();
 		
-		// Tree cannot be grown any further
-		if( gammaLength == 0 )
-			return;
-		
-		for( int g = 1; g < (int)Math.pow(2, gammaLength); g++ ){
+		for( int g = 0; g < (int)Math.pow(2, gammaLength); g++ ) {
+			
+			// properly clones HashMap by cloning internal ArrayLists, putAll fails because vales are a non-primitive type 
+			HashMap<String, ArrayList<String>> tempHistory = new HashMap<String, ArrayList<String>>();
+			for(String key : breadthfirstHistory.keySet()) {
+				ArrayList<String> compHistory = new ArrayList<String>(breadthfirstHistory.get(key)); 
+				tempHistory.put(key, compHistory);
+			}
+			
+			// clones failureTransition
+			State tempFailureTransition = failureTransition;
 			
 			String gInBinary = String.format("%" + gammaLength + "s", Integer.toBinaryString(g)).replace(' ', '0');
-			
-			curr.clearChildren();
-			State tempFailureTransition = failureTransition; 
 			
 			for( int b = 0; b < gInBinary.length(); b++ ) {
 				
@@ -95,16 +82,20 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				
 				if(!(failureTransition.getComponentCount(entriesInGamma[b]) < triggerComponent.getRedundancy()))
 					continue;
-				
-				if (gInBinary.charAt(b) == '0') {
-					complementMapCopy.get(entriesInGamma[b]).add(curr.getFailureNode().getType());
-				} else {
+			
+				if (gInBinary.charAt(b) == '1'){
 					curr.addChild(triggerComponent);
 					tempFailureTransition.incrementComponentCount(triggerComponent);
-					complementMapCopy.get(entriesInGamma[b]).add("|");
 					subTreeRateExcludingRoot *= curr.getFailureNode().getRate(entriesInGamma[b]);
+					tempHistory.get(entriesInGamma[b]).add("|");
 				}
+				else {
+					tempHistory.get(entriesInGamma[b]).add(curr.getFailureNode().getType());
+				}
+					
 			}
+			
+			ArrayList<String> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
 			
 			for( String transition : likeTransitions ) {
 				
@@ -121,30 +112,37 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				double rootRate = n * lambda;
 				
 				double complementRate = 1.0;
+				
 				for(String k : Simulation.nodeMap.keySet()) {
 					
 					int compsAvailable = Simulation.nodeMap.get(k).getRedundancy() - from.getComponentCount(k);
-					ArrayList<String> couldHaveCausedToFail = complementMapCopy.get(k);
-					
-					for(String s : couldHaveCausedToFail) {
-						if(s.equals("|")) {
+					ArrayList<String> couldHaveFailed = tempHistory.get(k);
+				 
+					for(String s : couldHaveFailed)
+						
+						if(s.equals("|")) 
 							--compsAvailable;
-						}
+					
 						else if(compsAvailable > 0) {
 							FailureNode parent = Simulation.nodeMap.get(s);
 							complementRate *= 1 - parent.getRate(k);
 						}
-						else
-							break;
-					}
+					
+						else break;
 				}
-				
-				Simulation.qMatrix[f][t] += rootRate * subTreeRateExcludingRoot * complementRate;
-				
+
+				Simulation.qMatrix[f][t] += rootRate * subTreeRateExcludingRoot * complementRate;	
+			}
+			
+			if(verboseDebug) {
+				System.out.println("Binary:" + gInBinary);
+				System.out.println(curr);
+				System.out.println(tempHistory);
+				System.out.println("\n\n");
 			}
 			
 			for(TreeNode child : curr.getChildren()) {
-				buildChildrenNodes(child, tempFailureTransition, subTreeRateExcludingRoot, complementMapCopy);
+				buildSubTree(child, tempFailureTransition, subTreeRateExcludingRoot, tempHistory);
 			}
 		}
 	}

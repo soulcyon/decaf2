@@ -112,7 +112,6 @@ public class TreeNode extends DECAF {
 	public void setRate(double rate) {
 		this.rate *= rate;
 		if( this.parentNode == null ) return;
-		
 		this.parentNode.setRate(rate);
 	}
 
