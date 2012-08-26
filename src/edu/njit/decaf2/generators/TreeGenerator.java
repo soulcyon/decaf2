@@ -14,22 +14,23 @@ import edu.njit.decaf2.data.State;
 
 /**
  * DECAF 2 - TreeGenerator
- *
+ * 
  * @author Sashank Tadepalli
  * @version 2.0
- *
+ * 
  */
 public class TreeGenerator extends DECAF {
-	private HashSet<TreeNode>				treeCache = new HashSet<TreeNode>();
-	private HashMap<State, TreeNode> 		stateCache = new HashMap<State, TreeNode>();
-	private HashMap<String, FailureNode>	nodeMap = new HashMap<String, FailureNode>();
-	private int								misses = 0;
-	
+	private HashSet<TreeNode> treeCache = new HashSet<TreeNode>();
+	private HashMap<State, TreeNode> stateCache = new HashMap<State, TreeNode>();
+	private HashMap<String, FailureNode> nodeMap = new HashMap<String, FailureNode>();
+	private int misses = 0;
+
 	/**
 	 * Sets {@link HashMap}<{@link String}, {@link FailureNode}> {@code nodeMap}
+	 * 
 	 * @param decaf_nodeMap
 	 */
-	public TreeGenerator(HashMap<String, FailureNode> nodeMap){
+	public TreeGenerator(HashMap<String, FailureNode> nodeMap) {
 		this.nodeMap = nodeMap;
 	}
 
@@ -39,23 +40,23 @@ public class TreeGenerator extends DECAF {
 	 * @param to
 	 * @return rate
 	 */
-	public double getFailureRate(State from, State to){
+	public double getFailureRate(State from, State to) {
 		State diffState = from.diff(to);
 
-		if( stateCache.containsKey(diffState) ){
+		if (stateCache.containsKey(diffState)) {
 			misses++;
 			return stateCache.get(diffState).getRate();
 		}
 
 		double failureRate = 0.0;
 		HashMap<String, Integer> diffVector = diffState.getVector();
-		for( String k : diffVector.keySet() ){
+		for (String k : diffVector.keySet()) {
 			failureRate += buildTree(k, diffState);
 		}
-		stateCache.put(diffState, new TreeNode(new FailureNode("NULL", new double[]{0.0}), 0));
+		stateCache.put(diffState, new TreeNode(new FailureNode("NULL", new double[] { 0.0 }), 0));
 		return failureRate;
 	}
-	
+
 	/**
 	 * 
 	 * @param root
@@ -63,37 +64,38 @@ public class TreeGenerator extends DECAF {
 	 * @return
 	 */
 	private double buildTree(String root, State transition) {
-		//TreeNode ft = new TreeNode(nodeMap.get(root), transition.getDemand());
-		//stateCache.put(transition.toString(), ft);
-		//return ft.getRate();
+		// TreeNode ft = new TreeNode(nodeMap.get(root),
+		// transition.getDemand());
+		// stateCache.put(transition.toString(), ft);
+		// return ft.getRate();
 		return 0.0;
 	}
 
 	/**
 	 * @return the nodeM
 	 */
-	public HashMap<String, FailureNode> getNodeMap(){
+	public HashMap<String, FailureNode> getNodeMap() {
 		return nodeMap;
 	}
-	
+
 	/**
 	 * @return the cache
 	 */
-	public HashMap<State, TreeNode> getCache(){
+	public HashMap<State, TreeNode> getCache() {
 		return stateCache;
 	}
 
 	/**
 	 * @return the misses
 	 */
-	public int getMisses(){
+	public int getMisses() {
 		return misses;
 	}
 
 	/**
 	 * @return the treeCache
 	 */
-	public HashSet<TreeNode> getTreeCache(){
+	public HashSet<TreeNode> getTreeCache() {
 		return treeCache;
 	}
 }
