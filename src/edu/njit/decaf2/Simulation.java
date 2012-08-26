@@ -19,10 +19,10 @@ import edu.njit.decaf2.generators.StateGenerator;
 
 /**
  * DECAF 2 - Simulation
- *
+ * 
  * @author Sashank Tadepalli
  * @version 2.0
- *
+ * 
  */
 public class Simulation extends DECAF {
 	private boolean debug;
@@ -30,22 +30,25 @@ public class Simulation extends DECAF {
 	public static double[][] demandMatrix;
 	public static HashMap<String, FailureNode> nodeMap = new HashMap<String, FailureNode>();
 	public static double[][] qMatrix;
-	
+
 	/**
-	 * Run through console.  Initializes new instance of Simulation and runs appropriate algorithms.
+	 * Run through console. Initializes new instance of Simulation and runs
+	 * appropriate algorithms.
+	 * 
 	 * @param args
 	 */
-	public static void main(String[] args){
+	public static void main(String[] args) {
 		Simulation sim = new Simulation();
 		sim.setDebug(true);
 		sim.run();
 	}
-	
+
 	/**
-	 * Runs with CPU Time stopwatch.  Set DECAF.VerboseDebug = true for detailed statistics.
+	 * Runs with CPU Time stopwatch. Set DECAF.VerboseDebug = true for detailed
+	 * statistics.
 	 */
-	private void debug_run(){
-		if( !debug ){
+	private void debug_run() {
+		if (!debug) {
 			return;
 		}
 		double resultProcessing = 0.0;
@@ -53,92 +56,95 @@ public class Simulation extends DECAF {
 		loadSimulationData("data/input.xml");
 
 		resultProcessing += System.nanoTime() - t;
-		
-		if( verboseDebug )
-			System.out.println("LoadXML Time: " + (System.nanoTime() - t)/1000.0/1000.0/1000.0 + " secs");
-		
+
+		if (verboseDebug)
+			System.out.println("LoadXML Time: " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
+
 		t = System.nanoTime();
 		StateGenerator sg = new StateGenerator(nodeMap, demandMatrix);
 		states = sg.generateStates();
 
 		resultProcessing += System.nanoTime() - t;
-		
-		if( verboseDebug )
-			System.out.println("StateGenerator Time: " + (System.nanoTime() - t)/1000.0/1000.0/1000.0 + " secs\n");
 
-		if( verboseDebug )
+		if (verboseDebug)
+			System.out
+					.println("StateGenerator Time: " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs\n");
+
+		if (verboseDebug)
 			System.out.println("\nStates Count: " + states.length + "\n");
-		
+
 		QMatrixGeneratorUnthreaded.init();
-		
-		if( verboseDebug )
+
+		if (verboseDebug)
 			System.out.println(sg);
-		
+
 		t = System.nanoTime();
-		
+
 		String[] nodeKeyArray = new String[nodeMap.keySet().size()];
 		nodeMap.keySet().toArray(nodeKeyArray);
-		//System.out.println(nodeMap);
-		
-		qMatrix = QMatrixGeneratorUnthreaded.generateQMatrix();
-		
-		System.out.println(QMatrixGeneratorUnthreaded.printQMatrix());
-		
-		resultProcessing += System.nanoTime() - t;
-		System.out.println("QMatrixGenerator Time:\t" + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
+		// System.out.println(nodeMap);
 
-		System.out.println("Total CPU Time:\t"+ resultProcessing/1000.0/1000.0/1000.0 + " secs");
+		qMatrix = QMatrixGeneratorUnthreaded.generateQMatrix();
+
+		System.out.println(QMatrixGeneratorUnthreaded.printQMatrix());
+
+		resultProcessing += System.nanoTime() - t;
+		System.out.println("QMatrixGenerator Time:\t" + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0);
+
+		System.out.println("Total CPU Time:\t" + resultProcessing / 1000.0 / 1000.0 / 1000.0 + " secs");
 	}
-	
+
 	/**
-	 * ===Note===
-	 * Deprecated until debug_run is finalized.
+	 * ===Note=== Deprecated until debug_run is finalized.
 	 */
-	private void run(){
-		if( debug ){
+	private void run() {
+		if (debug) {
 			debug_run();
 			return;
 		}
 	}
-	
+
 	/**
 	 * Proprietary simulation configuration engine.
 	 * 
-	 * @param filename Path to XML configuration file
+	 * @param filename
+	 *            Path to XML configuration file
 	 */
-	public void loadSimulationData(String filename){
+	public void loadSimulationData(String filename) {
 		try {
 			File xmlFile = new File(filename);
 			SAXParserFactory spf = new WstxSAXParserFactory();
 			SAXParser so = spf.newSAXParser();
 			so.parse(xmlFile, DECAF_SAXHandler.getInstance());
-			
+
 			demandMatrix = DECAF_SAXHandler.getDemand();
 			nodeMap = DECAF_SAXHandler.getNodeMap();
-		} catch (Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
 	}
-	
+
 	/**
-	 * @param debug the debug to set
+	 * @param debug
+	 *            the debug to set
 	 */
-	public void setDebug(boolean debug){
+	public void setDebug(boolean debug) {
 		this.debug = debug;
 	}
 
 	/**
 	 * @return the qMatrix
 	 */
-	public double[][] getQMatrix(){
+	public double[][] getQMatrix() {
 		return qMatrix;
 	}
 
 	/**
-	 * @param qMatrix the qMatrix to set
+	 * @param qMatrix
+	 *            the qMatrix to set
 	 */
-	public void setQMatrix(double[][] qMatrix){
+	public void setQMatrix(double[][] qMatrix) {
 		this.qMatrix = qMatrix;
 	}
 }
