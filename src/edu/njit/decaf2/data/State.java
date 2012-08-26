@@ -248,7 +248,7 @@ public class State extends DECAF {
 
 	@Override
 	public int hashCode() {
-		int result = new Integer(demand).hashCode();
+		int result = ( DECAF.forceStateDemandValidate ) ? new Integer(demand).hashCode() : 0;
 		for (String k : vector.keySet()) {
 			result += k.hashCode() + new Integer(vector.get(k)).hashCode();
 		}

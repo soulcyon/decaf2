@@ -21,7 +21,6 @@ import edu.njit.decaf2.data.State;
  */
 public class QMatrixGeneratorUnthreaded extends DECAF {
 
-	private static ArrayList<int[]> todoFill;
 	private static String[] vectorKeys;
 	public static HashMap<State, ArrayList<String>> likeTransitionMap;
 
@@ -33,7 +32,6 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 	 * @param vectorKeys
 	 */
 	public static void init() {
-		todoFill = new ArrayList<int[]>();
 		vectorKeys = new String[Simulation.nodeMap.size()];
 		vectorKeys = Simulation.nodeMap.keySet().toArray(vectorKeys);
 	}
@@ -64,6 +62,7 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 				if (Double.isNaN(fillV)) {
 					State differenceState = Simulation.states[i].diff(Simulation.states[j]);
 					String str = i + "," + j;
+
 					if (likeTransitionMap.containsKey(differenceState)) {
 						likeTransitionMap.get(differenceState).add(str);
 					} else {
@@ -71,7 +70,6 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 						temp.add(str);
 						likeTransitionMap.put(differenceState, temp);
 					}
-					todoFill.add(new int[] { i, j });
 				} else {
 					Simulation.qMatrix[i][j] = fillV;
 				}
@@ -156,5 +154,18 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 			result += "\n";
 		}
 		return DECAF.error(result);
+	}
+
+	public static String printQMatrix(boolean b) {
+		String result = "";
+		int statesLen = Simulation.states.length;
+		for (int i = 0; i < statesLen; i++) {
+			for (int j = 0; j < statesLen; j++) {
+				String t = (Simulation.qMatrix[i][j] + "");
+				result += "(" + t.substring(0, Math.min(t.length(), 5)) + ")" + "\t";
+			}
+			result += "\n";
+		}
+		return error(result);
 	}
 }
