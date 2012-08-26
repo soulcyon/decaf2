@@ -57,8 +57,7 @@ public class Simulation extends DECAF {
 
 		resultProcessing += System.nanoTime() - t;
 
-		if (verboseDebug)
-			System.out.println("LoadXML Time: " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
+		System.out.println("LoadXML Time: \t\t" + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
 
 		t = System.nanoTime();
 		StateGenerator sg = new StateGenerator(nodeMap, demandMatrix);
@@ -66,12 +65,9 @@ public class Simulation extends DECAF {
 
 		resultProcessing += System.nanoTime() - t;
 
-		if (verboseDebug)
-			System.out
-					.println("StateGenerator Time: " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs\n");
+		System.out.println("StateGenerator Time: \t" + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
 
-		if (verboseDebug)
-			System.out.println("\nStates Count: " + states.length + "\n");
+		System.out.println("States Count: \t\t" + states.length);
 
 		QMatrixGeneratorUnthreaded.init();
 
@@ -86,12 +82,13 @@ public class Simulation extends DECAF {
 
 		qMatrix = QMatrixGeneratorUnthreaded.generateQMatrix();
 
-		System.out.println(QMatrixGeneratorUnthreaded.printQMatrix());
+		if (verboseDebug)
+			System.out.println(QMatrixGeneratorUnthreaded.printQMatrix());
 
 		resultProcessing += System.nanoTime() - t;
 		System.out.println("QMatrixGenerator Time:\t" + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0);
 
-		System.out.println("Total CPU Time:\t" + resultProcessing / 1000.0 / 1000.0 / 1000.0 + " secs");
+		System.out.println("Total CPU Time:\t\t" + resultProcessing / 1000.0 / 1000.0 / 1000.0 + " secs");
 	}
 
 	/**
@@ -145,6 +142,6 @@ public class Simulation extends DECAF {
 	 *            the qMatrix to set
 	 */
 	public void setQMatrix(double[][] qMatrix) {
-		this.qMatrix = qMatrix;
+		Simulation.qMatrix = qMatrix;
 	}
 }

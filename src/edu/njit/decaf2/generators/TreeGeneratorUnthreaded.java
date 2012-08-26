@@ -21,15 +21,14 @@ import edu.njit.decaf2.data.TreeNode;
  * 
  */
 public class TreeGeneratorUnthreaded extends DECAF {
+	private static State failureTransition;
+
 	/**
 	 * 
 	 * @param statesCopy
 	 */
-
 	public static void initSubTrees() {
-
 		for (String root : Simulation.nodeMap.keySet()) {
-
 			TreeNode ft = new TreeNode(Simulation.nodeMap.get(root));
 			ft.makeRoot();
 
@@ -39,11 +38,9 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				breadthFirstHistory.put(k, new ArrayList<String>());
 
 			breadthFirstHistory.get(root).add("|");
-
-			State initFailureTransition = (State) Simulation.states[0].clone();
-			initFailureTransition.incrementComponentCount(Simulation.nodeMap.get(root));
-
-			buildSubTree(ft, initFailureTransition, 1.0, breadthFirstHistory);
+			failureTransition = (State) Simulation.states[0].clone();
+			failureTransition.incrementComponentCount(Simulation.nodeMap.get(root));
+			buildSubTree(ft, 1.0, breadthFirstHistory);
 		}
 	}
 
@@ -55,12 +52,11 @@ public class TreeGeneratorUnthreaded extends DECAF {
 	 * @param rate
 	 * @return
 	 */
-	private static void buildSubTree(TreeNode curr, State failureTransition, double subTreeRate,
+	private static void buildSubTree(TreeNode curr, double subTreeRate,
 			HashMap<String, ArrayList<String>> breadthFirstHistory) {
 
 		HashMap<String, Double> gamma = curr.getFailureNode().getCascadingFailures();
 		int gammaLength = gamma.size();
-
 		for (int g = 0; g < (int) Math.pow(2, gammaLength); g++) {
 
 			// Properly clones HashMap by cloning internal ArrayLists, putAll
@@ -71,10 +67,11 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				tempHistory.put(key, compHistory);
 			}
 
-			// Clones failureTransition
-			State tempFailureTransition = failureTransition.clone();
-
-			String gInBinary = String.format("%" + gammaLength + "s", Integer.toBinaryString(g)).replace(' ', '0');
+			// If curr has no gamma, then do not assign gInBinary
+			String gInBinary = "";
+			if (gammaLength > 0) {
+				gInBinary = String.format("%" + gammaLength + "s", Integer.toBinaryString(g)).replace(' ', '0');
+			}
 
 			for (int b = 0; b < gInBinary.length(); b++) {
 
@@ -87,19 +84,24 @@ public class TreeGeneratorUnthreaded extends DECAF {
 
 				if (gInBinary.charAt(b) == '1') {
 					curr.addChild(triggerComponent);
-					tempFailureTransition.incrementComponentCount(triggerComponent);
+					failureTransition.incrementComponentCount(triggerComponent);
 					subTreeRate *= curr.getFailureNode().getRate(entriesInGamma[b]);
 					tempHistory.get(entriesInGamma[b]).add("|");
 				} else {
 					tempHistory.get(entriesInGamma[b]).add(curr.getFailureNode().getType());
 				}
+			}
 
+			// We still need gInBinary to be "0" for qMatrix calculation
+			// even if curr has no gamma
+			if (gammaLength == 0) {
+				gInBinary = "0";
 			}
 
 			ArrayList<String> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
 
+			// Iterate through all likeTransitions
 			for (String transition : likeTransitions) {
-
 				String[] fromAndTo = transition.split(",");
 				int f = Integer.parseInt(fromAndTo[0]);
 				int t = Integer.parseInt(fromAndTo[1]);
@@ -111,16 +113,16 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				int n = root.getRedundancy() - from.getComponentCount(root.getType());
 				double lambda = root.getFailureRates()[from.getDemand()];
 				double rootRate = n * lambda;
-
 				double complementRate = 1.0;
 
+				// Iterate through all nodes, calculate complementRate
 				for (String k : Simulation.nodeMap.keySet()) {
-
 					int compsAvailable = Simulation.nodeMap.get(k).getRedundancy() - from.getComponentCount(k);
 					ArrayList<String> couldHaveFailed = tempHistory.get(k);
 
 					for (int i = 0; i < couldHaveFailed.size(); i++) {
 						String s = couldHaveFailed.get(i);
+
 						if (s.equals("|"))
 							--compsAvailable;
 
@@ -130,20 +132,24 @@ public class TreeGeneratorUnthreaded extends DECAF {
 						else
 							break;
 					}
+				}
 
+				if (verboseDebug/* && f == debugX && t == debugY */) {
+					System.out.println("========================\nDifference Transition " + failureTransition.toLine());
+					System.out.println("\nTree:\n" + curr + "\n");
+					System.out.println("Root Rate:\t" + rootRate);
+					System.out.println("Subtree Rate:\t" + subTreeRate);
+					System.out.println("Supertree Rate:\t" + complementRate);
+					System.out.println("BFHistory:\t" + tempHistory);
+					System.out.println("Rate: \t" + Simulation.qMatrix[f][t] + " + "
+							+ (rootRate * subTreeRate * complementRate) + "\n\n");
+				}
+				if (gInBinary.equals("0")) {
 					Simulation.qMatrix[f][t] += rootRate * subTreeRate * complementRate;
 				}
-
-				if (verboseDebug) {
-					System.out.println("Binary:" + gInBinary);
-					System.out.println(curr);
-					System.out.println(tempHistory);
-					System.out.println("\n\n");
-				}
-
-				for (TreeNode child : curr.getChildren()) {
-					buildSubTree(child, tempFailureTransition, subTreeRate, tempHistory);
-				}
+			}
+			for (TreeNode child : curr.getChildren()) {
+				buildSubTree(child, subTreeRate, tempHistory);
 			}
 		}
 	}
