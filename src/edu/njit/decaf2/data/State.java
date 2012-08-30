@@ -242,7 +242,9 @@ public class State extends DECAF {
 	public State clone() {
 		State result = new State();
 		result.demand = demand - 0;
-		result.vector = (HashMap<String, Integer>) vector.clone();
+		HashMap<String, Integer> tempVector = new HashMap<String, Integer>();
+		tempVector.putAll(vector);
+		result.vector = tempVector;
 		return result;
 	}
 

@@ -161,7 +161,7 @@ public class TreeNode extends DECAF {
 	}
 
 	/*
-	 * A -> B -> A -> B (read parent -> child) A | B | | A | | | B
+	 * A -> B -> A -> B (read parent -> child)
 	 */
 
 	@Override
@@ -182,5 +182,14 @@ public class TreeNode extends DECAF {
 		}
 		return result;
 	}
-
+	
+	@Override
+	public TreeNode clone(){
+		TreeNode temp = new TreeNode(currentNode, currentDemand);
+		temp.parentNode = parentNode;
+		temp.rootNode = rootNode;
+		temp.children = children;
+		temp.rate = rate;
+		return temp;
+	}
 }
