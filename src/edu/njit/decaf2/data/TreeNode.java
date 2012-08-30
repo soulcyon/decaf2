@@ -186,6 +186,8 @@ public class TreeNode extends DECAF {
 	@Override
 	public TreeNode clone(){
 		TreeNode temp = new TreeNode(currentNode, currentDemand);
+		if(parentNode != null)
+			temp.parentNode = parentNode.clone();
 		temp.parentNode = parentNode;
 		temp.rootNode = rootNode;
 		temp.children = children;
