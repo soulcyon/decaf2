@@ -1,7 +1,6 @@
 package edu.njit.decaf2.test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 public class Test$SimulTreeGen {
@@ -109,9 +108,10 @@ public class Test$SimulTreeGen {
 		if (x >= limits.size())
 			return;
 
-		for (int i = 0; i <= limits.get(x); i++) {
-			current.add(i);
-			cartesianProduct(limits, x + 1, current, list);
+		for (int i = 0; i < limits.get(x); i++) {
+			ArrayList<Integer> currentCopy = new ArrayList<Integer>(current); 
+			currentCopy.add(i);
+			cartesianProduct(limits, x + 1, currentCopy, list); 
 		}
 	}
 	

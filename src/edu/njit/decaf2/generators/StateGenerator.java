@@ -78,16 +78,19 @@ public class StateGenerator extends DECAF {
 	 * @param str
 	 * @param list
 	 */
-	private void combStates(int x, ArrayList<Integer> current, ArrayList<ArrayList<Integer>> list) {
+	private void combStates(int x, ArrayList<Integer> current, ArrayList<ArrayList<Integer>> list) { 
+		
 		if (current.size() == compLen) {
 			list.add(current);
 		}
-		if (x >= componentList.size())
-			return;
+		if (x >= componentList.size()) {
+			return; 
+		}
 
 		for (int i = 0; i <= componentList.get(x).getRedundancy(); i++) {
-			current.add(i);
-			combStates(x + 1, current, list);
+			ArrayList<Integer> currentCopy = new ArrayList<Integer>(current);
+			currentCopy.add(i);
+			combStates(x + 1, currentCopy, list);
 		}
 	}
 

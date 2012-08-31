@@ -52,6 +52,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 	 */
 	private static void buildSubTree(TreeNode curr, double subTreeRate,
 			HashMap<String, ArrayList<String>> breadthFirstHistory, State failureTransition) {
+		
 		HashMap<String, Double> gamma = curr.getFailureNode().getCascadingFailures();
 		int gammaLength = gamma.size();
 		for (int g = 0; g < (int) Math.pow(2, gammaLength); g++) {
