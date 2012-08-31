@@ -86,7 +86,7 @@ public class Simulation extends DECAF {
 			System.out.println(QMatrixGeneratorUnthreaded.printQMatrix());
 
 		resultProcessing += System.nanoTime() - t;
-		System.out.println(nodeMap);
+		// System.out.println(nodeMap);
 		System.out.println("QMatrixGenerator Time:\t" + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0);
 
 		System.out.println("Total CPU Time:\t\t" + resultProcessing / 1000.0 / 1000.0 / 1000.0 + " secs");
