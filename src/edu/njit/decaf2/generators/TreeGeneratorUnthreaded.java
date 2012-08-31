@@ -150,3 +150,4 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			}
 		}
 	}
+}
