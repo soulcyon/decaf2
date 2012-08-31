@@ -4,6 +4,7 @@
  */
 package edu.njit.decaf2.data;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -33,11 +34,11 @@ public class State extends DECAF {
 	 * @param states
 	 * @param demand
 	 */
-	public State(Set<String> components, String states, int demand) {
+	public State(Set<String> components, ArrayList<Integer> states, int demand) {
 		int i = 0;
 		vector = new HashMap<String, Integer>();
 		for (String k : components) {
-			vector.put(k, Integer.parseInt(states.substring(i, i + 1)));
+			vector.put(k, states.get(i));
 			i++;
 		}
 		this.demand = demand;
@@ -48,7 +49,7 @@ public class State extends DECAF {
 	 * @param components
 	 * @param states
 	 */
-	public State(Set<String> components, String states) {
+	public State(Set<String> components, ArrayList<Integer> states) {
 		this(components, states, 0);
 	}
 
@@ -238,7 +239,6 @@ public class State extends DECAF {
 		return result + demand + ")";
 	}
 
-	@SuppressWarnings("unchecked")
 	public State clone() {
 		State result = new State();
 		result.demand = demand - 0;

@@ -4,7 +4,6 @@
  */
 package edu.njit.decaf2.test;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import edu.njit.decaf2.data.FailureNode;
 import edu.njit.decaf2.data.State;

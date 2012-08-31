@@ -36,7 +36,7 @@ public class StateGenerator extends DECAF {
 	 */
 	public State[] generateStates() {
 		// comb will push resulting combinations into this list
-		ArrayList<String> list = new ArrayList<String>();
+		ArrayList<ArrayList<Integer>> list = new ArrayList<ArrayList<Integer>>();
 
 		// Convert HashMap componentMap to ArrayList for comb
 		for (String k : componentMap.keySet()) {
@@ -45,17 +45,17 @@ public class StateGenerator extends DECAF {
 		compLen = componentList.size();
 
 		// Go!
-		combStates(0, "", list);
+		
+		combStates(0, new ArrayList<Integer>(), list);
 
 		// Performance enhancement - use toArray rather than creating a new
 		// variable for toArray(<T>)
-		Object[] result = list.toArray();
-		transitionStates = new State[result.length * demandMatrix.length];
+		transitionStates = new State[list.size() * demandMatrix.length];
 
 		// Iterate over combinations and add demand changes
-		for (int i = 0, m = 0; i < result.length; i++) {
+		for (int i = 0, m = 0; i < list.size(); i++) {
 			for (int j = 0; j < demandMatrix.length; j++, m++) {
-				transitionStates[m] = new State(componentMap.keySet(), (String) result[i], j);
+				transitionStates[m] = new State(componentMap.keySet(), list.get(i), j);
 			}
 		}
 		return transitionStates;
@@ -78,15 +78,16 @@ public class StateGenerator extends DECAF {
 	 * @param str
 	 * @param list
 	 */
-	private void combStates(int x, String str, ArrayList<String> list) {
-		if (str.length() == compLen) {
-			list.add(str);
+	private void combStates(int x, ArrayList<Integer> current, ArrayList<ArrayList<Integer>> list) {
+		if (current.size() == compLen) {
+			list.add(current);
 		}
 		if (x >= componentList.size())
 			return;
 
 		for (int i = 0; i <= componentList.get(x).getRedundancy(); i++) {
-			combStates(x + 1, str + i, list);
+			current.add(i);
+			combStates(x + 1, current, list);
 		}
 	}
 
