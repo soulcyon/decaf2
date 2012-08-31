@@ -83,9 +83,8 @@ public class StateGenerator extends DECAF {
 		if (current.size() == compLen) {
 			list.add(current);
 		}
-		if (x >= componentList.size()) {
+		if (x >= componentList.size())
 			return; 
-		}
 
 		for (int i = 0; i <= componentList.get(x).getRedundancy(); i++) {
 			ArrayList<Integer> currentCopy = new ArrayList<Integer>(current);
