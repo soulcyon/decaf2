@@ -27,8 +27,23 @@ public class TreeGeneratorUnthreaded extends DECAF {
 	
 	public static void initSubTrees() {
 		
+		// build binaryEnumCache 
 		binaryEnumCache = new HashMap<String, ArrayList<String>>();
 		
+		for (String type : Simulation.nodeMap.keySet()) {
+			
+			// build binaryEnumCache
+			FailureNode fn = Simulation.nodeMap.get(type);
+			HashMap<String, Double> gamma = fn.getCascadingFailures();
+			
+			if(gamma.size() > 0) {
+				binaryEnumCache.put(type, powerSet(gamma.keySet()));
+			}
+		}
+		
+		printBinaryEnumCache();
+		
+		// plant trees using all types
 		for (String rootType : Simulation.nodeMap.keySet()) {
 			
 			// build binaryEnumCache
@@ -39,7 +54,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				binaryEnumCache.put(rootType, powerSet(gamma.keySet()));
 			}
 			
-			// initialize a tree and associated parameters
+			// initialize associated parameters 
 			ArrayList<String> levels = new ArrayList<String>();
 			levels.add("1:" + rootType);
 
@@ -99,18 +114,64 @@ public class TreeGeneratorUnthreaded extends DECAF {
 	private static void GrowSubTree(ArrayList<String> levels, State failureTransition, double subTreeRate,
 			HashMap<String, ArrayList<String>> breadthFirstHistory) {
 
-		// base case - break out if tree is invalid i.e. it has more component types than redundancy
+		// base case - break out if tree is invalid i.e. if it has more component types than redundancy
 		for(String type : Simulation.nodeMap.keySet()) {
 			FailureNode fn = Simulation.nodeMap.get(type);
 			if (failureTransition.getComponentCount(type) > fn.getRedundancy()) {
+				System.out.println(failureTransition.toLine());
 				System.out.println("HALT");
 				return;
 			}
 		}
 		
 		printTree(levels);
+		
+		// Iterate through all likeTransitions to which this tree applies
+		ArrayList<String> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
+		
+		for (String transition : likeTransitions) {
 
-		// grow tree
+			String[] fromAndTo = transition.split(",");
+			int f = Integer.parseInt(fromAndTo[0]);
+			int t = Integer.parseInt(fromAndTo[1]);
+			State from = Simulation.states[f];
+
+			String rootType = levels.get(0).substring(
+					levels.get(0).indexOf(":") + 1);
+			FailureNode root = Simulation.nodeMap.get(rootType);
+
+			// n * lambda for root of tree
+			int n = root.getRedundancy() - from.getComponentCount(rootType);
+			double lambda = root.getFailureRates()[from.getDemand()];
+			double rootRate = n * lambda;
+			double complementRate = 1.0;
+
+			// Iterate through BreadthFirstHistory to calculate complementRate
+			for (String k : Simulation.nodeMap.keySet()) {
+				int compsAvailable = Simulation.nodeMap.get(k).getRedundancy()
+						- from.getComponentCount(k);
+				ArrayList<String> couldHaveFailed = breadthFirstHistory.get(k);
+
+				for (int i = 0; i < couldHaveFailed.size(); i++) {
+					
+					String s = couldHaveFailed.get(i);
+
+					if (s.equals("|"))
+						--compsAvailable;
+
+					else if (compsAvailable > 0)
+						complementRate *= 1 - Simulation.nodeMap.get(s).getRate(k);
+
+					else
+						break;
+				}
+			}
+			
+			// populate Q
+			Simulation.qMatrix[f][t] += rootRate * subTreeRate * complementRate;
+		}
+		
+		// identify growth locations
 		String[] terminalNodes = levels.get(levels.size() - 1).split(",");
 		ArrayList<Integer> gammaPermutations = new ArrayList<Integer>();
 		ArrayList<String> terminalTypes = new ArrayList<String>();
@@ -142,7 +203,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				breadthFirstHistoryCopy.put(key, compHistory);
 			}
 
-			// add new level
+			// add one possible new level
 			ArrayList<Integer> breadthEncoding = cartesianProductEnum.get(c);
 			String newLevel = "";
 
@@ -173,57 +234,13 @@ public class TreeGeneratorUnthreaded extends DECAF {
 					}
 				}
 			}
-
-			// try to grow tree if there is at least one node added or
+			
+			// grow tree if there is at least one node added or
 			// equivalently if there is 1: present at least once in the new level 
 			if(c > 0) {
 				newLevel = newLevel.substring(0, newLevel.length() - 1);
 				levelsCopy.add(newLevel);
 				GrowSubTree(levelsCopy, failureTransitionCopy, subTreeRate, breadthFirstHistoryCopy);
-			}
-			
-			//otherwise calculate rate of stunted tree
-			else {	
-				
-				ArrayList<String> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
-
-				// Iterate through all likeTransitions
-				for (String transition : likeTransitions) {
-					
-					String[] fromAndTo = transition.split(",");
-					int f = Integer.parseInt(fromAndTo[0]);
-					int t = Integer.parseInt(fromAndTo[1]);
-					State from = Simulation.states[f];
-
-					String rootType = levels.get(0).substring(levels.get(0).indexOf(":") + 1);
-					FailureNode root = Simulation.nodeMap.get(rootType);
-
-					// n * lambda for root of tree
-					int n = root.getRedundancy() - from.getComponentCount(rootType);
-					double lambda = root.getFailureRates()[from.getDemand()];
-					double rootRate = n * lambda;
-					double complementRate = 1.0;
-
-					// Iterate through all nodes, calculate complementRate
-					for (String k : Simulation.nodeMap.keySet()) {
-						int compsAvailable = Simulation.nodeMap.get(k).getRedundancy() - from.getComponentCount(k);
-						ArrayList<String> couldHaveFailed = breadthFirstHistory.get(k);
-
-						for (int i = 0; i < couldHaveFailed.size(); i++) {
-							String s = couldHaveFailed.get(i);
-
-							if (s.equals("|"))
-								--compsAvailable;
-
-							else if (compsAvailable > 0)
-								complementRate *= 1 - Simulation.nodeMap.get(s).getRate(k);
-
-							else
-								break;
-						}
-					}
-					Simulation.qMatrix[f][t] += rootRate * subTreeRate * complementRate;
-				}
 			}
 		}
 	}
@@ -237,6 +254,22 @@ public class TreeGeneratorUnthreaded extends DECAF {
 		System.out.println("______________________________________________________");
 		for(String level : levels)
 			System.out.println(level);
+	}
+	
+	private static void printBinaryEnumCache() {
+		
+		System.out.println("Cache:");  
+		for(String key : binaryEnumCache.keySet()) {
+			System.out.print(key + " => ");
+
+			ArrayList<String> values = binaryEnumCache.get(key);
+			for(int i = 0; i < values.size(); i++) {
+				System.out.print(values.get(i) + " | ");
+			}
+			
+			System.out.println();
+		}
+		System.out.println();
 	}
 
 	/**
