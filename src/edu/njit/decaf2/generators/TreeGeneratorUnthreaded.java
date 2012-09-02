@@ -51,7 +51,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				breadthFirstHistory.put(k, new ArrayList<String>());
 			breadthFirstHistory.get(rootType).add("|");
 			
-			buildSubTree(levels, initFailureTransition, 1.0, breadthFirstHistory);
+			GrowSubTree(levels, initFailureTransition, 1.0, breadthFirstHistory);
 		}
 	}
 	
@@ -96,7 +96,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 	 * @param breadthFirstHistory
 	 */
 	
-	private static void buildSubTree(ArrayList<String> levels, State failureTransition, double subRate,
+	private static void GrowSubTree(ArrayList<String> levels, State failureTransition, double subTreeRate,
 			HashMap<String, ArrayList<String>> breadthFirstHistory) {
 
 		// base case - break out if tree is invalid i.e. it has more component types than redundancy
@@ -150,6 +150,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			for (int b = 0; b < breadthEncoding.size(); b++) {
 
 				String parentType = terminalTypes.get(b);
+				FailureNode parentFailureNode = Simulation.nodeMap.get(parentType);
 				int binEnumId = breadthEncoding.get(b);
 				String block = binaryEnumCache.get(parentType).get(binEnumId);
 				newLevel += block + ",";
@@ -166,22 +167,64 @@ public class TreeGeneratorUnthreaded extends DECAF {
 					if (childInfo.charAt(0) == '1') {
 						failureTransitionCopy.incrementComponentCount(childType);
 						breadthFirstHistoryCopy.get(childType).add("|");
-						//TODO update subRate
+						subTreeRate *= parentFailureNode.getRate(childType);
 					} else {
 						breadthFirstHistoryCopy.get(childType).add(parentType);
 					}
 				}
 			}
 
+			// try to grow tree if there is at least one node added or
+			// equivalently if there is 1: present at least once in the new level 
 			if(c > 0) {
 				newLevel = newLevel.substring(0, newLevel.length() - 1);
 				levelsCopy.add(newLevel);
-				buildSubTree(levelsCopy, failureTransitionCopy, subRate, breadthFirstHistoryCopy);
-			}
-			else {
-				// TODO rate calculation on existing tree, populate likeTransitions in Q
+				GrowSubTree(levelsCopy, failureTransitionCopy, subTreeRate, breadthFirstHistoryCopy);
 			}
 			
+			//otherwise calculate rate of stunted tree
+			else {	
+				
+				ArrayList<String> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
+
+				// Iterate through all likeTransitions
+				for (String transition : likeTransitions) {
+					
+					String[] fromAndTo = transition.split(",");
+					int f = Integer.parseInt(fromAndTo[0]);
+					int t = Integer.parseInt(fromAndTo[1]);
+					State from = Simulation.states[f];
+
+					String rootType = levels.get(0).substring(levels.get(0).indexOf(":") + 1);
+					FailureNode root = Simulation.nodeMap.get(rootType);
+
+					// n * lambda for root of tree
+					int n = root.getRedundancy() - from.getComponentCount(rootType);
+					double lambda = root.getFailureRates()[from.getDemand()];
+					double rootRate = n * lambda;
+					double complementRate = 1.0;
+
+					// Iterate through all nodes, calculate complementRate
+					for (String k : Simulation.nodeMap.keySet()) {
+						int compsAvailable = Simulation.nodeMap.get(k).getRedundancy() - from.getComponentCount(k);
+						ArrayList<String> couldHaveFailed = breadthFirstHistory.get(k);
+
+						for (int i = 0; i < couldHaveFailed.size(); i++) {
+							String s = couldHaveFailed.get(i);
+
+							if (s.equals("|"))
+								--compsAvailable;
+
+							else if (compsAvailable > 0)
+								complementRate *= 1 - Simulation.nodeMap.get(s).getRate(k);
+
+							else
+								break;
+						}
+					}
+					Simulation.qMatrix[f][t] += rootRate * subTreeRate * complementRate;
+				}
+			}
 		}
 	}
 	

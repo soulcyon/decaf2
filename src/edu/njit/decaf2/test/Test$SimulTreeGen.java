@@ -10,7 +10,7 @@ public class Test$SimulTreeGen {
 	private static String [][] gamma;
 	private static HashMap<String, ArrayList<String>> binaryEnumCache = new HashMap<String, ArrayList<String>>(); 
 	
-	/*
+	
 	public static void main(String[] args) {
 		
 		types = new String[] {"A", "B", "C", "D"};
@@ -22,7 +22,7 @@ public class Test$SimulTreeGen {
 		
 		initTrees();
 	}
-	*/
+	
 	
 	private static void printBinaryEnumCache() {
 		
@@ -50,6 +50,9 @@ public class Test$SimulTreeGen {
 	}
 
 	private static ArrayList<String> powerSet(String[] members) {
+		
+		System.out.println("Members: ");
+		printArray(members);
 		
 		if(members.length == 0)
 			return new ArrayList<String>();
@@ -215,11 +218,11 @@ public class Test$SimulTreeGen {
 		}
 	}
 	
-	public static void printArray(int[] a) {
+	public static void printArray(Object[] a) {
 		
 		String s = "[";
-		for(int i : a)
-			s += i + " ";
+		for(Object i : a)
+			s += i.toString() + " ";
 		s = s.substring(0, s.length() - 1);
 		s +="]";
 		System.out.println(s);
