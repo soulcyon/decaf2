@@ -124,53 +124,6 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			}
 		}
 		
-		printTree(levels);
-		
-		// Iterate through all likeTransitions to which this tree applies
-		ArrayList<String> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
-		
-		for (String transition : likeTransitions) {
-
-			String[] fromAndTo = transition.split(",");
-			int f = Integer.parseInt(fromAndTo[0]);
-			int t = Integer.parseInt(fromAndTo[1]);
-			State from = Simulation.states[f];
-
-			String rootType = levels.get(0).substring(
-					levels.get(0).indexOf(":") + 1);
-			FailureNode root = Simulation.nodeMap.get(rootType);
-
-			// n * lambda for root of tree
-			int n = root.getRedundancy() - from.getComponentCount(rootType);
-			double lambda = root.getFailureRates()[from.getDemand()];
-			double rootRate = n * lambda;
-			double complementRate = 1.0;
-
-			// Iterate through BreadthFirstHistory to calculate complementRate
-			for (String k : Simulation.nodeMap.keySet()) {
-				int compsAvailable = Simulation.nodeMap.get(k).getRedundancy()
-						- from.getComponentCount(k);
-				ArrayList<String> couldHaveFailed = breadthFirstHistory.get(k);
-
-				for (int i = 0; i < couldHaveFailed.size(); i++) {
-					
-					String s = couldHaveFailed.get(i);
-
-					if (s.equals("|"))
-						--compsAvailable;
-
-					else if (compsAvailable > 0)
-						complementRate *= 1 - Simulation.nodeMap.get(s).getRate(k);
-
-					else
-						break;
-				}
-			}
-			
-			// populate Q
-			Simulation.qMatrix[f][t] += rootRate * subTreeRate * complementRate;
-		}
-		
 		// identify growth locations
 		String[] terminalNodes = levels.get(levels.size() - 1).split(",");
 		ArrayList<Integer> gammaPermutations = new ArrayList<Integer>();
@@ -241,6 +194,63 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				newLevel = newLevel.substring(0, newLevel.length() - 1);
 				levelsCopy.add(newLevel);
 				GrowSubTree(levelsCopy, failureTransitionCopy, subTreeRate, breadthFirstHistoryCopy);
+			}
+			
+			else {
+				
+				// Iterate through all likeTransitions to which this tree applies
+				ArrayList<String> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
+				
+				for (String transition : likeTransitions) {
+		
+					String[] fromAndTo = transition.split(",");
+					int f = Integer.parseInt(fromAndTo[0]);
+					int t = Integer.parseInt(fromAndTo[1]);
+					State from = Simulation.states[f];
+		
+					String rootType = levels.get(0).substring(
+							levels.get(0).indexOf(":") + 1);
+					FailureNode root = Simulation.nodeMap.get(rootType);
+		
+					// n * lambda for root of tree
+					int n = root.getRedundancy() - from.getComponentCount(rootType);
+					double lambda = root.getFailureRates()[from.getDemand()];
+					double rootRate = n * lambda;
+					double complementRate = 1.0;
+		
+					// Iterate through BreadthFirstHistory to calculate complementRate
+					for (String k : Simulation.nodeMap.keySet()) {
+						int compsAvailable = Simulation.nodeMap.get(k).getRedundancy()- from.getComponentCount(k);
+						ArrayList<String> couldHaveFailed = breadthFirstHistoryCopy.get(k);
+		
+						for (int i = 0; i < couldHaveFailed.size(); i++) {
+							
+							String s = couldHaveFailed.get(i);
+		
+							if (s.equals("|"))
+								--compsAvailable;
+		
+							else if (compsAvailable > 0)
+								complementRate *= 1 - Simulation.nodeMap.get(s).getRate(k);
+		
+							else
+								break;
+						}
+					}
+					
+					if(verboseDebug) {
+						printTree(levels);
+						System.out.println("Failure Transition:" + failureTransition.toLine());
+						System.out.println("Root Rate:\t" + rootRate);
+						System.out.println("Subtree Rate:\t" + subTreeRate);
+						System.out.println("Supertree Rate:\t" + complementRate);
+						System.out.println("BFHistory:\t" + breadthFirstHistoryCopy);
+						System.out.println("Rate: \t" + Simulation.qMatrix[f][t] + " + " + (rootRate * subTreeRate * complementRate) + "\n\n");
+					}
+					
+					// populate Q
+					Simulation.qMatrix[f][t] += rootRate * subTreeRate * complementRate;
+				}	
 			}
 		}
 	}
