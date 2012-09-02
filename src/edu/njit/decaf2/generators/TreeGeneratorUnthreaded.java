@@ -6,6 +6,7 @@ package edu.njit.decaf2.generators;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Set;
 
 import edu.njit.decaf2.DECAF;
@@ -124,6 +125,8 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			}
 		}
 		
+		printAllLevels(levels);
+		
 		// identify growth locations
 		String[] terminalNodes = levels.get(levels.size() - 1).split(",");
 		ArrayList<Integer> gammaPermutations = new ArrayList<Integer>();
@@ -239,7 +242,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 					}
 					
 					if(verboseDebug) {
-						printTree(levels);
+						System.out.println("Tree: "); printTree(levels, 0, 0, "");
 						System.out.println("Failure Transition:" + failureTransition.toLine());
 						System.out.println("Root Rate:\t" + rootRate);
 						System.out.println("Subtree Rate:\t" + subTreeRate);
@@ -259,11 +262,47 @@ public class TreeGeneratorUnthreaded extends DECAF {
 	 * 
 	 * @param levels
 	 */
-	private static void printTree(ArrayList<String> levels) {
+	private static void printAllLevels(ArrayList<String> levels) {
 		
 		System.out.println("______________________________________________________");
 		for(String level : levels)
 			System.out.println(level);
+	}
+	
+	/**
+	 * 
+	 * @param levels
+	 * @param indent
+	 * @param nodeType
+	 */
+	
+	private static void printTree(ArrayList<String> levels, int level, int pos, String indent) {
+		
+		String breadth = levels.get(level);
+		String[] chunks = breadth.split(",");
+		
+		if(pos >= chunks.length)
+			return;
+		
+		if(chunks[pos].charAt(0) == '1')
+			System.out.println(indent + chunks[pos].substring(2));
+		
+		if(level < levels.size() - 1) {
+			
+			int offset = 0;
+			for(int c = 0; c < pos; c++) {
+				String type = chunks[c].substring(2);
+				if(chunks[pos].charAt(0) == '1' && binaryEnumCache.containsKey(type)) {
+					offset += binaryEnumCache.get(type).get(0).split(":").length;			
+				}
+			}
+			int childPos = offset;
+			
+			while(childPos < binaryEnumCache.get(chunks[pos].substring(2)).get(0).length()) {
+				printTree(levels, level + 1, childPos, indent + "|  ");
+				childPos++;
+			}
+		}
 	}
 	
 	private static void printBinaryEnumCache() {
