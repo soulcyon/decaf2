@@ -6,12 +6,14 @@ import java.util.HashMap;
 public class Test$SimulTreeGen {
 
 	private static String[] types;
+	private static int[] redundancies; 
 	private static String [][] gamma;
 	private static HashMap<String, ArrayList<String>> binaryEnumCache = new HashMap<String, ArrayList<String>>(); 
 	
 	public static void main(String[] args) {
 		
 		types = new String[] {"A", "B", "C", "D"};
+		redundancies = new int[] {2, 4, 2, 2};
 		gamma = new String[][] {{"B", "C", "D"}, {"C", "A", "D"}, {"A", "D"}, {"C"}};
 		
 		buildBinaryEnumCache();
@@ -77,26 +79,117 @@ public class Test$SimulTreeGen {
 			
 			ArrayList<String> levels = new ArrayList<String>();
 			levels.add("1:" + types[i]);
-			buildTrees(levels, initFailureTransition);
+			
+			HashMap<String, ArrayList<String>> breadthFirstHistory = new HashMap<String, ArrayList<String>>();
+			for (int j  = 0; j < types.length; j++)
+				breadthFirstHistory.put(types[j], new ArrayList<String>());
+			breadthFirstHistory.get(types[i]).add("|");
+			
+			buildTrees(levels, initFailureTransition, breadthFirstHistory);
 		}
 	}
 	
-	private static void buildTrees(ArrayList<String> levels, int[] failureTransition) {
+	private static void buildTrees(ArrayList<String> levels, int[] failureTransition, 
+			HashMap<String, ArrayList<String>> breadthFirstHistory) {
+
+		// base case - break out if tree is invalid i.e. it has more component types than redundancy
+		for(int i = 0 ; i < redundancies.length; i++)
+			if(failureTransition[i] > redundancies[i])
+				return;
 		
-		String[] terminalNodes = levels.get(levels.size() - 1).split(","); 
+		printTree(levels);
+
+		// grow tree
+		String[] terminalNodes = levels.get(levels.size() - 1).split(",");
 		ArrayList<Integer> gammaPermutations = new ArrayList<Integer>();
-		
-		for(int t = 0; t < terminalNodes.length; t++) {
+		ArrayList<String> terminalTypes = new ArrayList<String>();
+
+		// determine how many growth possibilities exist
+		for (int t = 0; t < terminalNodes.length; t++) {
 			String terminalNode = terminalNodes[t];
-			if(terminalNode.charAt(0) == '1') {
+			if (terminalNode.charAt(0) == '1') {
 				String type = terminalNode.substring(terminalNode.indexOf(":") + 1);
 				gammaPermutations.add(binaryEnumCache.get(type).size());
-			}	
+				terminalTypes.add(type);
+			}
 		}
-			
-		ArrayList<ArrayList<Integer>> cartesianProductEnum = new ArrayList<ArrayList<Integer>>(); 
+
+		// fork by different growth possibilities
+		ArrayList<ArrayList<Integer>> cartesianProductEnum = new ArrayList<ArrayList<Integer>>();
 		cartesianProduct(gammaPermutations, 0, new ArrayList<Integer>(gammaPermutations.size()), cartesianProductEnum);
 
+		for (int c = 0; c < cartesianProductEnum.size(); c++) {
+
+			// make copies of reference types to prevent data persistence over
+			// mutually exclusive recursive calls
+			ArrayList<String> levelsCopy = new ArrayList<String>(levels);
+
+			int[] failureTransitionCopy = new int[failureTransition.length];
+			System.arraycopy(failureTransition, 0, failureTransitionCopy, 0,failureTransition.length);
+
+			HashMap<String, ArrayList<String>> breadthFirstHistoryCopy = new HashMap<String, ArrayList<String>>();
+			for (String key : breadthFirstHistory.keySet()) {
+				ArrayList<String> compHistory = new ArrayList<String>(breadthFirstHistory.get(key));
+				breadthFirstHistoryCopy.put(key, compHistory);
+			}
+
+			// add new level
+			ArrayList<Integer> breadthEncoding = cartesianProductEnum.get(c);
+			String newLevel = "";
+
+			//go through all added nodes, denoted by 1:type
+			for (int b = 0; b < breadthEncoding.size(); b++) {
+
+				String parentType = terminalTypes.get(b);
+				int binEnumId = breadthEncoding.get(b);
+				String block = binaryEnumCache.get(parentType).get(binEnumId);
+				newLevel += block + ",";
+				
+				// go through one of the added nodes' children  
+				String[] gammaStatus = block.split(",");
+
+				for (int g = 0; g < gammaStatus.length; g++) {
+
+					String childInfo = gammaStatus[g];
+					String childType = childInfo.substring(childInfo.indexOf(":") + 1);
+
+					// update failureTransition, breadthFirstHistory for tree
+					if (childInfo.charAt(0) == '1') {
+						increment(failureTransitionCopy, childType);
+						breadthFirstHistoryCopy.get(childType).add("|");
+					} else {
+						breadthFirstHistoryCopy.get(childType).add(parentType);
+					}
+				}
+			}
+
+			if(c > 0) {
+				newLevel = newLevel.substring(0, newLevel.length() - 1);
+				levelsCopy.add(newLevel);
+				buildTrees(levelsCopy, failureTransitionCopy, breadthFirstHistoryCopy);
+			}
+			else {
+				// TODO rate calculation on existing tree
+			}
+			
+		}
+	}
+
+	private static void printTree(ArrayList<String> levels) {
+		
+		System.out.println("______________________________________________________");
+		for(String level : levels)
+			System.out.println(level);
+	}
+
+	private static void increment(int[] a, String type) {
+		
+		switch(type) {
+			case "A" : a[0]++; break;
+			case "B" : a[1]++; break;
+			case "C" : a[2]++; break;
+			case "D" : a[3]++; break;
+		}
 	}
 
 	private static void cartesianProduct(ArrayList<Integer> limits, int x, ArrayList<Integer> current, ArrayList<ArrayList<Integer>> list) {
