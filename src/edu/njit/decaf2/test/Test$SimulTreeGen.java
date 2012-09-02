@@ -13,7 +13,7 @@ public class Test$SimulTreeGen {
 	public static void main(String[] args) {
 		
 		types = new String[] {"A", "B", "C", "D"};
-		redundancies = new int[] {2, 4, 2, 2};
+		redundancies = new int[] {2, 2, 2, 2};
 		gamma = new String[][] {{"B", "C", "D"}, {"C", "A", "D"}, {"A", "D"}, {"C"}};
 		
 		buildBinaryEnumCache();
@@ -41,7 +41,9 @@ public class Test$SimulTreeGen {
 	private static void buildBinaryEnumCache() {
 		
 		for(int i = 0; i < types.length; i++) {
-			binaryEnumCache.put(types[i], powerSet(gamma[i]));
+			if(gamma[i].length > 0) {
+				binaryEnumCache.put(types[i], powerSet(gamma[i]));
+			}
 		}	
 	}
 
@@ -85,17 +87,20 @@ public class Test$SimulTreeGen {
 				breadthFirstHistory.put(types[j], new ArrayList<String>());
 			breadthFirstHistory.get(types[i]).add("|");
 			
-			buildTrees(levels, initFailureTransition, breadthFirstHistory);
+			buildTrees(levels, initFailureTransition, 1.0, breadthFirstHistory);
 		}
 	}
 	
-	private static void buildTrees(ArrayList<String> levels, int[] failureTransition, 
+	private static void buildTrees(ArrayList<String> levels, int[] failureTransition, double subRate,
 			HashMap<String, ArrayList<String>> breadthFirstHistory) {
 
 		// base case - break out if tree is invalid i.e. it has more component types than redundancy
-		for(int i = 0 ; i < redundancies.length; i++)
-			if(failureTransition[i] > redundancies[i])
+		for(int i = 0 ; i < redundancies.length; i++) {
+			if(failureTransition[i] > redundancies[i]) {
+				System.out.println("HALT");
 				return;
+			}
+		}
 		
 		printTree(levels);
 
@@ -107,8 +112,8 @@ public class Test$SimulTreeGen {
 		// determine how many growth possibilities exist
 		for (int t = 0; t < terminalNodes.length; t++) {
 			String terminalNode = terminalNodes[t];
-			if (terminalNode.charAt(0) == '1') {
-				String type = terminalNode.substring(terminalNode.indexOf(":") + 1);
+			String type = terminalNode.substring(terminalNode.indexOf(":") + 1);
+			if (terminalNode.charAt(0) == '1' && binaryEnumCache.containsKey(type)) {
 				gammaPermutations.add(binaryEnumCache.get(type).size());
 				terminalTypes.add(type);
 			}
@@ -120,8 +125,7 @@ public class Test$SimulTreeGen {
 
 		for (int c = 0; c < cartesianProductEnum.size(); c++) {
 
-			// make copies of reference types to prevent data persistence over
-			// mutually exclusive recursive calls
+			// make copies of reference types to prevent data persistence over mutually exclusive recursive calls
 			ArrayList<String> levelsCopy = new ArrayList<String>(levels);
 
 			int[] failureTransitionCopy = new int[failureTransition.length];
@@ -145,7 +149,7 @@ public class Test$SimulTreeGen {
 				String block = binaryEnumCache.get(parentType).get(binEnumId);
 				newLevel += block + ",";
 				
-				// go through one of the added nodes' children  
+				// go through each of the added nodes' children  
 				String[] gammaStatus = block.split(",");
 
 				for (int g = 0; g < gammaStatus.length; g++) {
@@ -153,10 +157,11 @@ public class Test$SimulTreeGen {
 					String childInfo = gammaStatus[g];
 					String childType = childInfo.substring(childInfo.indexOf(":") + 1);
 
-					// update failureTransition, breadthFirstHistory for tree
+					// update failureTransition and subRate, breadthFirstHistory for tree
 					if (childInfo.charAt(0) == '1') {
 						increment(failureTransitionCopy, childType);
 						breadthFirstHistoryCopy.get(childType).add("|");
+						//TODO update subRate
 					} else {
 						breadthFirstHistoryCopy.get(childType).add(parentType);
 					}
@@ -166,10 +171,10 @@ public class Test$SimulTreeGen {
 			if(c > 0) {
 				newLevel = newLevel.substring(0, newLevel.length() - 1);
 				levelsCopy.add(newLevel);
-				buildTrees(levelsCopy, failureTransitionCopy, breadthFirstHistoryCopy);
+				buildTrees(levelsCopy, failureTransitionCopy, subRate, breadthFirstHistoryCopy);
 			}
 			else {
-				// TODO rate calculation on existing tree
+				// TODO rate calculation on existing tree, populate likeTransitions in Q
 			}
 			
 		}
