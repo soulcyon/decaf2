@@ -10,6 +10,7 @@ public class Test$SimulTreeGen {
 	private static String [][] gamma;
 	private static HashMap<String, ArrayList<String>> binaryEnumCache = new HashMap<String, ArrayList<String>>(); 
 	
+	/*
 	public static void main(String[] args) {
 		
 		types = new String[] {"A", "B", "C", "D"};
@@ -21,6 +22,7 @@ public class Test$SimulTreeGen {
 		
 		initTrees();
 	}
+	*/
 	
 	private static void printBinaryEnumCache() {
 		

@@ -6,149 +6,216 @@ package edu.njit.decaf2.generators;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.Simulation;
 import edu.njit.decaf2.data.FailureNode;
 import edu.njit.decaf2.data.State;
-import edu.njit.decaf2.data.TreeNode;
 
 /**
  * DECAF 2 - TreeGenerator
  * 
- * @author Sashank Tadepalli, Mihir Sanghavi
+ * @author Mihir Sanghavi
  * @version 2.0
  * 
  */
+
 public class TreeGeneratorUnthreaded extends DECAF {
-	/**
-	 * 
-	 * @param statesCopy
-	 */
+	
+	private static HashMap<String, ArrayList<String>> binaryEnumCache;
+	
 	public static void initSubTrees() {
-		for (String root : Simulation.nodeMap.keySet()) {
-			TreeNode ft = new TreeNode(Simulation.nodeMap.get(root));
-			ft.makeRoot();
+		
+		binaryEnumCache = new HashMap<String, ArrayList<String>>();
+		
+		for (String rootType : Simulation.nodeMap.keySet()) {
+			
+			// build binaryEnumCache
+			FailureNode fn = Simulation.nodeMap.get(rootType);
+			HashMap<String, Double> gamma = fn.getCascadingFailures();
+			
+			if(gamma.size() > 0) {
+				binaryEnumCache.put(rootType, powerSet(gamma.keySet()));
+			}
+			
+			// initialize a tree and associated parameters
+			ArrayList<String> levels = new ArrayList<String>();
+			levels.add("1:" + rootType);
 
+			State initFailureTransition = (State) Simulation.states[0].clone();
+			initFailureTransition.incrementComponentCount(Simulation.nodeMap.get(rootType));
+			
 			HashMap<String, ArrayList<String>> breadthFirstHistory = new HashMap<String, ArrayList<String>>();
-
 			for (String k : Simulation.nodeMap.keySet())
 				breadthFirstHistory.put(k, new ArrayList<String>());
-
-			breadthFirstHistory.get(root).add("|");
-			State failureTransition = (State) Simulation.states[0].clone();
-			failureTransition.incrementComponentCount(Simulation.nodeMap.get(root));
-			buildSubTree(ft, 1.0, breadthFirstHistory, failureTransition);
+			breadthFirstHistory.get(rootType).add("|");
+			
+			buildSubTree(levels, initFailureTransition, 1.0, breadthFirstHistory);
 		}
+	}
+	
+	/**
+	 * 
+	 * @param set
+	 * @return
+	 */
+	
+	private static ArrayList<String> powerSet(Set<String> set) {
+		
+		ArrayList<String> members = new ArrayList<String>(set);
+		
+		if(members.size() == 0)
+			return new ArrayList<String>();
+		
+		int permutations = (int)Math.pow(2, members.size());
+		ArrayList<String> binaryEnum = new ArrayList<String>(permutations); 
+		
+		for(int p = 0; p < permutations; p++) {
+			
+			String binary =  Integer.toBinaryString(p);
+			while(binary.length() < members.size())
+				binary = 0 + binary; 
+			
+			String block = "";
+			for(int b = 0; b < binary.length(); b++) {
+				block += binary.charAt(b) + ":" + members.get(b) + ",";
+			}
+			block = block.substring(0, block.length() - 1);
+			binaryEnum.add(p, block);
+		}
+		
+		return binaryEnum;		
+	}
+	
+	/**
+	 * 
+	 * @param levels
+	 * @param failureTransition
+	 * @param subRate
+	 * @param breadthFirstHistory
+	 */
+	
+	private static void buildSubTree(ArrayList<String> levels, State failureTransition, double subRate,
+			HashMap<String, ArrayList<String>> breadthFirstHistory) {
+
+		// base case - break out if tree is invalid i.e. it has more component types than redundancy
+		for(String type : Simulation.nodeMap.keySet()) {
+			FailureNode fn = Simulation.nodeMap.get(type);
+			if (failureTransition.getComponentCount(type) > fn.getRedundancy()) {
+				System.out.println("HALT");
+				return;
+			}
+		}
+		
+		printTree(levels);
+
+		// grow tree
+		String[] terminalNodes = levels.get(levels.size() - 1).split(",");
+		ArrayList<Integer> gammaPermutations = new ArrayList<Integer>();
+		ArrayList<String> terminalTypes = new ArrayList<String>();
+
+		// determine how many growth possibilities exist
+		for (int t = 0; t < terminalNodes.length; t++) {
+			String terminalNode = terminalNodes[t];
+			String type = terminalNode.substring(terminalNode.indexOf(":") + 1);
+			if (terminalNode.charAt(0) == '1' && binaryEnumCache.containsKey(type)) {
+				gammaPermutations.add(binaryEnumCache.get(type).size());
+				terminalTypes.add(type);
+			}
+		}
+
+		// fork by different growth possibilities
+		ArrayList<ArrayList<Integer>> cartesianProductEnum = new ArrayList<ArrayList<Integer>>();
+		cartesianProduct(gammaPermutations, 0, new ArrayList<Integer>(gammaPermutations.size()), cartesianProductEnum);
+
+		for (int c = 0; c < cartesianProductEnum.size(); c++) {
+
+			// make copies of reference types to prevent data persistence over mutually exclusive recursive calls
+			ArrayList<String> levelsCopy = new ArrayList<String>(levels);
+
+			State failureTransitionCopy = failureTransition.clone();
+
+			HashMap<String, ArrayList<String>> breadthFirstHistoryCopy = new HashMap<String, ArrayList<String>>();
+			for (String key : breadthFirstHistory.keySet()) {
+				ArrayList<String> compHistory = new ArrayList<String>(breadthFirstHistory.get(key));
+				breadthFirstHistoryCopy.put(key, compHistory);
+			}
+
+			// add new level
+			ArrayList<Integer> breadthEncoding = cartesianProductEnum.get(c);
+			String newLevel = "";
+
+			//go through all added nodes, denoted by 1:type
+			for (int b = 0; b < breadthEncoding.size(); b++) {
+
+				String parentType = terminalTypes.get(b);
+				int binEnumId = breadthEncoding.get(b);
+				String block = binaryEnumCache.get(parentType).get(binEnumId);
+				newLevel += block + ",";
+				
+				// go through each of the added nodes' children  
+				String[] gammaStatus = block.split(",");
+
+				for (int g = 0; g < gammaStatus.length; g++) {
+
+					String childInfo = gammaStatus[g];
+					String childType = childInfo.substring(childInfo.indexOf(":") + 1);
+
+					// update failureTransition and subRate, breadthFirstHistory for tree
+					if (childInfo.charAt(0) == '1') {
+						failureTransitionCopy.incrementComponentCount(childType);
+						breadthFirstHistoryCopy.get(childType).add("|");
+						//TODO update subRate
+					} else {
+						breadthFirstHistoryCopy.get(childType).add(parentType);
+					}
+				}
+			}
+
+			if(c > 0) {
+				newLevel = newLevel.substring(0, newLevel.length() - 1);
+				levelsCopy.add(newLevel);
+				buildSubTree(levelsCopy, failureTransitionCopy, subRate, breadthFirstHistoryCopy);
+			}
+			else {
+				// TODO rate calculation on existing tree, populate likeTransitions in Q
+			}
+			
+		}
+	}
+	
+	/**
+	 * 
+	 * @param levels
+	 */
+	private static void printTree(ArrayList<String> levels) {
+		
+		System.out.println("______________________________________________________");
+		for(String level : levels)
+			System.out.println(level);
 	}
 
 	/**
-	 * Builds a larger tree by attaching nodes.
 	 * 
-	 * @param root
-	 * @param transition
-	 * @param rate
-	 * @return
+	 * @param limits
+	 * @param x
+	 * @param current
+	 * @param list
 	 */
-	private static void buildSubTree(TreeNode curr, double subTreeRate,
-			HashMap<String, ArrayList<String>> breadthFirstHistory, State failureTransition) {
+	private static void cartesianProduct(ArrayList<Integer> limits, int x, ArrayList<Integer> current, ArrayList<ArrayList<Integer>> list) {
 		
-		HashMap<String, Double> gamma = curr.getFailureNode().getCascadingFailures();
-		int gammaLength = gamma.size();
-		for (int g = 0; g < (int) Math.pow(2, gammaLength); g++) {
+		if (current.size() == limits.size()) {
+			list.add(current);
+		}
+		
+		if (x >= limits.size())
+			return;
 
-			// Properly clones HashMap by cloning internal ArrayLists, putAll
-			// Fails because vales are a non-primitive type
-			HashMap<String, ArrayList<String>> tempHistory = new HashMap<String, ArrayList<String>>();
-			for (String key : breadthFirstHistory.keySet()) {
-				ArrayList<String> compHistory = new ArrayList<String>(breadthFirstHistory.get(key));
-				tempHistory.put(key, compHistory);
-			}
-			
-			// If curr has no gamma, then do not assign gInBinary
-			String gInBinary = "";
-			if (gammaLength > 0) {
-				gInBinary = String.format("%" + gammaLength + "s", Integer.toBinaryString(g)).replace(' ', '0');
-			}
-
-			for (int b = 0; b < gInBinary.length(); b++) {
-				String[] entriesInGamma = new String[gammaLength];
-				entriesInGamma = gamma.keySet().toArray(entriesInGamma);
-				FailureNode triggerComponent = Simulation.nodeMap.get(entriesInGamma[b]);
-
-				if (!(failureTransition.getComponentCount(entriesInGamma[b]) < triggerComponent.getRedundancy()))
-					continue;
-
-				if (gInBinary.charAt(b) == '1') {
-					curr.addChild(triggerComponent);
-					failureTransition.incrementComponentCount(triggerComponent);
-					subTreeRate *= curr.getFailureNode().getRate(entriesInGamma[b]);
-					tempHistory.get(entriesInGamma[b]).add("|");
-				} else {
-					tempHistory.get(entriesInGamma[b]).add(curr.getFailureNode().getType());
-				}
-			}
-
-			for (TreeNode child : curr.getChildren()) {
-				System.out.println(curr);
-				buildSubTree(child, subTreeRate, tempHistory, failureTransition.clone());
-			}
-			
-			// We still need gInBinary to be "0" for qMatrix calculation
-			// even if curr has no gamma
-			if (gammaLength == 0) {
-				gInBinary = "0";
-			}
-
-			ArrayList<String> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
-
-			// Iterate through all likeTransitions
-			for (String transition : likeTransitions) {
-				String[] fromAndTo = transition.split(",");
-				int f = Integer.parseInt(fromAndTo[0]);
-				int t = Integer.parseInt(fromAndTo[1]);
-				State from = Simulation.states[f];
-
-				FailureNode root = curr.getRoot();
-
-				// n * lambda for root of tree
-				int n = root.getRedundancy() - from.getComponentCount(root.getType());
-				double lambda = root.getFailureRates()[from.getDemand()];
-				double rootRate = n * lambda;
-				double complementRate = 1.0;
-
-				// Iterate through all nodes, calculate complementRate
-				for (String k : Simulation.nodeMap.keySet()) {
-					int compsAvailable = Simulation.nodeMap.get(k).getRedundancy() - from.getComponentCount(k);
-					ArrayList<String> couldHaveFailed = tempHistory.get(k);
-
-					for (int i = 0; i < couldHaveFailed.size(); i++) {
-						String s = couldHaveFailed.get(i);
-
-						if (s.equals("|"))
-							--compsAvailable;
-
-						else if (compsAvailable > 0)
-							complementRate *= 1 - Simulation.nodeMap.get(s).getRate(k);
-
-						else
-							break;
-					}
-				}
-
-				if (verboseDebug/* && f == debugX && t == debugY */) {
-					/*System.out.println("========================\nDifference Transition " + failureTransition.toLine());
-					System.out.println("\nTree:\n" + curr + "\n");
-					System.out.println("Root Rate:\t" + rootRate);
-					System.out.println("Subtree Rate:\t" + subTreeRate);
-					System.out.println("Supertree Rate:\t" + complementRate);
-					System.out.println("BFHistory:\t" + tempHistory);
-					System.out.println("Rate: \t" + Simulation.qMatrix[f][t] + " + " + (rootRate * subTreeRate * complementRate) + "\n\n");*/
-				}
-				if (gInBinary.equals("0")) {
-					Simulation.qMatrix[f][t] += rootRate * subTreeRate * complementRate;
-				}
-			}
+		for (int i = 0; i < limits.get(x); i++) {
+			ArrayList<Integer> currentCopy = new ArrayList<Integer>(current); 
+			currentCopy.add(i);
+			cartesianProduct(limits, x + 1, currentCopy, list); 
 		}
 	}
 }
