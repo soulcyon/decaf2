@@ -125,8 +125,6 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			}
 		}
 		
-		printAllLevels(levels);
-		
 		// identify growth locations
 		String[] terminalNodes = levels.get(levels.size() - 1).split(",");
 		ArrayList<Integer> gammaPermutations = new ArrayList<Integer>();
@@ -243,6 +241,8 @@ public class TreeGeneratorUnthreaded extends DECAF {
 					
 					if(verboseDebug) {
 						System.out.println("Tree: "); printTree(levels, 0, 0, "");
+						System.out.println("From:" + from.toLine());
+						System.out.println("To:" + Simulation.states[t].toLine());
 						System.out.println("Failure Transition:" + failureTransition.toLine());
 						System.out.println("Root Rate:\t" + rootRate);
 						System.out.println("Subtree Rate:\t" + subTreeRate);
