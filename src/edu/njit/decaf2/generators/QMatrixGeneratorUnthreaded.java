@@ -151,7 +151,7 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 				if (Simulation.qMatrix[i][j] != 0.0)
 					result += Simulation.qMatrix[i][j] + "@(" + i + "," + j + "); ";
 			}
-			result += "\n";
+			//result += "\n";
 		}
 		return DECAF.error(result);
 	}
