@@ -147,6 +147,8 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				ArrayList<String> compHistory = new ArrayList<String>(breadthFirstHistory.get(key));
 				breadthFirstHistoryCopy.put(key, compHistory);
 			}
+			
+			double subTreeRateCopy = subTreeRate;
 
 			// add one possible new level
 			ArrayList<Integer> breadthEncoding = cartesianProductEnum.get(c);
@@ -174,7 +176,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 					if (childInfo.charAt(0) == '1') {
 						failureTransitionCopy.incrementComponentCount(childType);
 						breadthFirstHistoryCopy.get(childType).add("|");
-						subTreeRate *= parentFailureNode.getRate(childType);
+						subTreeRateCopy *= parentFailureNode.getRate(childType);
 					} else {
 						breadthFirstHistoryCopy.get(childType).add(parentType);
 					}
@@ -195,7 +197,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			if (c > 0) {
 				newLevel = newLevel.substring(0, newLevel.length() - 1);
 				levelsCopy.add(newLevel);
-				GrowSubTree(levelsCopy, failureTransitionCopy, subTreeRate, breadthFirstHistoryCopy);
+				GrowSubTree(levelsCopy, failureTransitionCopy, subTreeRateCopy, breadthFirstHistoryCopy);
 			} else {
 				// Iterate through all likeTransitions to which this tree
 				// applies
