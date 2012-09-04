@@ -19,14 +19,15 @@ import edu.njit.decaf2.data.State;
  * 
  */
 public class StateGenerator extends DECAF {
-	private ArrayList<FailureNode> componentList = new ArrayList<FailureNode>();
+	private ArrayList<String> typeList = new ArrayList<String>();
 	private int compLen;
-	private HashMap<String, FailureNode> componentMap;
+	private HashMap<String, FailureNode> nodeMap;
 	private double[][] demandMatrix;
 	private State[] transitionStates;
 
-	public StateGenerator(HashMap<String, FailureNode> componentMap, double[][] demandMatrix) {
-		this.componentMap = componentMap;
+	public StateGenerator(HashMap<String, FailureNode> componentMap, ArrayList<String> typeList, double[][] demandMatrix) {
+		this.nodeMap = componentMap;
+		this.typeList = typeList;
 		this.demandMatrix = demandMatrix;
 	}
 
@@ -37,15 +38,9 @@ public class StateGenerator extends DECAF {
 	public State[] generateStates() {
 		// comb will push resulting combinations into this list
 		ArrayList<ArrayList<Integer>> list = new ArrayList<ArrayList<Integer>>();
-
-		// Convert HashMap componentMap to ArrayList for comb
-		for (String k : componentMap.keySet()) {
-			componentList.add(componentMap.get(k));
-		}
-		compLen = componentList.size();
+		compLen = typeList.size();
 
 		// Go!
-		
 		combStates(0, new ArrayList<Integer>(), list);
 
 		// Performance enhancement - use toArray rather than creating a new
@@ -55,7 +50,7 @@ public class StateGenerator extends DECAF {
 		// Iterate over combinations and add demand changes
 		for (int i = 0, m = 0; i < list.size(); i++) {
 			for (int j = 0; j < demandMatrix.length; j++, m++) {
-				transitionStates[m] = new State(componentMap.keySet(), list.get(i), j);
+				transitionStates[m] = new State(typeList, list.get(i), j);
 			}
 		}
 		return transitionStates;
@@ -78,15 +73,15 @@ public class StateGenerator extends DECAF {
 	 * @param str
 	 * @param list
 	 */
-	private void combStates(int x, ArrayList<Integer> current, ArrayList<ArrayList<Integer>> list) { 
-		
+	private void combStates(int x, ArrayList<Integer> current, ArrayList<ArrayList<Integer>> list) {
+
 		if (current.size() == compLen) {
 			list.add(current);
 		}
-		if (x >= componentList.size())
-			return; 
+		if (x >= typeList.size())
+			return;
 
-		for (int i = 0; i <= componentList.get(x).getRedundancy(); i++) {
+		for (int i = 0; i <= nodeMap.get(typeList.get(x)).getRedundancy(); i++) {
 			ArrayList<Integer> currentCopy = new ArrayList<Integer>(current);
 			currentCopy.add(i);
 			combStates(x + 1, currentCopy, list);
@@ -97,7 +92,7 @@ public class StateGenerator extends DECAF {
 	 * @return the componentMap
 	 */
 	public HashMap<String, FailureNode> getComponentMap() {
-		return componentMap;
+		return nodeMap;
 	}
 
 	/**
@@ -105,7 +100,7 @@ public class StateGenerator extends DECAF {
 	 *            the componentMap to set
 	 */
 	public void setComponentMap(HashMap<String, FailureNode> componentMap) {
-		this.componentMap = componentMap;
+		this.nodeMap = componentMap;
 	}
 
 	/**

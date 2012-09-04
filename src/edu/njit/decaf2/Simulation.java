@@ -5,6 +5,7 @@
 package edu.njit.decaf2;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.xml.parsers.SAXParser;
@@ -28,6 +29,7 @@ public class Simulation extends DECAF {
 	private boolean debug;
 	public static State[] states;
 	public static double[][] demandMatrix;
+	public static ArrayList<String> typeList = new ArrayList<String>();
 	public static HashMap<String, FailureNode> nodeMap = new HashMap<String, FailureNode>();
 	public static double[][] qMatrix;
 
@@ -60,7 +62,7 @@ public class Simulation extends DECAF {
 		System.out.println("LoadXML Time: \t\t" + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
 
 		t = System.nanoTime();
-		StateGenerator sg = new StateGenerator(nodeMap, demandMatrix);
+		StateGenerator sg = new StateGenerator(nodeMap, typeList, demandMatrix);
 		states = sg.generateStates();
 
 		resultProcessing += System.nanoTime() - t;
@@ -117,6 +119,7 @@ public class Simulation extends DECAF {
 
 			demandMatrix = DECAF_SAXHandler.getDemand();
 			nodeMap = DECAF_SAXHandler.getNodeMap();
+			typeList = DECAF_SAXHandler.getTypeList();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);

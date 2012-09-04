@@ -47,10 +47,10 @@ public class Test$TreeGens {
 			failureState.put("A", 0);
 			failureState.put("B", 0);
 			failureState.put("C", 0);
-			State tempState = new State(failureState, 0);
-			tempState.incrementComponentCount(nodeMap.get(k));
+			//State tempState = new State(failureState, 0);
+			//tempState.incrementComponentCount(nodeMap.get(k));
 			
-			buildTrees(tempNode, tempState);
+			//buildTrees(tempNode, tempState);
 		}
 
 		System.out.println("Test A1: " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0);

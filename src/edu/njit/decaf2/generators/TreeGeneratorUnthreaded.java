@@ -188,8 +188,6 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			for (String type : Simulation.nodeMap.keySet()) {
 				FailureNode fn = Simulation.nodeMap.get(type);
 				if (failureTransitionCopy.getComponentCount(type) > fn.getRedundancy()) {
-					System.out.println(failureTransitionCopy.toLine());
-					System.out.println("HALT");
 					return;
 				}
 			}
@@ -240,7 +238,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 						}
 					}
 
-					if (verboseDebug) {
+					if (verboseDebug && f == 0 && t == 1) {
 						printAllLevels(levels);
 						System.out.println("From:\t" + f + " => " + from.toLine());
 						System.out.println("To:\t" + t + " => " + Simulation.states[t].toLine());

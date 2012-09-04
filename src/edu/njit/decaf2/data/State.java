@@ -18,6 +18,7 @@ import edu.njit.decaf2.DECAF;
  * 
  */
 public class State extends DECAF {
+	private ArrayList<String> typeList;
 	private HashMap<String, Integer> vector;
 	private int demand = -1;
 
@@ -26,6 +27,7 @@ public class State extends DECAF {
 	 */
 	public State() {
 		vector = new HashMap<String, Integer>();
+		typeList = new ArrayList<String>();
 	}
 
 	/**
@@ -34,10 +36,11 @@ public class State extends DECAF {
 	 * @param states
 	 * @param demand
 	 */
-	public State(Set<String> components, ArrayList<Integer> states, int demand) {
+	public State(ArrayList<String> typeList, ArrayList<Integer> states, int demand) {
+		this.typeList = typeList;
 		int i = 0;
 		vector = new HashMap<String, Integer>();
-		for (String k : components) {
+		for (String k : typeList) {
 			vector.put(k, states.get(i));
 			i++;
 		}
@@ -49,16 +52,8 @@ public class State extends DECAF {
 	 * @param components
 	 * @param states
 	 */
-	public State(Set<String> components, ArrayList<Integer> states) {
-		this(components, states, 0);
-	}
-
-	/**
-	 * 
-	 * @param vector
-	 */
-	public State(HashMap<String, Integer> vector) {
-		this.vector = vector;
+	public State(ArrayList<String> typeList, ArrayList<Integer> states) {
+		this(typeList, states, 0);
 	}
 
 	/**
@@ -68,7 +63,9 @@ public class State extends DECAF {
 	 */
 	public State(String type, int state) {
 		vector = new HashMap<String, Integer>();
+		typeList = new ArrayList<String>();
 		vector.put(type, state);
+		typeList.add(type);
 	}
 
 	/**
@@ -76,7 +73,8 @@ public class State extends DECAF {
 	 * @param vector
 	 * @param demand
 	 */
-	public State(HashMap<String, Integer> vector, int demand) {
+	public State(ArrayList<String> typeList, HashMap<String, Integer> vector, int demand) {
+		this.typeList = typeList;
 		this.vector = vector;
 		this.demand = demand;
 	}
@@ -135,11 +133,14 @@ public class State extends DECAF {
 		if (b.demand != demand)
 			return null;
 
+		if (!typeList.equals(b.typeList))
+			return null;
+
 		HashMap<String, Integer> temp = new HashMap<String, Integer>();
 		for (String k : vector.keySet()) {
 			temp.put(k, getComponentCount(k) + b.getComponentCount(k));
 		}
-		return new State(temp, demand);
+		return new State(typeList, temp, demand);
 	}
 
 	/**
@@ -224,7 +225,8 @@ public class State extends DECAF {
 	@Override
 	public String toString() {
 		String result = "";
-		for (String k : vector.keySet()) {
+		System.out.println(typeList);
+		for (String k : typeList) {
 			result += "--" + k + "\t=>\t" + vector.get(k) + "\n";
 		}
 		result += "--Env\t=>\t" + demand;
@@ -233,7 +235,7 @@ public class State extends DECAF {
 
 	public String toLine() {
 		String result = "(";
-		for (String k : vector.keySet()) {
+		for (String k : typeList) {
 			result += vector.get(k) + ", ";
 		}
 		return result + demand + ")";
@@ -245,12 +247,13 @@ public class State extends DECAF {
 		HashMap<String, Integer> tempVector = new HashMap<String, Integer>();
 		tempVector.putAll(vector);
 		result.vector = tempVector;
+		result.typeList = typeList;
 		return result;
 	}
 
 	@Override
 	public int hashCode() {
-		int result = ( DECAF.forceStateDemandValidate ) ? new Integer(demand).hashCode() : 0;
+		int result = (DECAF.forceStateDemandValidate) ? new Integer(demand).hashCode() : 0;
 		for (String k : vector.keySet()) {
 			result += k.hashCode() + new Integer(vector.get(k)).hashCode();
 		}

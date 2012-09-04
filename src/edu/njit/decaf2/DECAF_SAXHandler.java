@@ -33,6 +33,7 @@ public class DECAF_SAXHandler extends DefaultHandler {
 	 * Resulting data
 	 */
 	private double[][] demandMatrix;
+	private static ArrayList<String> typeList = new ArrayList<String>();
 	private ConcurrentHashMap<String, FailureNode> nodeCache = new ConcurrentHashMap<String, FailureNode>();
 
 	/*
@@ -193,6 +194,7 @@ public class DECAF_SAXHandler extends DefaultHandler {
 
 		if (grabCompType) {
 			currentType = res;
+			typeList.add(currentType);
 			cascadingCache.put(currentType, new ArrayList<String>());
 			grabCompType = false;
 		}
@@ -229,9 +231,13 @@ public class DECAF_SAXHandler extends DefaultHandler {
 
 	public static HashMap<String, FailureNode> getNodeMap() {
 		HashMap<String, FailureNode> temp = new HashMap<String, FailureNode>();
-		for (String k : instance.nodeCache.keySet()) {
+		for (String k : typeList ) {
 			temp.put(k, instance.nodeCache.get(k));
 		}
 		return temp;
+	}
+	
+	public static ArrayList<String> getTypeList(){
+		return typeList;
 	}
 }
