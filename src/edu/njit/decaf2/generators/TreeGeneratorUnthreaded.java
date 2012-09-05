@@ -92,7 +92,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			String binary = Integer.toBinaryString(p);
 			while (binary.length() < members.size())
 				binary = 0 + binary;
-
+			
 			String block = "";
 			for (int b = 0; b < binary.length(); b++) {
 				block += binary.charAt(b) + ":" + members.get(b) + ",";
@@ -133,9 +133,11 @@ public class TreeGeneratorUnthreaded extends DECAF {
 		// fork by different growth possibilities
 		ArrayList<ArrayList<Integer>> cartesianProductEnum = new ArrayList<ArrayList<Integer>>();
 		cartesianProduct(gammaPermutations, 0, new ArrayList<Integer>(gammaPermutations.size()), cartesianProductEnum);
-
+		
+		// nextLevel label is a $500 solution - copyright Mihir Sanghavi
+		nextLevel:
 		for (int c = 0; c < cartesianProductEnum.size(); c++) {
-
+			
 			// make copies of reference types to prevent data persistence over
 			// mutually exclusive recursive calls
 			ArrayList<String> levelsCopy = new ArrayList<String>(levels);
@@ -161,7 +163,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				FailureNode parentFailureNode = Simulation.nodeMap.get(parentType);
 				int binEnumId = breadthEncoding.get(b);
 				String block = binaryEnumCache.get(parentType).get(binEnumId);
-				newLevel += block + ",";
+				newLevel += block + ","; 
 
 				// go through each of the added nodes' children
 				String[] gammaStatus = block.split(",");
@@ -188,7 +190,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			for (String type : Simulation.nodeMap.keySet()) {
 				FailureNode fn = Simulation.nodeMap.get(type);
 				if (failureTransitionCopy.getComponentCount(type) > fn.getRedundancy()) {
-					return;
+					continue nextLevel;
 				}
 			}
 
@@ -238,7 +240,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 						}
 					}
 
-					if (verboseDebug && f == 0 && t == 1) {
+					if (verboseDebug /*&& f == 0 && t == 47*/) {
 						printAllLevels(levels);
 						System.out.println("From:\t" + f + " => " + from.toLine());
 						System.out.println("To:\t" + t + " => " + Simulation.states[t].toLine());
