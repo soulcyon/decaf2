@@ -6,7 +6,6 @@ package edu.njit.decaf2.generators;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Set;
 
 import edu.njit.decaf2.DECAF;
@@ -91,7 +90,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 
 			String binary = Integer.toBinaryString(p);
 			while (binary.length() < members.size())
-				binary = 0 + binary;
+				binary = "0" + binary;
 			
 			String block = "";
 			for (int b = 0; b < binary.length(); b++) {
@@ -199,8 +198,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				levelsCopy.add(newLevel);
 				GrowSubTree(levelsCopy, failureTransitionCopy, subTreeRateCopy, breadthFirstHistoryCopy);
 			} else {
-				// Iterate through all likeTransitions to which this tree
-				// applies
+				// Iterate through all likeTransitions to which this tree applies
 				ArrayList<String> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
 
 				for (String transition : likeTransitions) {
@@ -278,29 +276,6 @@ public class TreeGeneratorUnthreaded extends DECAF {
 	 * @param levels
 	 * @param indent
 	 * @param nodeType
-	 */
-
-	/*
-	 * private static void printTree(ArrayList<String> levels, int level, int
-	 * pos, String indent) {
-	 * 
-	 * String breadth = levels.get(level); String[] chunks = breadth.split(",");
-	 * 
-	 * if (pos >= chunks.length) return;
-	 * 
-	 * if (chunks[pos].charAt(0) == '1') System.out.println(indent +
-	 * chunks[pos].substring(2));
-	 * 
-	 * if (level < levels.size() - 1) {
-	 * 
-	 * int offset = 0; for (int c = 0; c < pos; c++) { String type =
-	 * chunks[c].substring(2); if (chunks[pos].charAt(0) == '1') { offset +=
-	 * binaryEnumCache.get(type).get(0).split(":").length; } } int childPos =
-	 * offset;
-	 * 
-	 * while (childPos <
-	 * binaryEnumCache.get(chunks[pos].substring(2)).get(0).length()) {
-	 * printTree(levels, level + 1, childPos, indent + "|  "); childPos++; } } }
 	 */
 
 	private static void printBinaryEnumCache() {
