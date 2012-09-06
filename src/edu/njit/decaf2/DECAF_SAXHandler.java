@@ -50,6 +50,7 @@ public class DECAF_SAXHandler extends DefaultHandler {
 	private boolean grabCompDemand = false;
 	private boolean grabCascading = false;
 	private boolean grabCompDemandRate = false;
+	private boolean grabCompDemandRepair = false;
 	private boolean grabDemandLevels = false;
 
 	/*
@@ -60,6 +61,7 @@ public class DECAF_SAXHandler extends DefaultHandler {
 	private String currentType;
 	private int currentRequired;
 	private int currentRedundancy;
+	private double[] currentRepairRates;
 	private double[] currentFailureRates;
 	private String currentCascadingType;
 	private int currentDemandChangeFrom;
@@ -74,6 +76,8 @@ public class DECAF_SAXHandler extends DefaultHandler {
 		if (grabCompDemand) {
 			if (tag.equalsIgnoreCase("failure-rate") && currentDemand != -1) {
 				grabCompDemandRate = true;
+			} else if (tag.equalsIgnoreCase("repair-rate") && currentDemand != -1) {
+				grabCompDemandRepair = true;
 			} else {
 				grabCompDemand = false;
 			}
@@ -151,7 +155,7 @@ public class DECAF_SAXHandler extends DefaultHandler {
 
 		if (grabComponent && tag.equalsIgnoreCase("component")) {
 			FailureNode temp = new FailureNode(currentRequired, currentType, currentRedundancy,
-					currentFailureRates.clone());
+					currentFailureRates.clone(), currentRepairRates.clone());
 			nodeCache.put(currentType, temp);
 			grabComponent = false;
 			grabDemandLevels = false;
@@ -182,6 +186,11 @@ public class DECAF_SAXHandler extends DefaultHandler {
 		if (grabCompRequired && tag.equalsIgnoreCase("failure-rate")) {
 			grabCompDemandRate = false;
 		}
+
+		if (grabCompRequired && tag.equalsIgnoreCase("repair")) {
+			grabCompDemandRepair = false;
+		}
+
 	}
 
 	public void characters(char a[], int b, int c) throws SAXException {
@@ -213,6 +222,7 @@ public class DECAF_SAXHandler extends DefaultHandler {
 			int t = Integer.parseInt(res);
 			demandMatrix = new double[t][t];
 			currentFailureRates = new double[t];
+			currentRepairRates = new double[t];
 			grabDemandLevels = false;
 		}
 
@@ -220,6 +230,12 @@ public class DECAF_SAXHandler extends DefaultHandler {
 			currentFailureRates[currentDemand] = Double.parseDouble(res);
 			grabCompDemandRate = false;
 		}
+
+		if (grabCompDemand && grabCompDemandRepair && res.trim().length() > 0) {
+			currentRepairRates[currentDemand] = Double.parseDouble(res);
+			grabCompDemandRepair = false;
+		}
+
 		if (grabCascading && currentCascadingType != null && res.trim().length() > 0) {
 			cascadingCache.get(currentType).add(currentCascadingType + ":" + res);
 		}
@@ -231,13 +247,13 @@ public class DECAF_SAXHandler extends DefaultHandler {
 
 	public static HashMap<String, FailureNode> getNodeMap() {
 		HashMap<String, FailureNode> temp = new HashMap<String, FailureNode>();
-		for (String k : typeList ) {
+		for (String k : typeList) {
 			temp.put(k, instance.nodeCache.get(k));
 		}
 		return temp;
 	}
-	
-	public static ArrayList<String> getTypeList(){
+
+	public static ArrayList<String> getTypeList() {
 		return typeList;
 	}
 }

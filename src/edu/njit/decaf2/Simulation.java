@@ -4,7 +4,9 @@
  */
 package edu.njit.decaf2;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -59,7 +61,7 @@ public class Simulation extends DECAF {
 
 		resultProcessing += System.nanoTime() - t;
 
-		System.out.println("LoadXML Time: \t\t" + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
+		System.out.println("XML Parsing Time:       " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
 
 		t = System.nanoTime();
 		StateGenerator sg = new StateGenerator(nodeMap, typeList, demandMatrix);
@@ -67,9 +69,9 @@ public class Simulation extends DECAF {
 
 		resultProcessing += System.nanoTime() - t;
 
-		System.out.println("StateGenerator Time: \t" + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
-
-		System.out.println("States Count: \t\t" + states.length);
+		System.out.println("StateGenerator Time:    " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
+		
+		System.out.println("States Count:           " + states.length);
 
 		QMatrixGeneratorUnthreaded.init();
 
@@ -84,14 +86,24 @@ public class Simulation extends DECAF {
 
 		qMatrix = QMatrixGeneratorUnthreaded.generateQMatrix();
 
-		if (verboseDebug)
-			System.out.println(QMatrixGeneratorUnthreaded.printQMatrix());
-
 		resultProcessing += System.nanoTime() - t;
 		// System.out.println(nodeMap);
-		System.out.println("QMatrixGenerator Time:\t" + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
+		System.out.println("\nQMatrixGenerator Time:  " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
 
-		System.out.println("Total CPU Time:\t\t" + resultProcessing / 1000.0 / 1000.0 / 1000.0 + " secs");
+		t = System.nanoTime();
+		try {
+			FileWriter fstream = new FileWriter("out.txt");
+			BufferedWriter out = new BufferedWriter(fstream);
+			out.write(QMatrixGeneratorUnthreaded.printQMatrix());
+			out.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		resultProcessing += System.nanoTime() - t;
+
+		System.out.println("Total Trees:            " + QMatrixGeneratorUnthreaded.getTotalTrees());
+		System.out.println("Reused Trees:           " + QMatrixGeneratorUnthreaded.getReusedTrees());
+		System.out.println("Total CPU Time:         " + resultProcessing / 1000.0 / 1000.0 / 1000.0 + " secs");
 	}
 
 	/**

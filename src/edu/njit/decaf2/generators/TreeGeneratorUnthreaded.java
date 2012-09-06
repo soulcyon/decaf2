@@ -41,8 +41,6 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			}
 		}
 
-		printBinaryEnumCache();
-
 		// plant trees using all types
 		for (String rootType : Simulation.nodeMap.keySet()) {
 
@@ -91,7 +89,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			String binary = Integer.toBinaryString(p);
 			while (binary.length() < members.size())
 				binary = "0" + binary;
-			
+
 			String block = "";
 			for (int b = 0; b < binary.length(); b++) {
 				block += binary.charAt(b) + ":" + members.get(b) + ",";
@@ -132,11 +130,10 @@ public class TreeGeneratorUnthreaded extends DECAF {
 		// fork by different growth possibilities
 		ArrayList<ArrayList<Integer>> cartesianProductEnum = new ArrayList<ArrayList<Integer>>();
 		cartesianProduct(gammaPermutations, 0, new ArrayList<Integer>(gammaPermutations.size()), cartesianProductEnum);
-		
+
 		// nextLevel label is a $500 solution - copyright Mihir Sanghavi
-		nextLevel:
-		for (int c = 0; c < cartesianProductEnum.size(); c++) {
-			
+		nextLevel: for (int c = 0; c < cartesianProductEnum.size(); c++) {
+
 			// make copies of reference types to prevent data persistence over
 			// mutually exclusive recursive calls
 			ArrayList<String> levelsCopy = new ArrayList<String>(levels);
@@ -148,7 +145,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				ArrayList<String> compHistory = new ArrayList<String>(breadthFirstHistory.get(key));
 				breadthFirstHistoryCopy.put(key, compHistory);
 			}
-			
+
 			double subTreeRateCopy = subTreeRate;
 
 			// add one possible new level
@@ -162,7 +159,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				FailureNode parentFailureNode = Simulation.nodeMap.get(parentType);
 				int binEnumId = breadthEncoding.get(b);
 				String block = binaryEnumCache.get(parentType).get(binEnumId);
-				newLevel += block + ","; 
+				newLevel += block + ",";
 
 				// go through each of the added nodes' children
 				String[] gammaStatus = block.split(",");
@@ -198,9 +195,10 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				levelsCopy.add(newLevel);
 				GrowSubTree(levelsCopy, failureTransitionCopy, subTreeRateCopy, breadthFirstHistoryCopy);
 			} else {
-				// Iterate through all likeTransitions to which this tree applies
+				// Iterate through all likeTransitions to which this tree
+				// applies
 				ArrayList<String> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
-
+				
 				for (String transition : likeTransitions) {
 
 					String[] fromAndTo = transition.split(",");
@@ -238,7 +236,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 						}
 					}
 
-					if (verboseDebug /*&& f == 0 && t == 47*/) {
+					if (verboseDebug /* && f == 0 && t == 47 */) {
 						printAllLevels(levels);
 						System.out.println("From:\t" + f + " => " + from.toLine());
 						System.out.println("To:\t" + t + " => " + Simulation.states[t].toLine());
@@ -255,6 +253,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 
 					// populate Q
 					Simulation.qMatrix[f][t] += rootRate * subTreeRate * complementRate;
+					QMatrixGeneratorUnthreaded.numberOfTrees++;
 				}
 			}
 		}
@@ -271,14 +270,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			System.out.println(level);
 	}
 
-	/**
-	 * 
-	 * @param levels
-	 * @param indent
-	 * @param nodeType
-	 */
-
-	private static void printBinaryEnumCache() {
+	/*private static void printBinaryEnumCache() {
 
 		System.out.println("Cache:");
 		for (String key : binaryEnumCache.keySet()) {
@@ -292,7 +284,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			System.out.println();
 		}
 		System.out.println();
-	}
+	}*/
 
 	/**
 	 * 

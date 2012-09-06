@@ -20,6 +20,8 @@ public class FailureNode extends DECAF {
 	private int required;
 	private int redundancy;
 	private double[] failureRates;
+	private double[] repairRates;
+
 	private HashMap<String, Double> cascadingFailures = new HashMap<String, Double>();
 
 	/**
@@ -44,11 +46,12 @@ public class FailureNode extends DECAF {
 	 * @param redundancy
 	 * @param failureRate
 	 */
-	public FailureNode(int required, String type, int redundancy, double[] failureRates) {
+	public FailureNode(int required, String type, int redundancy, double[] failureRates, double[] repairRates) {
 		setRequired(required);
 		setType(type);
 		setRedundancy(redundancy);
 		setFailureRates(failureRates);
+		setRepairRates(repairRates);
 	}
 
 	/**
@@ -120,6 +123,20 @@ public class FailureNode extends DECAF {
 		this.failureRates = failureRates;
 	}
 
+	/**
+	 * @return the repairRates
+	 */
+	public double[] getRepairRates() {
+		return repairRates;
+	}
+
+	/**
+	 * @param repairRates the repairRates to set
+	 */
+	public void setRepairRates(double[] repairRates) {
+		this.repairRates = repairRates;
+	}
+	
 	/**
 	 * @return the cascadingFailures
 	 */

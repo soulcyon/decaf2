@@ -20,7 +20,7 @@ import edu.njit.decaf2.data.State;
  * 
  */
 public class QMatrixGeneratorUnthreaded extends DECAF {
-
+	public static double numberOfTrees;
 	private static String[] vectorKeys;
 	public static HashMap<State, ArrayList<String>> likeTransitionMap;
 
@@ -139,8 +139,21 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 			return Double.NaN;
 
 		if (repairTransition && repair != null)
-			return (double) from.getVector().get(repair) / (double) from.sum();
+			return (double) from.getVector().get(repair) * Simulation.nodeMap.get(repair).getRepairRates()[fromDemand]
+					/ (double) from.sum();
 		return 0.0;
+	}
+
+	public static int getReusedTrees() {
+		int result = 0;
+		for (State k : likeTransitionMap.keySet()) {
+			result += likeTransitionMap.get(k).size();
+		}
+		return result;
+	}
+
+	public static int getTotalTrees() {
+		return (int) numberOfTrees;
 	}
 
 	public static String printQMatrix() {
@@ -151,9 +164,9 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 				if (Simulation.qMatrix[i][j] != 0.0)
 					result += Simulation.qMatrix[i][j] + "@(" + i + "," + j + "); ";
 			}
-			//result += "\n";
+			// result += "\n";
 		}
-		return DECAF.error(result);
+		return result;
 	}
 
 	public static String printQMatrix(boolean b) {
