@@ -1,4 +1,5 @@
 bin
 bin/*
 bin/*.*
-input.xml
+data/input.xml
+*.txt
