@@ -53,10 +53,8 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 
 		// Iterate over matrix, ignore diagonal
 		for (int i = 0; i < statesLen; i++) {
-			for (int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1) {
+			for (int j = i + 1; j < statesLen; j++) {
 
-				if (j == i)
-					continue;
 				double fillV = fillQMatrix(Simulation.states[i], Simulation.states[j]);
 
 				if (Double.isNaN(fillV)) {
