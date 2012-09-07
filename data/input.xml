@@ -1,113 +1,183 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sim-test>
 <debug>on</debug>
-<system-up-expr><![CDATA[(A >= 1) and (B >= 1) and (C >= 1) and (D >= 1) and (E >= 1) and (F >= 1)]]></system-up-expr>    
+<system-up-expr>
+<![CDATA[
+(A3 == 1)
+and 
+( 
+( (  ( (A1 == 1) and (A4 ==1) )
+  or ( (A1 == 1) and (A5 ==1) )
+  or ( (A2 == 1) and (A4 ==1) )
+  or ( (A2 == 1) and (A5 ==1) ) )
+ and ( ( (B1 == 1) and (B2 == 1) )
+    or ( (B1 == 1) and (B3 == 1) ) 
+    or ( (B2 == 1) and (B3 == 1) ) )
+ and ( ( (C1 == 1) and (C2 == 1) and (C3 == 1) )
+    or ( (C1 == 1) and (C2 == 1) and (C4 == 1) )
+    or ( (C1 == 1) and (C3 == 1) and (C4 == 1) )
+    or ( (C2 == 1) and (C3 == 1) and (C4 == 1) ) ) )
+or
+ ( ( (A1 == 1) and ( (A4 ==1) or (A5 == 1) ) )
+ and (B3 == 1) 
+ and ( (C1 == 1) and (C3 == 1) and (C4 == 1) ) )
+or
+ ( ( ( (A1 == 1) or (A2 == 1) ) and (A5 == 1) )
+ and (B1 == 1) 
+ and ( (C1 == 1) and (C2 == 1) and (C4 == 1) ) )
+)
+]]></system-up-expr>    
 <demand-info>
-    <demand-levels>2</demand-levels>
-	<!-- demand change rate 1/12 -->
-    <change-rate from="0">
-        <to level="1">0.5</to>
-    </change-rate>
-    <change-rate from="1">
-        <to level="0">0.5</to>
-    </change-rate>
+    <demand-levels>1</demand-levels>
 </demand-info>
 <component-info>
     <component>
-            <type>A</type>
-            <redundancy>2</redundancy>
-            <required>1</required>
+            <type>A1</type>
+            <redundancy>1</redundancy>
+            <required>0</required>
             <cascade-failure>
-                <triggers-failure type="C">0.2</triggers-failure>
-				<triggers-failure type="D">0.1</triggers-failure>
+                <triggers-failure type="A2">0.1</triggers-failure>
             </cascade-failure>
             <demand demandID="0">
                 <failure-rate>0.001</failure-rate>
-                <repair-rate>8</repair-rate>
+                <repair-rate>16</repair-rate>
             </demand>
-            <demand demandID="1">
-                <failure-rate>0.0005</failure-rate>
+    </component>
+    <component>
+            <type>A2</type>
+            <redundancy>1</redundancy>
+            <required>0</required>
+            <cascade-failure>
+                <triggers-failure type="A1">0.1</triggers-failure>
+            </cascade-failure>
+            <demand demandID="0">
+                <failure-rate>0.001</failure-rate>
+                <repair-rate>16</repair-rate>
+            </demand>
+    </component>
+    <component>
+            <type>A3</type>
+            <redundancy>1</redundancy>
+            <required>0</required>
+            <cascade-failure>
+            </cascade-failure>
+            <demand demandID="0">
+                <failure-rate>0.001</failure-rate>
+                <repair-rate>16</repair-rate>
+            </demand>
+    </component>
+    <component>
+            <type>A4</type>
+            <redundancy>1</redundancy>
+            <required>0</required>
+            <cascade-failure>
+                <triggers-failure type="A5">0.1</triggers-failure>
+            </cascade-failure>
+            <demand demandID="0">
+                <failure-rate>0.001</failure-rate>
+                <repair-rate>16</repair-rate>
+            </demand>
+    </component>
+    <component>
+            <type>A5</type>
+            <redundancy>1</redundancy>
+            <required>0</required>
+            <cascade-failure>
+                <triggers-failure type="A4">0.1</triggers-failure>
+            </cascade-failure>
+            <demand demandID="0">
+                <failure-rate>0.001</failure-rate>
+                <repair-rate>16</repair-rate>
+            </demand>
+    </component>
+    <component>
+            <type>B1</type>
+            <redundancy>1</redundancy>
+            <required>0</required>
+            <cascade-failure>
+                <triggers-failure type="B2">0.2</triggers-failure>
+                <triggers-failure type="B3">0.2</triggers-failure>
+            </cascade-failure>
+            <demand demandID="0">
+                <failure-rate>0.002</failure-rate>
                 <repair-rate>8</repair-rate>
             </demand>
     </component>
     <component>
-            <type>B</type>
-            <redundancy>2</redundancy>
-            <required>1</required>
+            <type>B2</type>
+            <redundancy>1</redundancy>
+            <required>0</required>
             <cascade-failure>
-                <triggers-failure type="D">0.2</triggers-failure>
-				<triggers-failure type="C">0.1</triggers-failure>
+                <triggers-failure type="B1">0.2</triggers-failure>
+                <triggers-failure type="B3">0.2</triggers-failure>
             </cascade-failure>
             <demand demandID="0">
-                <failure-rate>0.001</failure-rate>
-                <repair-rate>8</repair-rate>
-            </demand>
-            <demand demandID="1">
-                <failure-rate>0.0005</failure-rate>
-                <repair-rate>8</repair-rate>
-            </demand>
-    </component>	
-    <component>
-            <type>C</type>
-            <redundancy>2</redundancy>
-            <required>1</required>
-            <cascade-failure>
-                <triggers-failure type="A">0.1</triggers-failure>
-				<triggers-failure type="E">0.2</triggers-failure>
-            </cascade-failure>
-            <demand demandID="0">
-                <failure-rate>0.004</failure-rate>
-                <repair-rate>8</repair-rate>
-            </demand>
-            <demand demandID="1">
                 <failure-rate>0.002</failure-rate>
-                <repair-rate>8</repair-rate>
-            </demand>
-    </component>	
-    <component>
-            <type>D</type>
-            <redundancy>3</redundancy>
-            <required>1</required>
-            <cascade-failure>
-                <triggers-failure type="B">0.1</triggers-failure>
-				<triggers-failure type="F">0.2</triggers-failure>
-            </cascade-failure>
-            <demand demandID="0">
-                <failure-rate>0.004</failure-rate>
-                <repair-rate>8</repair-rate>
-            </demand>
-            <demand demandID="1">
-                <failure-rate>0.002</failure-rate>
-                <repair-rate>8</repair-rate>
-            </demand>
-    </component>	
-    <component>
-            <type>E</type>
-            <redundancy>2</redundancy>
-            <required>1</required>
-            <cascade-failure/>
-            <demand demandID="0">
-                <failure-rate>0.006</failure-rate>
-                <repair-rate>8</repair-rate>
-            </demand>
-            <demand demandID="1">
-                <failure-rate>0.003</failure-rate>
                 <repair-rate>8</repair-rate>
             </demand>
     </component>
     <component>
-            <type>F</type>
-            <redundancy>2</redundancy>
-            <required>1</required>
-            <cascade-failure/>
+            <type>B3</type>
+            <redundancy>1</redundancy>
+            <required>0</required>
+            <cascade-failure>
+                <triggers-failure type="B1">0.2</triggers-failure>
+                <triggers-failure type="B2">0.2</triggers-failure>
+            </cascade-failure>
             <demand demandID="0">
-                <failure-rate>0.006</failure-rate>
+                <failure-rate>0.002</failure-rate>
                 <repair-rate>8</repair-rate>
             </demand>
-            <demand demandID="1">
-                <failure-rate>0.003</failure-rate>
-                <repair-rate>8</repair-rate>
+    </component>
+    <component>
+            <type>C1</type>
+            <redundancy>1</redundancy>
+            <required>0</required>
+            <cascade-failure>
+                <triggers-failure type="C2">0.15</triggers-failure>
+            </cascade-failure>
+            <demand demandID="0">
+                <failure-rate>0.001</failure-rate>
+                <repair-rate>2</repair-rate>
             </demand>
-    </component>	
+    </component>
+    <component>
+            <type>C2</type>
+            <redundancy>1</redundancy>
+            <required>0</required>
+            <cascade-failure>
+                <triggers-failure type="C1">0.15</triggers-failure>
+                <triggers-failure type="C3">0.15</triggers-failure>
+            </cascade-failure>
+            <demand demandID="0">
+                <failure-rate>0.001</failure-rate>
+                <repair-rate>2</repair-rate>
+            </demand>
+    </component>
+    <component>
+            <type>C3</type>
+            <redundancy>1</redundancy>
+            <required>0</required>
+            <cascade-failure>
+                <triggers-failure type="C2">0.15</triggers-failure>
+                <triggers-failure type="C4">0.15</triggers-failure>
+            </cascade-failure>
+            <demand demandID="0">
+                <failure-rate>0.001</failure-rate>
+                <repair-rate>2</repair-rate>
+            </demand>
+    </component>
+    <component>
+            <type>C4</type>
+            <redundancy>1</redundancy>
+            <required>0</required>
+            <cascade-failure>
+                <triggers-failure type="C3">0.15</triggers-failure>
+            </cascade-failure>
+            <demand demandID="0">
+                <failure-rate>0.001</failure-rate>
+                <repair-rate>2</repair-rate>
+            </demand>
+    </component>
 </component-info>
 </sim-test>
