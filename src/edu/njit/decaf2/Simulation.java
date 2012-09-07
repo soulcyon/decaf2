@@ -84,13 +84,15 @@ public class Simulation extends DECAF {
 		nodeMap.keySet().toArray(nodeKeyArray);
 		// System.out.println(nodeMap);
 
-		qMatrix = QMatrixGeneratorUnthreaded.generateQMatrix();
+		QMatrixGeneratorUnthreaded.generateQMatrix();
 
 		resultProcessing += System.nanoTime() - t;
 		// System.out.println(nodeMap);
 		System.out.println("\nQMatrixGenerator Time:  " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
 
-		t = System.nanoTime();
+		System.out.println("Total Trees:            " + QMatrixGeneratorUnthreaded.getTotalTrees());
+		System.out.println("Reused Trees:           " + QMatrixGeneratorUnthreaded.getReusedTrees());
+		/*t = System.nanoTime();
 		try {
 			FileWriter fstream = new FileWriter("out.txt");
 			BufferedWriter out = new BufferedWriter(fstream);
@@ -99,10 +101,7 @@ public class Simulation extends DECAF {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		resultProcessing += System.nanoTime() - t;
-
-		System.out.println("Total Trees:            " + QMatrixGeneratorUnthreaded.getTotalTrees());
-		System.out.println("Reused Trees:           " + QMatrixGeneratorUnthreaded.getReusedTrees());
+		resultProcessing += System.nanoTime() - t;*/
 		System.out.println("Total CPU Time:         " + resultProcessing / 1000.0 / 1000.0 / 1000.0 + " secs");
 	}
 

@@ -42,7 +42,7 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 	 * 
 	 * @return qMatrix
 	 */
-	public static double[][] generateQMatrix() {
+	public static void generateQMatrix() {
 		// Cache the length of valid transition states
 		int statesLen = Simulation.states.length;
 
@@ -84,10 +84,8 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 			double sum = 0.0;
 			for (int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1)
 				sum += Simulation.qMatrix[i][j];
-			Simulation.qMatrix[i][i] = 0.0 - sum;
+			Simulation.qMatrix[i][i] = -sum;
 		}
-
-		return Simulation.qMatrix;
 	}
 
 	/**
@@ -147,7 +145,12 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 	public static int getReusedTrees() {
 		int result = 0;
 		for (State k : likeTransitionMap.keySet()) {
-			result += likeTransitionMap.get(k).size();
+			for (String j : likeTransitionMap.get(k)) {
+				int f = Integer.parseInt(j.split(",")[0]);
+				int t = Integer.parseInt(j.split(",")[1]);
+				if( Simulation.qMatrix[f][t] != 0 )
+					result++;
+			}
 		}
 		return result;
 	}
