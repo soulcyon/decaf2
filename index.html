@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Decaf2 by soulcyon</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Decaf2</h1>
+          <h2>Dependability Evaluator of Cascading Failures v2</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/soulcyon/decaf2/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/soulcyon/decaf2/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/soulcyon/decaf2" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h3>Welcome to DECAF2</h3>
+
+<p><a href="http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=4785456">A Markovian Dependability Model with Cascading Failures</a> </p>
+
+<p>Mihir Sanghavi and Sashank Tadepalli, undergraduate students at New Jersey Institute of Technology alongside Professor Marvin Nakayamam, have developed a cutting-edge implementation of DECAF.</p>
+
+<h3>Benchmark</h3>
+
+<pre><code> ______  _______ _______ _______ _______      _____ _____
+ |     \ |______ |       |_____| |______        |     |  
+ |_____/ |______ |______ |     | |            __|__ __|__
+
+Hardware Setup
+--------------------------------------------------------------------------------
+   CPU:                    2.7 Ghz (Intel Xeon 2667) @ 4x32 + 4x32 + 4x6144
+   Memory:                 1.7 GB @ 333 Mhz
+   HardDisk                30GB virtualized by RHEL
+
+Software Setup
+--------------------------------------------------------------------------------
+   Operating System:       Microsoft Windows Server 2008 R2 Datacenter 7601
+   Virtualization:         XEN
+   Java Version:           7
+   JavaVM Arguments:       -Xmx1500m
+   IDE:                    Eclipse Juno
+
+Benchmarks
+--------------------------------------------------------------------------------
+Note:  The "Reused Trees" statistic is slightly different between the two
+       versions of code.   We try to represent this statistic as the count of
+       times a tree was NOT calculated, but the tree was picked up from cache.
+       As noted by the results, more trees were hits from cache in the new code
+       - this is primarily due to the power of the BreadthHistory logic developed
+       by Mihir.
+
+--------------------------------------------------------------------------------
+81 State Model | 3803 Trees
+--------------------------------------------------------------------------------
+   Version                 v1.0          |   v1.5          |   v2.0
+   --------------------------------------------------------------------------
+   XML Parsing (s):        0.538195872   |   0.347897412   |   0.347859024
+   StateGenerator (s):     0.009461472   |   0.014582006   |   0.004763136
+   QMatrixGenerator (s):   1.405532655   |   0.277618467   |   0.377838848
+   Reused Trees:           0             |   1215          |   1215
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+288 State Model | 42816 Trees
+--------------------------------------------------------------------------------
+   Version                 v1.0          |   v1.5          |   v2.0
+   --------------------------------------------------------------------------
+   XML Parsing:            0.703253968   |   0.470909536   |   0.349191504
+   StateGenerator:         0.084235264   |   0.023053952   |   0.008494096
+   QMatrixGenerator:       22.94189494   |   9.447867808   |   0.891594528
+   Reused Trees:           0             |   4507          |   6912
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+640 State Model | 437866 Trees
+--------------------------------------------------------------------------------
+   Version                 v1.0          |   v1.5          |   v2.0
+   --------------------------------------------------------------------------
+   XML Parsing:            0.530996081   |   0.483729645   |   0.262888448
+   StateGenerator:         0.030771120   |   0.118595665   |   0.011125088
+   QMatrixGenerator:       349.5213188   |   91.86788622   |   6.043573247
+   Reused Trees:           0             |   27746         |   29360
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+1440 State Model | 185064 Trees
+--------------------------------------------------------------------------------
+   Version                 v1.0          |   v1.5          |   v2.0
+   --------------------------------------------------------------------------
+   XML Parsing:            0.486194976   |   0.568334416   |   0.328434512
+   StateGenerator:         0.095746464   |   0.123831472   |   0.017252384
+   QMatrixGenerator:       2374.502689   |   118.9196693   |   27.03615324
+   Reused Trees:           3899          |   106560
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+1944 State Model | 194404 Trees
+--------------------------------------------------------------------------------
+   Version                 v1.0          |   v1.5          |   v2.0
+   --------------------------------------------------------------------------
+   XML Parsing:            0.588945296   |   0.503568608   |   0.264800304
+   StateGenerator:         0.047809611   |   0.039703648   |   0.018026912
+   QMatrixGenerator:       7722.709750   |   425.7825838   |   14.10575419
+   Reused Trees:           0             |   6328          |   153576
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+4096 State Model | 49664 Trees
+--------------------------------------------------------------------------------
+   Version                 v1.0          |   v1.5          |   v2.0
+   --------------------------------------------------------------------------
+   XML Parsing:            0.571897376   |   0.518986208   |   0.327514634
+   StateGenerator:         0.164754384   |   0.127744208   |   0.029360624
+   QMatrixGenerator:       33308.70585   |   1521.175887   |   213.7326432
+   Reused Trees:           0             |   47            |   527345
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+6144 State Model | 75520 Trees
+--------------------------------------------------------------------------------
+   Version                 v1.0          |   v1.5          |   v2.0
+   --------------------------------------------------------------------------
+   XML Parsing:            0.526125392   |   0.480173344   |   0.327510112
+   StateGenerator:         0.277208336   |   0.127744208   |   0.037197824
+   QMatrixGenerator:       4200.160334   |   1198.807579
+   Reused Trees:           0             |   47            |   1056738
+--------------------------------------------------------------------------------
+</code></pre>
+        </section>
+
+        <footer>
+          Decaf2 is maintained by <a href="https://github.com/soulcyon">soulcyon</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="http://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
