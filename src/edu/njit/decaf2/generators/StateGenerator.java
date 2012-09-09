@@ -12,9 +12,10 @@ import edu.njit.decaf2.data.FailureNode;
 import edu.njit.decaf2.data.State;
 
 /**
- * DECAF 2 - StateGenerator
  * 
- * @author Sashank Tadepalli
+ * DECAF - StateGenerator
+ * 
+ * @author Sashank Tadepalli, Mihir Sanghavi
  * @version 2.0
  * 
  */

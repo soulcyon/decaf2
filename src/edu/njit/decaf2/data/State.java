@@ -10,9 +10,10 @@ import java.util.HashMap;
 import edu.njit.decaf2.DECAF;
 
 /**
- * DECAF 2 - State
  * 
- * @author Sashank Tadepalli
+ * DECAF - State
+ * 
+ * @author Sashank Tadepalli, Mihir Sanghavi
  * @version 2.0
  * 
  */

@@ -21,13 +21,14 @@ import edu.njit.decaf2.generators.QMatrixGeneratorUnthreaded;
 import edu.njit.decaf2.generators.StateGenerator;
 
 /**
- * DECAF 2 - Simulation
  * 
- * @author Sashank Tadepalli
+ * DECAF - Simulation
+ * 
+ * @author Sashank Tadepalli, Mihir Sanghavi
  * @version 2.0
  * 
  */
-public class Simulation extends DECAF {
+public class Simulation {
 	private boolean debug;
 	public static State[] states;
 	public static double[][] demandMatrix;
@@ -70,12 +71,12 @@ public class Simulation extends DECAF {
 		resultProcessing += System.nanoTime() - t;
 
 		System.out.println("StateGenerator Time:    " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
-		
+
 		System.out.println("States Count:           " + states.length);
 
 		QMatrixGeneratorUnthreaded.init();
 
-		if (verboseDebug)
+		if (DECAF.verboseDebug)
 			System.out.println(sg);
 
 		t = System.nanoTime();
@@ -92,16 +93,14 @@ public class Simulation extends DECAF {
 
 		System.out.println("Total Trees:            " + QMatrixGeneratorUnthreaded.getTotalTrees());
 		System.out.println("Reused Trees:           " + QMatrixGeneratorUnthreaded.getReusedTrees());
-		/*t = System.nanoTime();
-		try {
-			FileWriter fstream = new FileWriter("out.txt");
-			BufferedWriter out = new BufferedWriter(fstream);
-			out.write(QMatrixGeneratorUnthreaded.printQMatrix());
-			out.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		resultProcessing += System.nanoTime() - t;*/
+		
+		t = System.nanoTime(); try { FileWriter fstream = new
+		FileWriter("out.txt"); BufferedWriter out = new
+		BufferedWriter(fstream);
+		out.write(QMatrixGeneratorUnthreaded.printQMatrix()); out.close(); }
+		catch (Exception e) { e.printStackTrace(); } resultProcessing +=
+		System.nanoTime() - t;
+		
 		System.out.println("Total CPU Time:         " + resultProcessing / 1000.0 / 1000.0 / 1000.0 + " secs");
 	}
 

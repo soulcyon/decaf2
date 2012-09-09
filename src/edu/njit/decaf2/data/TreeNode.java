@@ -10,9 +10,10 @@ import java.util.Arrays;
 import edu.njit.decaf2.DECAF;
 
 /**
- * DECAF 2 - FailureTree
  * 
- * @author Sashank Tadepalli
+ * DECAF - TreeNode
+ * 
+ * @author Sashank Tadepalli, Mihir Sanghavi
  * @version 2.0
  * 
  */
@@ -182,11 +183,11 @@ public class TreeNode extends DECAF {
 		}
 		return result;
 	}
-	
+
 	@Override
-	public TreeNode clone(){
+	public TreeNode clone() {
 		TreeNode temp = new TreeNode(currentNode, currentDemand);
-		if(parentNode != null)
+		if (parentNode != null)
 			temp.parentNode = parentNode.clone();
 		temp.parentNode = parentNode;
 		temp.rootNode = rootNode;

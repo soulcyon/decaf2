@@ -13,7 +13,8 @@ import edu.njit.decaf2.Simulation;
 import edu.njit.decaf2.data.State;
 
 /**
- * DECAF 2 - QMatrixGenerator
+ * 
+ * DECAF - QMatrixGeneratorUnthreaded
  * 
  * @author Sashank Tadepalli, Mihir Sanghavi
  * @version 2.0
@@ -148,7 +149,7 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 			for (String j : likeTransitionMap.get(k)) {
 				int f = Integer.parseInt(j.split(",")[0]);
 				int t = Integer.parseInt(j.split(",")[1]);
-				if( Simulation.qMatrix[f][t] != 0 )
+				if (Simulation.qMatrix[f][t] != 0)
 					result++;
 			}
 		}

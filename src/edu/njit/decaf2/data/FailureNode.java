@@ -9,9 +9,10 @@ import java.util.HashMap;
 import edu.njit.decaf2.DECAF;
 
 /**
- * DECAF 2 - FailureNode
  * 
- * @author Sashank Tadepalli
+ * DECAF - FailureNode
+ * 
+ * @author Sashank Tadepalli, Mihir Sanghavi
  * @version 2.0
  * 
  */
@@ -131,12 +132,13 @@ public class FailureNode extends DECAF {
 	}
 
 	/**
-	 * @param repairRates the repairRates to set
+	 * @param repairRates
+	 *            the repairRates to set
 	 */
 	public void setRepairRates(double[] repairRates) {
 		this.repairRates = repairRates;
 	}
-	
+
 	/**
 	 * @return the cascadingFailures
 	 */

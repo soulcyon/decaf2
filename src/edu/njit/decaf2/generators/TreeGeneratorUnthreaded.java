@@ -14,13 +14,13 @@ import edu.njit.decaf2.data.FailureNode;
 import edu.njit.decaf2.data.State;
 
 /**
- * DECAF 2 - TreeGenerator
  * 
- * @author Mihir Sanghavi
+ * DECAF - TreeGeneratorUnthreaded
+ * 
+ * @author Sashank Tadepalli, Mihir Sanghavi
  * @version 2.0
  * 
  */
-
 public class TreeGeneratorUnthreaded extends DECAF {
 
 	private static HashMap<String, ArrayList<String>> binaryEnumCache;
@@ -198,7 +198,7 @@ public class TreeGeneratorUnthreaded extends DECAF {
 				// Iterate through all likeTransitions to which this tree
 				// applies
 				ArrayList<String> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
-				
+
 				for (String transition : likeTransitions) {
 
 					String[] fromAndTo = transition.split(",");
@@ -270,21 +270,17 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			System.out.println(level);
 	}
 
-	/*private static void printBinaryEnumCache() {
-
-		System.out.println("Cache:");
-		for (String key : binaryEnumCache.keySet()) {
-			System.out.print(key + " => ");
-
-			ArrayList<String> values = binaryEnumCache.get(key);
-			for (int i = 0; i < values.size(); i++) {
-				System.out.print(values.get(i) + " | ");
-			}
-
-			System.out.println();
-		}
-		System.out.println();
-	}*/
+	/*
+	 * private static void printBinaryEnumCache() {
+	 * 
+	 * System.out.println("Cache:"); for (String key : binaryEnumCache.keySet())
+	 * { System.out.print(key + " => ");
+	 * 
+	 * ArrayList<String> values = binaryEnumCache.get(key); for (int i = 0; i <
+	 * values.size(); i++) { System.out.print(values.get(i) + " | "); }
+	 * 
+	 * System.out.println(); } System.out.println(); }
+	 */
 
 	/**
 	 * 

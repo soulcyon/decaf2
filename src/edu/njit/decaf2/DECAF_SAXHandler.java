@@ -16,9 +16,10 @@ import org.xml.sax.helpers.DefaultHandler;
 import edu.njit.decaf2.data.FailureNode;
 
 /**
- * DECAF 2 - DECAF_SAXHandler
  * 
- * @author Sashank Tadepalli
+ * DECAF - DECAF_SAXHandler
+ * 
+ * @author Sashank Tadepalli, Mihir Sanghavi
  * @version 2.0
  * 
  */

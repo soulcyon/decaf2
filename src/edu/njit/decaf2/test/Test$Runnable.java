@@ -5,10 +5,12 @@
 package edu.njit.decaf2.test;
 
 /**
- * DECAF 2 - Test$Runnable
  * 
- * @author Sashank Tadepalli
- *
+ * DECAF - Test$Runnable
+ * 
+ * @author Sashank Tadepalli, Mihir Sanghavi
+ * @version 2.0
+ * 
  */
 public class Test$Runnable implements Runnable {
 	private final long countUntil;

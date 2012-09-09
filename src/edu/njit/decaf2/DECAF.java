@@ -7,9 +7,10 @@ package edu.njit.decaf2;
 import java.util.concurrent.ForkJoinPool;
 
 /**
- * DECAF 2 - DECAF
  * 
- * @author Sashank Tadepalli
+ * DECAF
+ * 
+ * @author Sashank Tadepalli, Mihir Sanghavi
  * @version 2.0
  * 
  */

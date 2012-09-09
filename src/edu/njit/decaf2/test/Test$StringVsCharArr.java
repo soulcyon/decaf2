@@ -5,46 +5,46 @@
 package edu.njit.decaf2.test;
 
 /**
- * DECAF 2 - Test$StringVsCharArr
- *
- * @author Sashank Tadepalli
+ * DECAF - Test$StringVsCharArr
+ * 
+ * @author Sashank Tadepalli, Mihir Sanghavi
  * @version 2.0
- *
+ * 
  */
 public class Test$StringVsCharArr {
-	private static String 				temp = "";
-	private static char[] 				char1;
-	private static char[] 				char2;
-	
-	public static void main(String[] args){
+	private static String temp = "";
+	private static char[] char1;
+	private static char[] char2;
+
+	public static void main(String[] args) {
 		/****************************************************************************/
 		/* String */
 		/****************************************************************************/
 		int i = 0;
 		int max = 1000000000;
-		
+
 		double t = System.nanoTime();
-		while( i++ < max ){
+		while (i++ < max) {
 			setTemp("1");
 		}
 		System.out.println("Strings:");
-		System.out.println((System.nanoTime() - t)/1000.0/1000.0/1000.0);
-		
+		System.out.println((System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0);
+
 		/****************************************************************************/
 		/* CharArr */
 		/****************************************************************************/
 		i = 0;
 		max = 1000000000;
-		
+
 		t = System.nanoTime();
-		while( i++ < max ){
+		while (i++ < max) {
 			char1 = new char[0];
-			char2 = new char[]{ '1' };
+			char2 = new char[] { '1' };
 			char1 = char2;
 			char2 = char1;
 		}
 		System.out.println("Char Arr:");
-		System.out.println((System.nanoTime() - t)/1000.0/1000.0/1000.0);
+		System.out.println((System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0);
 	}
 
 	/**
@@ -55,7 +55,8 @@ public class Test$StringVsCharArr {
 	}
 
 	/**
-	 * @param temp the temp to set
+	 * @param temp
+	 *            the temp to set
 	 */
 	public static void setTemp(String temp) {
 		Test$StringVsCharArr.temp = temp;
@@ -69,7 +70,8 @@ public class Test$StringVsCharArr {
 	}
 
 	/**
-	 * @param char1 the char1 to set
+	 * @param char1
+	 *            the char1 to set
 	 */
 	public static void setChar1(char[] char1) {
 		Test$StringVsCharArr.char1 = char1;
