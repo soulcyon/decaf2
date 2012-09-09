@@ -1,7 +1,3 @@
-/* http://meyerweb.com/eric/tools/css/reset/ 
-   v2.0 | 20110126
-   License: none (public domain)
-*/
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -219,18 +215,39 @@ em {
 table {
   width: 100%;
   border: 1px solid #ebebeb;
+  margin-bottom: 30px;
 }
 
 th {
-  font-weight: 500;
+  font-weight: bold;
+  background: #ccc;
+  color: #111;
+  padding: 6px;
 }
-
+thead td {
+  font-weight: bold;
+  color: #535353;
+  text-align: center;
+}
 td {
   border: 1px solid #ebebeb;
-  text-align: center; 
+  padding: 2px;
+  text-align: left;
   font-weight: 300;
 }
 
+td[fastest] {
+  color: green;s
+}
+
+td[slowest] {
+  color: maroon;
+}
+
+td:first-child {
+  color: black;
+  width: 250px;
+}
 form {
   background: #f2f2f2;
   padding: 20px;
