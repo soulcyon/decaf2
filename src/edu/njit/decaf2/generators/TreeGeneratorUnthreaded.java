@@ -11,6 +11,7 @@ import java.util.Set;
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.Simulation;
 import edu.njit.decaf2.data.FailureNode;
+import edu.njit.decaf2.data.QMatrix;
 import edu.njit.decaf2.data.State;
 
 /**
@@ -70,45 +71,11 @@ public class TreeGeneratorUnthreaded extends DECAF {
 
 	/**
 	 * 
-	 * @param set
-	 * @return
-	 */
-
-	private static ArrayList<String> powerSet(Set<String> set) {
-
-		ArrayList<String> members = new ArrayList<String>(set);
-
-		if (members.size() == 0)
-			return new ArrayList<String>();
-
-		int permutations = (int) Math.pow(2, members.size());
-		ArrayList<String> binaryEnum = new ArrayList<String>(permutations);
-
-		for (int p = 0; p < permutations; p++) {
-
-			String binary = Integer.toBinaryString(p);
-			while (binary.length() < members.size())
-				binary = "0" + binary;
-
-			String block = "";
-			for (int b = 0; b < binary.length(); b++) {
-				block += binary.charAt(b) + ":" + members.get(b) + ",";
-			}
-			block = block.substring(0, block.length() - 1);
-			binaryEnum.add(p, block);
-		}
-
-		return binaryEnum;
-	}
-
-	/**
-	 * 
 	 * @param levels
 	 * @param failureTransition
 	 * @param subRate
 	 * @param breadthFirstHistory
 	 */
-
 	private static void GrowSubTree(ArrayList<String> levels, State failureTransition, double subTreeRate,
 			HashMap<String, ArrayList<String>> breadthFirstHistory) {
 
@@ -183,18 +150,11 @@ public class TreeGeneratorUnthreaded extends DECAF {
 
 			// base case - break out if tree is invalid i.e. if it has more
 			// component types than redundancy
-			for (String type : Simulation.nodeMap.keySet()) {
-				FailureNode fn = Simulation.nodeMap.get(type);
-				if (failureTransitionCopy.getComponentCount(type) > fn.getRedundancy()) {
+			for (String type : Simulation.nodeMap.keySet())
+				if (failureTransitionCopy.getComponentCount(type) > Simulation.nodeMap.get(type).getRedundancy())
 					continue nextLevel;
-				}
-			}
 
-			if (c > 0) {
-				newLevel = newLevel.substring(0, newLevel.length() - 1);
-				levelsCopy.add(newLevel);
-				GrowSubTree(levelsCopy, failureTransitionCopy, subTreeRateCopy, breadthFirstHistoryCopy);
-			} else {
+			if (c == 0){
 				// Iterate through all likeTransitions to which this tree
 				// applies
 				ArrayList<String> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
@@ -247,14 +207,17 @@ public class TreeGeneratorUnthreaded extends DECAF {
 						System.out.println("Subtree Rate:\t" + subTreeRate);
 						System.out.println("Supertree Rate:\t" + complementRate);
 						System.out.println("BFHistory:\t" + breadthFirstHistoryCopy);
-						System.out.println("Rate: \t" + Simulation.qMatrix[f][t] + " + "
-								+ (rootRate * subTreeRate * complementRate) + "\n\n");
+						System.out.println("Rate: \t" + (rootRate * subTreeRate * complementRate) + "\n\n");
 					}
 
 					// populate Q
-					Simulation.qMatrix[f][t] += rootRate * subTreeRate * complementRate;
+					QMatrix.update(f, t, rootRate * subTreeRate * complementRate);
 					QMatrixGeneratorUnthreaded.numberOfTrees++;
 				}
+			} else {
+				newLevel = newLevel.substring(0, newLevel.length() - 1);
+				levelsCopy.add(newLevel);
+				GrowSubTree(levelsCopy, failureTransitionCopy, subTreeRateCopy, breadthFirstHistoryCopy);
 			}
 		}
 	}
@@ -304,5 +267,38 @@ public class TreeGeneratorUnthreaded extends DECAF {
 			currentCopy.add(i);
 			cartesianProduct(limits, x + 1, currentCopy, list);
 		}
+	}
+
+
+	/**
+	 * 
+	 * @param set
+	 * @return
+	 */
+	private static ArrayList<String> powerSet(Set<String> set) {
+
+		ArrayList<String> members = new ArrayList<String>(set);
+
+		if (members.size() == 0)
+			return new ArrayList<String>();
+
+		int permutations = (int) Math.pow(2, members.size());
+		ArrayList<String> binaryEnum = new ArrayList<String>(permutations);
+
+		for (int p = 0; p < permutations; p++) {
+
+			String binary = Integer.toBinaryString(p);
+			while (binary.length() < members.size())
+				binary = "0" + binary;
+
+			String block = "";
+			for (int b = 0; b < binary.length(); b++) {
+				block += binary.charAt(b) + ":" + members.get(b) + ",";
+			}
+			block = block.substring(0, block.length() - 1);
+			binaryEnum.add(p, block);
+		}
+
+		return binaryEnum;
 	}
 }

@@ -22,7 +22,7 @@ public class Test$SrinisMatrices {
 		String newCode = "";
 		String oldCode = "";
 		try {
-			FileInputStream fstream = new FileInputStream("out.txt");
+			FileInputStream fstream = new FileInputStream("output.txt");
 			DataInputStream in = new DataInputStream(fstream);
 			BufferedReader br = new BufferedReader(new InputStreamReader(in));
 			String strLine = "";

@@ -16,6 +16,7 @@ import javax.xml.parsers.SAXParserFactory;
 import com.ctc.wstx.sax.WstxSAXParserFactory;
 
 import edu.njit.decaf2.data.FailureNode;
+import edu.njit.decaf2.data.QMatrix;
 import edu.njit.decaf2.data.State;
 import edu.njit.decaf2.generators.QMatrixGeneratorUnthreaded;
 import edu.njit.decaf2.generators.StateGenerator;
@@ -34,8 +35,7 @@ public class Simulation {
 	public static double[][] demandMatrix;
 	public static ArrayList<String> typeList = new ArrayList<String>();
 	public static HashMap<String, FailureNode> nodeMap = new HashMap<String, FailureNode>();
-	public static double[][] qMatrix;
-
+public static HashMap<Integer, Integer> temp = new HashMap<Integer, Integer>();
 	/**
 	 * Run through console. Initializes new instance of Simulation and runs
 	 * appropriate algorithms.
@@ -56,8 +56,10 @@ public class Simulation {
 		if (!debug) {
 			return;
 		}
+		
 		double resultProcessing = 0.0;
 		double t = System.nanoTime();
+
 		loadSimulationData("data/input.xml");
 
 		resultProcessing += System.nanoTime() - t;
@@ -93,14 +95,18 @@ public class Simulation {
 
 		System.out.println("Total Trees:            " + QMatrixGeneratorUnthreaded.getTotalTrees());
 		System.out.println("Reused Trees:           " + QMatrixGeneratorUnthreaded.getReusedTrees());
-		
-		t = System.nanoTime(); try { FileWriter fstream = new
-		FileWriter("out.txt"); BufferedWriter out = new
-		BufferedWriter(fstream);
-		out.write(QMatrixGeneratorUnthreaded.printQMatrix()); out.close(); }
-		catch (Exception e) { e.printStackTrace(); } resultProcessing +=
-		System.nanoTime() - t;
-		
+
+		t = System.nanoTime();
+		try {
+			FileWriter fstream = new FileWriter("output.txt");
+			BufferedWriter out = new BufferedWriter(fstream);
+			out.write(QMatrix.generateCCM());
+			out.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		resultProcessing += System.nanoTime() - t;
+
 		System.out.println("Total CPU Time:         " + resultProcessing / 1000.0 / 1000.0 / 1000.0 + " secs");
 	}
 
@@ -142,20 +148,5 @@ public class Simulation {
 	 */
 	public void setDebug(boolean debug) {
 		this.debug = debug;
-	}
-
-	/**
-	 * @return the qMatrix
-	 */
-	public double[][] getQMatrix() {
-		return qMatrix;
-	}
-
-	/**
-	 * @param qMatrix
-	 *            the qMatrix to set
-	 */
-	public void setQMatrix(double[][] qMatrix) {
-		Simulation.qMatrix = qMatrix;
 	}
 }
