@@ -28,7 +28,22 @@ public class DECAF {
 	 * @param message
 	 * @return {@link String}
 	 */
-	public static String error(String message) {
+	public static String error(final String message) {
 		return "\n[DECAF" + "::\n" + message + "]\n";
+	}
+	
+	/**
+	 * 
+	 */
+	protected DECAF(){
+		super();
+	}
+	
+	/**
+	 * 
+	 */
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		throw new CloneNotSupportedException();
 	}
 }

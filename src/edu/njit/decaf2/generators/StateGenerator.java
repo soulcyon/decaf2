@@ -5,10 +5,10 @@
 package edu.njit.decaf2.generators;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 
 import edu.njit.decaf2.DECAF;
-import edu.njit.decaf2.data.FailureNode;
+import edu.njit.decaf2.Simulation;
 import edu.njit.decaf2.data.State;
 
 /**
@@ -19,42 +19,42 @@ import edu.njit.decaf2.data.State;
  * @version 2.0
  * 
  */
-public class StateGenerator extends DECAF {
-	private ArrayList<String> typeList = new ArrayList<String>();
-	private int compLen;
-	private HashMap<String, FailureNode> nodeMap;
-	private double[][] demandMatrix;
-	private State[] transitionStates;
+public final class StateGenerator extends DECAF {
+	/**
+	 * 
+	 */
+	private StateGenerator() {
+		super();
+	}
 
-	public StateGenerator(HashMap<String, FailureNode> componentMap, ArrayList<String> typeList, double[][] demandMatrix) {
-		this.nodeMap = componentMap;
-		this.typeList = typeList;
-		this.demandMatrix = demandMatrix;
+	/**
+	 * 
+	 */
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		throw new CloneNotSupportedException();
 	}
 
 	/**
 	 * 
 	 * @return transitionStates
 	 */
-	public State[] generateStates() {
+	public static void generateStates() {
 		// comb will push resulting combinations into this list
-		ArrayList<ArrayList<Integer>> list = new ArrayList<ArrayList<Integer>>();
-		compLen = typeList.size();
-
+		final List<List<Integer>> list = new ArrayList<List<Integer>>();
 		// Go!
 		combStates(0, new ArrayList<Integer>(), list);
 
 		// Performance enhancement - use toArray rather than creating a new
 		// variable for toArray(<T>)
-		transitionStates = new State[list.size() * demandMatrix.length];
+		Simulation.states = new State[list.size() * Simulation.demandMatrix.length];
 
 		// Iterate over combinations and add demand changes
 		for (int i = 0, m = 0; i < list.size(); i++) {
-			for (int j = 0; j < demandMatrix.length; j++, m++) {
-				transitionStates[m] = new State(typeList, list.get(i), j);
+			for (int j = 0; j < Simulation.demandMatrix.length; j++, m++) {
+				Simulation.states[m] = new State(list.get(i), j);
 			}
 		}
-		return transitionStates;
 	}
 
 	/**
@@ -74,72 +74,28 @@ public class StateGenerator extends DECAF {
 	 * @param str
 	 * @param list
 	 */
-	private void combStates(int x, ArrayList<Integer> current, ArrayList<ArrayList<Integer>> list) {
+	private static void combStates(final int index, final List<Integer> current, final List<List<Integer>> list) {
 
-		if (current.size() == compLen) {
+		if (current.size() == Simulation.typeList.size()) {
 			list.add(current);
 		}
-		if (x >= typeList.size())
+		if (index >= Simulation.typeList.size()) {
 			return;
+		}
 
-		for (int i = 0; i <= nodeMap.get(typeList.get(x)).getRedundancy(); i++) {
-			ArrayList<Integer> currentCopy = new ArrayList<Integer>(current);
+		for (int i = 0; i <= Simulation.nodeMap.get(Simulation.typeList.get(index)).getRedundancy(); i++) {
+			final List<Integer> currentCopy = new ArrayList<Integer>(current);
 			currentCopy.add(i);
-			combStates(x + 1, currentCopy, list);
+			combStates(index + 1, currentCopy, list);
 		}
 	}
 
-	/**
-	 * @return the componentMap
-	 */
-	public HashMap<String, FailureNode> getComponentMap() {
-		return nodeMap;
-	}
-
-	/**
-	 * @param componentMap
-	 *            the componentMap to set
-	 */
-	public void setComponentMap(HashMap<String, FailureNode> componentMap) {
-		this.nodeMap = componentMap;
-	}
-
-	/**
-	 * @return the demandLevels
-	 */
-	public double[][] getDemandLevels() {
-		return demandMatrix;
-	}
-
-	/**
-	 * @param demandLevels
-	 *            the demandLevels to set
-	 */
-	public void setDemandLevels(double[][] demandLevels) {
-		this.demandMatrix = demandLevels;
-	}
-
-	/**
-	 * @return the transitionStates
-	 */
-	public State[] getTransitionStates() {
-		return transitionStates;
-	}
-
-	/**
-	 * @param transitionStates
-	 *            the transitionStates to set
-	 */
-	public void setTransitionStates(State[] transitionStates) {
-		this.transitionStates = transitionStates;
-	}
-
-	@Override
-	public String toString() {
-		String sgString = "";
-		for (int i = 0; i < transitionStates.length; i++) {
-			sgString += transitionStates[i].toLine() + "\t";
+	public static String stateString() {
+		final StringBuffer sgString = new StringBuffer();
+		for (int i = 0; i < Simulation.states.length; i++) {
+			sgString.append(Simulation.states[i].toLine());
+			sgString.append('\t');
 		}
-		return error(sgString);
+		return error(sgString.toString());
 	}
 }

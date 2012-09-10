@@ -6,6 +6,7 @@ package edu.njit.decaf2.generators;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 //import java.util.Iterator;
 
 import edu.njit.decaf2.DECAF;
@@ -21,10 +22,25 @@ import edu.njit.decaf2.data.State;
  * @version 2.0
  * 
  */
-public class QMatrixGeneratorUnthreaded extends DECAF {
+public final class QMatrixGeneratorUnthreaded extends DECAF {
 	public static double numberOfTrees;
 	private static String[] vectorKeys;
-	public static HashMap<State, ArrayList<String>> likeTransitionMap;
+	public static Map<State, ArrayList<String>> likeTransitionMap;
+	
+	/**
+	 * 
+	 */
+	private QMatrixGeneratorUnthreaded() {
+		super();
+	}
+
+	/**
+	 * 
+	 */
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		throw new CloneNotSupportedException();
+	}
 
 	/**
 	 * Sets {@link State} {@code transitionStates}, {@link String}[]
@@ -46,25 +62,24 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 	 */
 	public static void generateQMatrix() {
 		// Cache the length of valid transition states
-		int statesLen = Simulation.states.length;
+		final int statesLen = Simulation.states.length;
 
 		likeTransitionMap = new HashMap<State, ArrayList<String>>();
 
 		// Iterate over matrix, ignore diagonal
 		for (int i = 0; i < statesLen; i++) {
 			for (int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1) {
-				if (j == i)
-					continue;
-				double fillV = fillQMatrix(Simulation.states[i], Simulation.states[j]);
+				
+				final double fillV = fillQMatrix(Simulation.states[i], Simulation.states[j]);
 
 				if (Double.isNaN(fillV)) {
-					State differenceState = Simulation.states[i].diff(Simulation.states[j]);
-					String str = i + "," + j;
+					final State differenceState = Simulation.states[i].diff(Simulation.states[j]);
+					final String str = i + "," + j;
 
 					if (likeTransitionMap.containsKey(differenceState)) {
 						likeTransitionMap.get(differenceState).add(str);
 					} else {
-						ArrayList<String> temp = new ArrayList<String>();
+						final ArrayList<String> temp = new ArrayList<String>();
 						temp.add(str);
 						likeTransitionMap.put(differenceState, temp);
 					}
@@ -80,8 +95,9 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 		// Fill diagonals with negative row sum
 		for (int i = 0; i < statesLen; i++) {
 			double sum = 0.0;
-			for (int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1)
+			for (int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1){
 				sum += QMatrix.get(i, j);
+			}
 			QMatrix.put(i, i, -sum);
 		}
 	}
@@ -91,7 +107,7 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 	 * @return
 	 */
 
-	public HashMap<State, ArrayList<String>> getLikeTransitionMap() {
+	public Map<State, ArrayList<String>> getLikeTransitionMap() {
 		return likeTransitionMap;
 	}
 
@@ -103,19 +119,20 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 	 * @param to
 	 * @return rate
 	 */
-	public static double fillQMatrix(State from, State to) {
+	public static double fillQMatrix(final State from, final State to) {
 		boolean repairTransition = true;
 		boolean failedTransition = true;
 		boolean enviroTransition = false;
 		String repair = null;
-		int fromDemand = from.getDemand();
-		int toDemand = to.getDemand();
+		final int fromDemand = from.getDemand();
+		final int toDemand = to.getDemand();
 
 		if (fromDemand != toDemand) {
 			enviroTransition = true;
 		}
 		for (int i = 0; i < vectorKeys.length; i++) {
-			int iFrom = from.getVector().get(vectorKeys[i]), iTo = to.getVector().get(vectorKeys[i]);
+			final int iFrom = from.getVector().get(vectorKeys[i]);
+			final int iTo = to.getVector().get(vectorKeys[i]);
 
 			if (enviroTransition && iFrom != iTo) {
 				return 0.0;
@@ -129,14 +146,16 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 			}
 		}
 
-		if (enviroTransition)
+		if (enviroTransition){
 			return Simulation.demandMatrix[fromDemand][toDemand];
-		if (failedTransition)
+		}
+		if (failedTransition){
 			return Double.NaN;
-
-		if (repairTransition && repair != null)
+		}
+		if (repairTransition && repair != null){
 			return (double) from.getVector().get(repair) * Simulation.nodeMap.get(repair).getRepairRates()[fromDemand]
 					/ (double) from.sum();
+		}
 		return 0.0;
 	}
 
@@ -144,10 +163,11 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 		int result = 0;
 		for (State k : likeTransitionMap.keySet()) {
 			for (String j : likeTransitionMap.get(k)) {
-				int f = Integer.parseInt(j.split(",")[0]);
-				int t = Integer.parseInt(j.split(",")[1]);
-				if (QMatrix.get(f, t) != 0)
+				final int fIndex = Integer.parseInt(j.split(",")[0]);
+				final int tIndex = Integer.parseInt(j.split(",")[1]);
+				if (QMatrix.get(fIndex, tIndex) != 0){
 					result++;
+				}
 			}
 		}
 		return result;
@@ -158,28 +178,31 @@ public class QMatrixGeneratorUnthreaded extends DECAF {
 	}
 
 	public static String printQMatrix() {
-		int statesLen = Simulation.states.length;
-		String result = "";
+		final int statesLen = Simulation.states.length;
+		final StringBuffer result = new StringBuffer();
 		for (int i = 0; i < statesLen; i++) {
 			for (int j = 0; j < statesLen; j++) {
-				if (QMatrix.get(i, j) != 0.0)
-					result += QMatrix.get(i, j) + "@(" + i + "," + j + "); ";
+				if (QMatrix.get(i, j) != 0.0){
+					result.append(QMatrix.get(i, j) + "@(" + i + "," + j + "); ");
+				}
 			}
 			// result += "\n";
 		}
-		return result;
+		return result.toString();
 	}
 
-	public static String printQMatrix(boolean b) {
-		String result = "";
-		int statesLen = Simulation.states.length;
+	public static String printQMatrix(final boolean flag) {
+		final StringBuffer result = new StringBuffer();
+		final int statesLen = Simulation.states.length;
 		for (int i = 0; i < statesLen; i++) {
 			for (int j = 0; j < statesLen; j++) {
-				String t = (QMatrix.get(i, j) + "");
-				result += "(" + t.substring(0, Math.min(t.length(), 5)) + ")" + "\t";
+				final String point = Double.toString(QMatrix.get(i, j));
+				result.append('(');
+				result.append(point.substring(0, Math.min(point.length(), 5)));
+				result.append(")\t");
 			}
-			result += "\n";
+			result.append('\n');
 		}
-		return error(result);
+		return error(result.toString());
 	}
 }

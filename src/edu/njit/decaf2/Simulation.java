@@ -35,7 +35,7 @@ public class Simulation {
 	public static double[][] demandMatrix;
 	public static ArrayList<String> typeList = new ArrayList<String>();
 	public static HashMap<String, FailureNode> nodeMap = new HashMap<String, FailureNode>();
-public static HashMap<Integer, Integer> temp = new HashMap<Integer, Integer>();
+
 	/**
 	 * Run through console. Initializes new instance of Simulation and runs
 	 * appropriate algorithms.
@@ -67,8 +67,7 @@ public static HashMap<Integer, Integer> temp = new HashMap<Integer, Integer>();
 		System.out.println("XML Parsing Time:       " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
 
 		t = System.nanoTime();
-		StateGenerator sg = new StateGenerator(nodeMap, typeList, demandMatrix);
-		states = sg.generateStates();
+		StateGenerator.generateStates();
 
 		resultProcessing += System.nanoTime() - t;
 
@@ -78,8 +77,9 @@ public static HashMap<Integer, Integer> temp = new HashMap<Integer, Integer>();
 
 		QMatrixGeneratorUnthreaded.init();
 
-		if (DECAF.verboseDebug)
-			System.out.println(sg);
+		if (DECAF.verboseDebug){
+			System.out.println(states);
+		}
 
 		t = System.nanoTime();
 
