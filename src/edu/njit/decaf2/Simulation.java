@@ -18,6 +18,8 @@ import com.ctc.wstx.sax.WstxSAXParserFactory;
 import edu.njit.decaf2.data.FailureNode;
 import edu.njit.decaf2.data.QMatrix;
 import edu.njit.decaf2.data.State;
+import edu.njit.decaf2.generators.PMatrixGenerator;
+import edu.njit.decaf2.generators.PMatrixGeneratorUnthreaded;
 import edu.njit.decaf2.generators.QMatrixGenerator;
 import edu.njit.decaf2.generators.QMatrixGeneratorUnthreaded;
 import edu.njit.decaf2.generators.StateGenerator;
@@ -57,61 +59,71 @@ public class Simulation {
 		if (!debug) {
 			return;
 		}
-		
+
 		double resultProcessing = 0.0;
 		double t = System.nanoTime();
 
+		/* ------------------ XML PARSING ------------------ */
 		loadSimulationData("data/input.xml");
 
 		resultProcessing += System.nanoTime() - t;
 
 		System.out.println("XML Parsing Time:       " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
 
+
+		/* ------------------ State Generation ------------------ */
 		t = System.nanoTime();
+		
 		StateGenerator.generateStates();
-
+		
 		resultProcessing += System.nanoTime() - t;
-
 		System.out.println("StateGenerator Time:    " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
-
 		System.out.println("States Count:           " + states.length);
 
-		if( DECAF.enableThreading){
+		/* ------------------ QMatrix Generation ------------------ */
+		t = System.nanoTime();
+		if (DECAF.enableThreading) {
 			QMatrixGenerator.init();
 		} else {
 			QMatrixGeneratorUnthreaded.init();
 		}
-		
-		if (DECAF.verboseDebug){
-			System.out.println(states);
-		}
-
-		t = System.nanoTime();
 
 		String[] nodeKeyArray = new String[nodeMap.keySet().size()];
 		nodeMap.keySet().toArray(nodeKeyArray);
-		
-		if( DECAF.enableThreading){
+
+		if (DECAF.enableThreading) {
 			QMatrixGenerator.generateQMatrix();
 		} else {
 			QMatrixGeneratorUnthreaded.generateQMatrix();
 		}
 
 		resultProcessing += System.nanoTime() - t;
-
 		System.out.println("\nQMatrixGenerator Time:  " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
 
-		t = System.nanoTime();
-		try {
-			FileWriter fstream = new FileWriter("output.txt");
-			BufferedWriter out = new BufferedWriter(fstream);
-			out.write(QMatrix.generateCCM());
-			out.close();
-		} catch (Exception e) {
-			e.printStackTrace();
+		if (DECAF.sriniOutput) {
+			t = System.nanoTime();
+			try {
+				FileWriter fstream = new FileWriter("output.txt");
+				BufferedWriter out = new BufferedWriter(fstream);
+				out.write(QMatrix.generateCCM());
+				out.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			resultProcessing += System.nanoTime() - t;
 		}
-		resultProcessing += System.nanoTime() - t;
+		
+		/* ------------------ PMatrix Generation ------------------ */
+		t = System.nanoTime();
+		
+		if (DECAF.enableThreading) {
+			PMatrixGenerator.generatePMatrix();
+		} else {
+			PMatrixGeneratorUnthreaded.generatePMatrix();
+		}
 
+		System.out.println("\nQMatrixGenerator Time:  " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
+		resultProcessing += System.nanoTime() - t;
 		System.out.println("Total CPU Time:         " + resultProcessing / 1000.0 / 1000.0 / 1000.0 + " secs");
 	}
 

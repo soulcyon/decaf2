@@ -15,12 +15,13 @@ import java.util.concurrent.ForkJoinPool;
  * 
  */
 public class DECAF {
-	public static boolean forceStateDemandValidate = false;
-	public static boolean verboseDebug = false;
-	public static int debugX = 0;
-	public static int debugY = 8;
-	public static boolean enableThreading = false;
-	public static ForkJoinPool threadPool = new ForkJoinPool();
+	public static final boolean sriniOutput = false;
+	public static final boolean forceStateDemandValidate = false;
+	public static final boolean verboseDebug = false;
+	public static final int debugX = 0;
+	public static final int debugY = 8;
+	public static final boolean enableThreading = false;
+	public static final ForkJoinPool threadPool = new ForkJoinPool();
 
 	/**
 	 * Utility function to pretty-print error messages thrown by sub-classes.
