@@ -18,6 +18,7 @@ import com.ctc.wstx.sax.WstxSAXParserFactory;
 import edu.njit.decaf2.data.FailureNode;
 import edu.njit.decaf2.data.QMatrix;
 import edu.njit.decaf2.data.State;
+import edu.njit.decaf2.generators.QMatrixGenerator;
 import edu.njit.decaf2.generators.QMatrixGeneratorUnthreaded;
 import edu.njit.decaf2.generators.StateGenerator;
 
@@ -75,8 +76,12 @@ public class Simulation {
 
 		System.out.println("States Count:           " + states.length);
 
-		QMatrixGeneratorUnthreaded.init();
-
+		if( DECAF.enableThreading){
+			QMatrixGenerator.init();
+		} else {
+			QMatrixGeneratorUnthreaded.init();
+		}
+		
 		if (DECAF.verboseDebug){
 			System.out.println(states);
 		}
@@ -85,16 +90,16 @@ public class Simulation {
 
 		String[] nodeKeyArray = new String[nodeMap.keySet().size()];
 		nodeMap.keySet().toArray(nodeKeyArray);
-		// System.out.println(nodeMap);
-
-		QMatrixGeneratorUnthreaded.generateQMatrix();
+		
+		if( DECAF.enableThreading){
+			QMatrixGenerator.generateQMatrix();
+		} else {
+			QMatrixGeneratorUnthreaded.generateQMatrix();
+		}
 
 		resultProcessing += System.nanoTime() - t;
-		// System.out.println(nodeMap);
-		System.out.println("\nQMatrixGenerator Time:  " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
 
-		System.out.println("Total Trees:            " + QMatrixGeneratorUnthreaded.getTotalTrees());
-		System.out.println("Reused Trees:           " + QMatrixGeneratorUnthreaded.getReusedTrees());
+		System.out.println("\nQMatrixGenerator Time:  " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
 
 		t = System.nanoTime();
 		try {

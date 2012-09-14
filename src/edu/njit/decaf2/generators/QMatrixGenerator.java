@@ -4,9 +4,16 @@
  */
 package edu.njit.decaf2.generators;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.Simulation;
@@ -15,21 +22,21 @@ import edu.njit.decaf2.data.State;
 
 /**
  * 
- * DECAF - QMatrixGeneratorUnthreaded
+ * DECAF - QMatrixGenerator
  * 
  * @author Sashank Tadepalli, Mihir Sanghavi
  * @version 2.0
  * 
  */
-public final class QMatrixGeneratorUnthreaded extends DECAF {
+public final class QMatrixGenerator extends DECAF {
 	public static double numberOfTrees;
 	private static String[] vectorKeys;
-	public static Map<State, ArrayList<String>> likeTransitionMap;
+	public static Map<State, CopyOnWriteArrayList<String>> likeTransitionMap;
 	
 	/**
 	 * 
 	 */
-	private QMatrixGeneratorUnthreaded() {
+	private QMatrixGenerator() {
 		super();
 	}
 
@@ -51,7 +58,7 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 	public static void init() {
 		vectorKeys = new String[Simulation.nodeMap.size()];
 		vectorKeys = Simulation.nodeMap.keySet().toArray(vectorKeys);
-		likeTransitionMap = new HashMap<State, ArrayList<String>>();
+		likeTransitionMap = new ConcurrentHashMap<State, CopyOnWriteArrayList<String>>();
 	}
 
 	/**
@@ -63,32 +70,31 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 	public static void generateQMatrix() {
 		// Cache the length of valid transition states
 		final int statesLen = Simulation.states.length;
+		final int cores = Runtime.getRuntime().availableProcessors();
 		
-		// Iterate over matrix, ignore diagonal
-		for (int i = 0; i < statesLen; i++) {
-			for (int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1) {
-				
-				final double fillV = fillQMatrix(Simulation.states[i], Simulation.states[j]);
-
-				if (Double.isNaN(fillV)) {
-					final State differenceState = Simulation.states[i].diff(Simulation.states[j]);
-					final String str = i + "," + j;
-
-					if (likeTransitionMap.containsKey(differenceState)) {
-						likeTransitionMap.get(differenceState).add(str);
-					} else {
-						final ArrayList<String> temp = new ArrayList<String>();
-						temp.add(str);
-						likeTransitionMap.put(differenceState, temp);
-					}
-				} else {
-					QMatrix.put(i, j, fillV);
-				}
+		double time = System.nanoTime();
+		
+		ExecutorService pool = Executors.newFixedThreadPool(statesLen/cores);
+		Set<Future<Object>> set = new HashSet<Future<Object>>();
+		
+		for (int i = statesLen/cores; i <= statesLen; i += statesLen/cores) {
+			Callable<Object> callable = new QMatrixCallable(i - statesLen/cores, i, statesLen);
+			Future<Object> submit = pool.submit(callable);
+			set.add(submit);
+		}
+		for (Future<Object> future : set) {
+			try {
+				future.get();
+			} catch (InterruptedException | ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
+		System.out.println("Time to parse:" + ((System.nanoTime() - time)/1000/1000/1000) + " => " + likeTransitionMap.size());
+		System.exit(0);
 
 		// Generate trees as required
-		TreeGeneratorUnthreaded.initSubTrees();
+		TreeGenerator.initSubTrees();
 
 		// Fill diagonals with negative row sum
 		for (int i = 0; i < statesLen; i++) {
@@ -99,19 +105,8 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 			QMatrix.put(i, i, -sum);
 		}
 	}
-
+	
 	/**
-	 * 
-	 * @return
-	 */
-
-	public Map<State, ArrayList<String>> getLikeTransitionMap() {
-		return likeTransitionMap;
-	}
-
-	/**
-	 * === NOTE === QMatrixRunnable will call this method, please use the
-	 * refactoring tool in Eclipse to make any modifications.
 	 * 
 	 * @param from
 	 * @param to
