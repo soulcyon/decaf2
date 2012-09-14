@@ -13,11 +13,11 @@ import edu.njit.decaf2.DECAF;
  * @version 2.0
  * 
  */
-public class PMatrixGenerator extends DECAF {
+public class Dependability extends DECAF {
 	/**
 	 * 
 	 */
-	private PMatrixGenerator() {
+	private Dependability() {
 		super();
 	}
 
@@ -30,9 +30,18 @@ public class PMatrixGenerator extends DECAF {
 	}
 
 	/**
+	 * @return 
 	 * 
 	 */
-	public static void generatePMatrix() {
-		
+	public static double calculateMTTF() {
+		return 0.0;
+	}
+
+	/**
+	 * @return
+	 */
+	public static double calculateSSU() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

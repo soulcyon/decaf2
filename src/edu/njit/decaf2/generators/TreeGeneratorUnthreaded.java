@@ -197,7 +197,7 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 			 */
 
 			QMatrix.update(fIndex, tIndex, rootRate * subTreeRate * complementRate);
-			QMatrixGeneratorUnthreaded.numberOfTrees++;
+			Simulation.numberOfTrees++;
 		}
 	}
 

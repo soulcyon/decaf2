@@ -104,6 +104,9 @@ public final class QMatrixGenerator extends DECAF {
 			}
 			QMatrix.put(i, i, -sum);
 		}
+		
+		// Fill statistics
+		setValidTransitionCount();
 	}
 	
 	/**
@@ -152,18 +155,16 @@ public final class QMatrixGenerator extends DECAF {
 		return 0.0;
 	}
 
-	public static int getReusedTrees() {
-		int result = 0;
+	public static void setValidTransitionCount() {
 		for (State k : likeTransitionMap.keySet()) {
 			for (String j : likeTransitionMap.get(k)) {
 				final int fIndex = Integer.parseInt(j.split(",")[0]);
 				final int tIndex = Integer.parseInt(j.split(",")[1]);
 				if (QMatrix.get(fIndex, tIndex) != 0){
-					result++;
+					Simulation.numberOfTransitions++;
 				}
 			}
 		}
-		return result;
 	}
 
 	public static int getTotalTrees() {

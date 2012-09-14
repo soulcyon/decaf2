@@ -18,8 +18,8 @@ import com.ctc.wstx.sax.WstxSAXParserFactory;
 import edu.njit.decaf2.data.FailureNode;
 import edu.njit.decaf2.data.QMatrix;
 import edu.njit.decaf2.data.State;
-import edu.njit.decaf2.generators.PMatrixGenerator;
-import edu.njit.decaf2.generators.PMatrixGeneratorUnthreaded;
+import edu.njit.decaf2.generators.Dependability;
+import edu.njit.decaf2.generators.DependabilityUnthreaded;
 import edu.njit.decaf2.generators.QMatrixGenerator;
 import edu.njit.decaf2.generators.QMatrixGeneratorUnthreaded;
 import edu.njit.decaf2.generators.StateGenerator;
@@ -34,11 +34,16 @@ import edu.njit.decaf2.generators.StateGenerator;
  */
 public class Simulation {
 	private boolean debug;
+	public static double meanTimeToFailure;
+	public static double steadyStateUnavailability;
+	public static int numberOfTrees;
+	public static int numberOfTransitions;
+	
 	public static State[] states;
 	public static double[][] demandMatrix;
 	public static ArrayList<String> typeList = new ArrayList<String>();
 	public static HashMap<String, FailureNode> nodeMap = new HashMap<String, FailureNode>();
-
+	
 	/**
 	 * Run through console. Initializes new instance of Simulation and runs
 	 * appropriate algorithms.
@@ -68,7 +73,7 @@ public class Simulation {
 
 		resultProcessing += System.nanoTime() - t;
 
-		System.out.println("XML Parsing Time:       " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
+		System.out.println("XML Parsing:            " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 
 
 		/* ------------------ State Generation ------------------ */
@@ -77,8 +82,7 @@ public class Simulation {
 		StateGenerator.generateStates();
 		
 		resultProcessing += System.nanoTime() - t;
-		System.out.println("StateGenerator Time:    " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
-		System.out.println("States Count:           " + states.length);
+		System.out.println("State Generation:       " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 
 		/* ------------------ QMatrix Generation ------------------ */
 		t = System.nanoTime();
@@ -98,7 +102,7 @@ public class Simulation {
 		}
 
 		resultProcessing += System.nanoTime() - t;
-		System.out.println("\nQMatrixGenerator Time:  " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
+		System.out.println("QMatrix Generation:     " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 
 		if (DECAF.sriniOutput) {
 			t = System.nanoTime();
@@ -113,18 +117,40 @@ public class Simulation {
 			resultProcessing += System.nanoTime() - t;
 		}
 		
-		/* ------------------ PMatrix Generation ------------------ */
+		/* ------------------ MTTF Calculation ------------------ */
 		t = System.nanoTime();
 		
 		if (DECAF.enableThreading) {
-			PMatrixGenerator.generatePMatrix();
+			meanTimeToFailure = Dependability.calculateMTTF();
 		} else {
-			PMatrixGeneratorUnthreaded.generatePMatrix();
+			meanTimeToFailure = DependabilityUnthreaded.calculateMTTF();
 		}
 
-		System.out.println("\nQMatrixGenerator Time:  " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " secs");
+		System.out.println("Calculate MTTF:         " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 		resultProcessing += System.nanoTime() - t;
-		System.out.println("Total CPU Time:         " + resultProcessing / 1000.0 / 1000.0 / 1000.0 + " secs");
+		
+		/* ------------------ SSU Calculation ------------------ */
+		t = System.nanoTime();
+		
+		if (DECAF.enableThreading) {
+			steadyStateUnavailability = Dependability.calculateSSU();
+		} else {
+			steadyStateUnavailability = DependabilityUnthreaded.calculateSSU();
+		}
+
+		System.out.println("Calculate SSU:          " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
+		resultProcessing += System.nanoTime() - t;
+		
+		System.out.println("Total CPU Time:         " + resultProcessing / 1000.0 / 1000.0 / 1000.0 + " s");
+
+		/* ------------------ Generic Statistics ------------------ */
+		System.out.println("");
+		System.out.println("Number of States:       " + states.length);
+		System.out.println("Number of Trees:        " + numberOfTrees);
+		System.out.println("Number of Transitions:  " + numberOfTransitions);
+		System.out.println("");
+		System.out.println("Mean Time To Failure:   " + meanTimeToFailure + " s");
+		System.out.println("SS Unavailability:      " + steadyStateUnavailability);
 	}
 
 	/**

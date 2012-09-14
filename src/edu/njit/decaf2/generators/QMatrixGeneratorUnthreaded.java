@@ -22,7 +22,6 @@ import edu.njit.decaf2.data.State;
  * 
  */
 public final class QMatrixGeneratorUnthreaded extends DECAF {
-	public static double numberOfTrees;
 	private static String[] vectorKeys;
 	public static Map<State, ArrayList<String>> likeTransitionMap;
 	
@@ -98,6 +97,9 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 			}
 			QMatrix.put(i, i, -sum);
 		}
+		
+		// Fill statistics
+		setValidTransitionCount();
 	}
 
 	/**
@@ -157,22 +159,16 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 		return 0.0;
 	}
 
-	public static int getReusedTrees() {
-		int result = 0;
+	public static void setValidTransitionCount() {
 		for (State k : likeTransitionMap.keySet()) {
 			for (String j : likeTransitionMap.get(k)) {
 				final int fIndex = Integer.parseInt(j.split(",")[0]);
 				final int tIndex = Integer.parseInt(j.split(",")[1]);
 				if (QMatrix.get(fIndex, tIndex) != 0){
-					result++;
+					Simulation.numberOfTransitions++;
 				}
 			}
 		}
-		return result;
-	}
-
-	public static int getTotalTrees() {
-		return (int) numberOfTrees;
 	}
 
 	public static String printQMatrix() {
