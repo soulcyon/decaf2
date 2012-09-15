@@ -232,7 +232,7 @@ thead td {
 td {
   border: 1px solid #ebebeb;
   padding: 2px;
-  text-align: left;
+  text-align: center;
   font-weight: 300;
 }
 
@@ -244,9 +244,10 @@ td[slowest] {
   color: maroon;
 }
 
-td:first-child {
+td:first-child, td.first {
   color: black;
   width: 250px;
+  text-align: left;
 }
 form {
   background: #f2f2f2;
