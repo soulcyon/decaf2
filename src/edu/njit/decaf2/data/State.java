@@ -255,8 +255,10 @@ public class State extends DECAF implements Cloneable {
 
 		final State other = (State) obj;
 
-		if (DECAF.forceStateDemandValidate && demand != other.demand) {
-			return false;
+		if (DECAF.forceStateDemandValidate) {
+			if (demand != other.demand) {
+				return false;
+			}
 		}
 
 		for (String k : vector.keySet()) {

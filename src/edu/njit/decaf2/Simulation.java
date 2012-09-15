@@ -37,13 +37,14 @@ public class Simulation {
 	public static double meanTimeToFailure;
 	public static double steadyStateUnavailability;
 	public static int numberOfTrees;
+	public static int numberOfReusedTrees;
 	public static int numberOfTransitions;
-	
+
 	public static State[] states;
 	public static double[][] demandMatrix;
 	public static ArrayList<String> typeList = new ArrayList<String>();
 	public static HashMap<String, FailureNode> nodeMap = new HashMap<String, FailureNode>();
-	
+
 	/**
 	 * Run through console. Initializes new instance of Simulation and runs
 	 * appropriate algorithms.
@@ -75,12 +76,11 @@ public class Simulation {
 
 		System.out.println("XML Parsing:            " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 
-
 		/* ------------------ State Generation ------------------ */
 		t = System.nanoTime();
-		
+
 		StateGenerator.generateStates();
-		
+
 		resultProcessing += System.nanoTime() - t;
 		System.out.println("State Generation:       " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 
@@ -116,10 +116,10 @@ public class Simulation {
 			}
 			resultProcessing += System.nanoTime() - t;
 		}
-		
+
 		/* ------------------ MTTF Calculation ------------------ */
 		t = System.nanoTime();
-		
+
 		if (DECAF.enableThreading) {
 			meanTimeToFailure = Dependability.calculateMTTF();
 		} else {
@@ -128,10 +128,10 @@ public class Simulation {
 
 		System.out.println("Calculate MTTF:         " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 		resultProcessing += System.nanoTime() - t;
-		
+
 		/* ------------------ SSU Calculation ------------------ */
 		t = System.nanoTime();
-		
+
 		if (DECAF.enableThreading) {
 			steadyStateUnavailability = Dependability.calculateSSU();
 		} else {
@@ -140,13 +140,14 @@ public class Simulation {
 
 		System.out.println("Calculate SSU:          " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 		resultProcessing += System.nanoTime() - t;
-		
+
 		System.out.println("Total CPU Time:         " + resultProcessing / 1000.0 / 1000.0 / 1000.0 + " s");
 
 		/* ------------------ Generic Statistics ------------------ */
 		System.out.println("");
 		System.out.println("Number of States:       " + states.length);
 		System.out.println("Number of Trees:        " + numberOfTrees);
+		System.out.println("Number of Reused Trees: " + numberOfReusedTrees);
 		System.out.println("Number of Transitions:  " + numberOfTransitions);
 		System.out.println("");
 		System.out.println("Mean Time To Failure:   " + meanTimeToFailure + " s");

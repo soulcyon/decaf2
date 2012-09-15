@@ -212,13 +212,13 @@ public class FailureNode extends DECAF {
 
 	@Override
 	public boolean equals(final Object obj) {
-		if (!(obj instanceof FailureNode)){
+		if (!(obj instanceof FailureNode)) {
 			return false;
 		}
 
 		final FailureNode other = (FailureNode) obj;
 		if (!type.equals(other.type) || redundancy != other.redundancy || required != other.required
-				|| failureRates != other.failureRates || cascadingFailures.size() != other.cascadingFailures.size()){
+				|| failureRates != other.failureRates || cascadingFailures.size() != other.cascadingFailures.size()) {
 			return false;
 		}
 		for (String k : cascadingFailures.keySet()) {

@@ -54,7 +54,7 @@ public final class DependabilityUnthreaded extends DECAF {
 			hvectorArray[0][i] = -qmatrix[i][i];
 			qmatrix[i][i] = 1;
 		}
-		
+
 		DenseMatrix64F pmatrix = new DenseMatrix64F(qmatrix);
 		DenseMatrix64F hvector = new DenseMatrix64F(hvectorArray);
 		DenseMatrix64F result = new DenseMatrix64F(new double[qmatrix.length][1]);
@@ -62,25 +62,24 @@ public final class DependabilityUnthreaded extends DECAF {
 		SolvePseudoInverseSvd spSVD = new SolvePseudoInverseSvd(qmatrix.length, qmatrix.length);
 		spSVD.setA(pmatrix);
 		spSVD.invert(pmatrix);
-		
+
 		MatrixVectorMult.mult(pmatrix, hvector, result);
-		
+
 		return result.get(0);
 	}
-	
-	public static double calculateSSU(){
+
+	public static double calculateSSU() {
 		double[][] qmatrix = QMatrix.toDoubleArray();
 		double[][] eArray = new double[1][qmatrix.length];
-		for( int i = 0; i < qmatrix.length; i++ ){
+		for (int i = 0; i < qmatrix.length; i++) {
 			eArray[0][i] = 1;
 		}
-		
+
 		DenseMatrix64F pmatrix = new DenseMatrix64F(qmatrix);
 		DenseMatrix64F hvector = new DenseMatrix64F(eArray);
 		DenseMatrix64F result = new DenseMatrix64F(new double[qmatrix.length][1]);
 		MatrixVectorMult.mult(pmatrix, hvector, result);
-		
-		System.out.println(result.get(0));
+
 		return 0;
 	}
 }

@@ -24,7 +24,7 @@ import edu.njit.decaf2.data.State;
 public final class QMatrixGeneratorUnthreaded extends DECAF {
 	private static String[] vectorKeys;
 	public static Map<State, ArrayList<String>> likeTransitionMap;
-	
+
 	/**
 	 * 
 	 */
@@ -62,11 +62,11 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 	public static void generateQMatrix() {
 		// Cache the length of valid transition states
 		final int statesLen = Simulation.states.length;
-		
+
 		// Iterate over matrix, ignore diagonal
 		for (int i = 0; i < statesLen; i++) {
 			for (int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1) {
-				
+
 				final double fillV = fillQMatrix(Simulation.states[i], Simulation.states[j]);
 
 				if (Double.isNaN(fillV)) {
@@ -92,14 +92,13 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 		// Fill diagonals with negative row sum
 		for (int i = 0; i < statesLen; i++) {
 			double sum = 0.0;
-			for (int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1){
+			for (int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1) {
 				sum += QMatrix.get(i, j);
 			}
 			QMatrix.put(i, i, -sum);
 		}
-		
-		// Fill statistics
-		setValidTransitionCount();
+
+		generateStatistics();
 	}
 
 	/**
@@ -146,25 +145,28 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 			}
 		}
 
-		if (enviroTransition){
+		if (enviroTransition) {
 			return Simulation.demandMatrix[fromDemand][toDemand];
 		}
-		if (failedTransition){
+		if (failedTransition) {
 			return Double.NaN;
 		}
-		if (repairTransition && repair != null){
+		if (repairTransition && repair != null) {
 			return (double) from.getVector().get(repair) * Simulation.nodeMap.get(repair).getRepairRates()[fromDemand]
 					/ (double) from.sum();
 		}
 		return 0.0;
 	}
 
-	public static void setValidTransitionCount() {
-		for (State k : likeTransitionMap.keySet()) {
-			for (String j : likeTransitionMap.get(k)) {
+	public static void generateStatistics() {
+		for (ArrayList<String> value : likeTransitionMap.values()) {
+			if (value.size() > 1) {
+				Simulation.numberOfReusedTrees++;
+			}
+			for (String j : value) {
 				final int fIndex = Integer.parseInt(j.split(",")[0]);
 				final int tIndex = Integer.parseInt(j.split(",")[1]);
-				if (QMatrix.get(fIndex, tIndex) != 0){
+				if (QMatrix.get(fIndex, tIndex) != 0) {
 					Simulation.numberOfTransitions++;
 				}
 			}
@@ -176,7 +178,7 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 		final StringBuffer result = new StringBuffer();
 		for (int i = 0; i < statesLen; i++) {
 			for (int j = 0; j < statesLen; j++) {
-				if (QMatrix.get(i, j) != 0.0){
+				if (QMatrix.get(i, j) != 0.0) {
 					result.append(QMatrix.get(i, j) + "@(" + i + "," + j + "); ");
 				}
 			}

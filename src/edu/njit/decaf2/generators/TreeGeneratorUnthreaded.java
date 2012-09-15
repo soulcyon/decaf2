@@ -75,8 +75,8 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 	 * @param subRate
 	 * @param bfhMap
 	 */
-	private static void growSubTree(final List<String> levels, final State failureTransition, 
-			final double subTreeRate, final Map<String, ArrayList<String>> bfhMap) {
+	private static void growSubTree(final List<String> levels, final State failureTransition, final double subTreeRate,
+			final Map<String, ArrayList<String>> bfhMap) {
 
 		final String[] terminalNodes = levels.get(levels.size() - 1).split(",");
 		final ArrayList<Integer> gammaPermutations = new ArrayList<Integer>();

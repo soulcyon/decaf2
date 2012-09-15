@@ -30,7 +30,7 @@ public class Dependability extends DECAF {
 	}
 
 	/**
-	 * @return 
+	 * @return
 	 * 
 	 */
 	public static double calculateMTTF() {

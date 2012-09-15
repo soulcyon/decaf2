@@ -32,14 +32,14 @@ public class DECAF {
 	public static String error(final String message) {
 		return "\n[DECAF" + "::\n" + message + "]\n";
 	}
-	
+
 	/**
 	 * 
 	 */
-	protected DECAF(){
+	protected DECAF() {
 		super();
 	}
-	
+
 	/**
 	 * 
 	 */
