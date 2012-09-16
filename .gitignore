@@ -2,8 +2,6 @@ bin
 bin/*
 bin/*.*
 data/
-data/*
-data/*.*
 *.txt
 *.com
 *.class
