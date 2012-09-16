@@ -1,6 +1,7 @@
 bin
 bin/*
 bin/*.*
+.settings/
 data/
 *.txt
 *.com

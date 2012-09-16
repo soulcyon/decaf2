@@ -7,7 +7,7 @@
 	<classpathentry kind="lib" path="lib/ejml-0.20.jar"/>
 	<classpathentry kind="lib" path="/jmatbench/lib/EJML.jar"/>
 	<classpathentry kind="lib" path="lib/Jama-1.0.2.jar"/>
-	<classpathentry kind="lib" path="lib/jscience.jar"/>
 	<classpathentry kind="lib" path="lib/ojalgo-32.0.jar"/>
+	<classpathentry kind="lib" path="lib/javolution-6.0-20120909.204206-2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

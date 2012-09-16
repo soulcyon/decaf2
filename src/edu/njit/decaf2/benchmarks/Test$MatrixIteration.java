@@ -16,13 +16,16 @@ public class Test$MatrixIteration {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		int l = 4500;
+		double[][] matrix = new double[l][l];
 		double t = 0;
 		/****************************************************************************/
 		/* No continue Bench */
 		/****************************************************************************/
 		t = System.nanoTime();
-		for (int i = 0; i < 1944; i++) {
-			for (int j = i == 0 ? 1 : 0; j < 1944; j = j == i - 1 ? j + 2 : j + 1) {
+		for (int i = 0; i < l; i++) {
+			for (int j = i == 0 ? 1 : 0; j < l; j = j == i - 1 ? j + 2 : j + 1) {
+				matrix[i][j] = 1.0;
 			}
 		}
 		System.out.println("NoContinue:   " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0);
@@ -31,10 +34,11 @@ public class Test$MatrixIteration {
 		/* Continue Bench */
 		/****************************************************************************/
 		t = System.nanoTime();
-		for (int i = 0; i < 1944; i++) {
-			for (int j = 0; j < 1944; j++) {
+		for (int i = 0; i < l; i++) {
+			for (int j = 0; j < l; j++) {
 				if( i == j )
 					continue;
+				matrix[i][j] = 1.0;
 			}
 		}
 		System.out.println("Continue:     " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0);
