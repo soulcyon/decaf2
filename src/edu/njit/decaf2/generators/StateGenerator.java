@@ -9,7 +9,7 @@ import java.util.List;
 
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.Simulation;
-import edu.njit.decaf2.data.State;
+import edu.njit.decaf2.structures.State;
 
 /**
  * 

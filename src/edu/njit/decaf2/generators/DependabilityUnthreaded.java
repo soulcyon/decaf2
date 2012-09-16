@@ -14,7 +14,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.Simulation;
-import edu.njit.decaf2.data.QMatrix;
+import edu.njit.decaf2.structures.QMatrix;
 
 /**
  * DECAF - PMatrixGeneratorUnthreaded

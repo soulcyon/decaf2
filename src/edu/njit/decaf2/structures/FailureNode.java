@@ -2,7 +2,7 @@
  * |     \ |______ |       |_____| |______        |     |  
  * |_____/ |______ |______ |     | |            __|__ __|__
  */
-package edu.njit.decaf2.data;
+package edu.njit.decaf2.structures;
 
 import java.util.HashMap;
 import java.util.Map;

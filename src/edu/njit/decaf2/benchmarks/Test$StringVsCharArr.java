@@ -2,7 +2,7 @@
  * |     \ |______ |       |_____| |______        |     |  
  * |_____/ |______ |______ |     | |            __|__ __|__
  */
-package edu.njit.decaf2.test;
+package edu.njit.decaf2.benchmarks;
 
 /**
  * DECAF - Test$StringVsCharArr

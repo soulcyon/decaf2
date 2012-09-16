@@ -13,9 +13,9 @@ import java.util.Set;
 
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.Simulation;
-import edu.njit.decaf2.data.FailureNode;
-import edu.njit.decaf2.data.QMatrix;
-import edu.njit.decaf2.data.State;
+import edu.njit.decaf2.structures.FailureNode;
+import edu.njit.decaf2.structures.QMatrix;
+import edu.njit.decaf2.structures.State;
 
 /**
  * 

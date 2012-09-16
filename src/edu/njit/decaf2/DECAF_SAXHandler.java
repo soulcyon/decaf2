@@ -13,7 +13,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import edu.njit.decaf2.data.FailureNode;
+import edu.njit.decaf2.structures.FailureNode;
 
 /**
  * 

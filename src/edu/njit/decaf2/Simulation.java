@@ -15,14 +15,14 @@ import javax.xml.parsers.SAXParserFactory;
 
 import com.ctc.wstx.sax.WstxSAXParserFactory;
 
-import edu.njit.decaf2.data.FailureNode;
-import edu.njit.decaf2.data.QMatrix;
-import edu.njit.decaf2.data.State;
 import edu.njit.decaf2.generators.Dependability;
 import edu.njit.decaf2.generators.DependabilityUnthreaded;
 import edu.njit.decaf2.generators.QMatrixGenerator;
 import edu.njit.decaf2.generators.QMatrixGeneratorUnthreaded;
 import edu.njit.decaf2.generators.StateGenerator;
+import edu.njit.decaf2.structures.FailureNode;
+import edu.njit.decaf2.structures.QMatrix;
+import edu.njit.decaf2.structures.State;
 
 /**
  * 

@@ -2,11 +2,11 @@
  * |     \ |______ |       |_____| |______        |     |  
  * |_____/ |______ |______ |     | |            __|__ __|__
  */
-package edu.njit.decaf2.test;
+package edu.njit.decaf2.benchmarks;
 
 import java.util.HashMap;
 
-import edu.njit.decaf2.data.FailureNode;
+import edu.njit.decaf2.structures.FailureNode;
 
 /**
  * 
