@@ -10,7 +10,6 @@ import java.util.Map;
 
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.Simulation;
-import edu.njit.decaf2.structures.QMatrix;
 import edu.njit.decaf2.structures.State;
 
 /**
@@ -84,7 +83,10 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 						likeTransitionMap.put(differenceState, temp);
 					}
 				} else {
-					QMatrix.put(i, j, fillV);
+					Simulation.qmatrix.setQuick(i, j, fillV);
+					
+					// Custom QMatrix Deprecation in progress
+					//QMatrix.put(i, j, fillV);
 				}
 			}
 		}
@@ -96,9 +98,15 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 		for (int i = 0; i < statesLen; i++) {
 			double sum = 0.0;
 			for (int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1) {
-				sum += QMatrix.get(i, j);
+				sum += Simulation.qmatrix.getQuick(i, j);
+				
+				// Custom QMatrix Deprecation in progress
+				//sum += QMatrix.get(i, j);
 			}
-			QMatrix.put(i, i, -sum);
+			Simulation.qmatrix.setQuick(i, i, -sum);
+			
+			// Custom QMatrix Deprecation in progress
+			//QMatrix.put(i, i, -sum);
 		}
 
 		generateStatistics();
@@ -167,11 +175,16 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 				Simulation.numberOfReusedTrees++;
 			}
 			for (String j : value) {
-				final int fIndex = Integer.parseInt(j.split(",")[0]);
-				final int tIndex = Integer.parseInt(j.split(",")[1]);
-				if (QMatrix.get(fIndex, tIndex) != 0) {
+				String[] t = j.split(",");
+				
+				if( Simulation.qmatrix.getQuick(Integer.parseInt(t[0]), Integer.parseInt(t[1])) != 0 ){
 					Simulation.numberOfTransitions++;
 				}
+
+				// Custom QMatrix Deprecation in progress
+				//if (QMatrix.get(Integer.parseInt(t[0]), Integer.parseInt(t[1])) != 0) {
+				//	Simulation.numberOfTransitions++;
+				//}
 			}
 		}
 	}
@@ -181,11 +194,15 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 		final StringBuffer result = new StringBuffer();
 		for (int i = 0; i < statesLen; i++) {
 			for (int j = 0; j < statesLen; j++) {
-				if (QMatrix.get(i, j) != 0.0) {
-					result.append(QMatrix.get(i, j) + "@(" + i + "," + j + "); ");
+				if( Simulation.qmatrix.getQuick(i, j) != 0.0 ){
+					result.append(Simulation.qmatrix.get(i, j) + "@(" + i + "," + j + "); ");
 				}
+
+				// Custom QMatrix Deprecation in progress
+				//if (QMatrix.get(i, j) != 0.0) {
+				//	result.append(QMatrix.get(i, j) + "@(" + i + "," + j + "); ");
+				//}
 			}
-			// result += "\n";
 		}
 		return result.toString();
 	}
@@ -195,7 +212,7 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 		final int statesLen = Simulation.states.length;
 		for (int i = 0; i < statesLen; i++) {
 			for (int j = 0; j < statesLen; j++) {
-				final String point = Double.toString(QMatrix.get(i, j));
+				final String point = Double.toString(Simulation.qmatrix.getQuick(i, j));
 				result.append('(');
 				result.append(point.substring(0, Math.min(point.length(), 5)));
 				result.append(")\t");

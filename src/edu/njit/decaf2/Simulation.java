@@ -13,6 +13,8 @@ import java.util.HashMap;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;
+
 import com.ctc.wstx.sax.WstxSAXParserFactory;
 
 import edu.njit.decaf2.generators.Dependability;
@@ -21,7 +23,6 @@ import edu.njit.decaf2.generators.QMatrixGenerator;
 import edu.njit.decaf2.generators.QMatrixGeneratorUnthreaded;
 import edu.njit.decaf2.generators.StateGenerator;
 import edu.njit.decaf2.structures.FailureNode;
-import edu.njit.decaf2.structures.QMatrix;
 import edu.njit.decaf2.structures.State;
 
 /**
@@ -40,6 +41,7 @@ public class Simulation {
 	public static int numberOfReusedTrees;
 	public static int numberOfTransitions;
 
+	public static DenseDoubleMatrix2D qmatrix;
 	public static State[] states;
 	public static double[][] demandMatrix;
 	public static ArrayList<String> typeList = new ArrayList<String>();
@@ -94,7 +96,8 @@ public class Simulation {
 
 		String[] nodeKeyArray = new String[nodeMap.keySet().size()];
 		nodeMap.keySet().toArray(nodeKeyArray);
-
+		Simulation.qmatrix = new DenseDoubleMatrix2D(states.length, states.length);
+		
 		if (DECAF.enableThreading) {
 			QMatrixGenerator.generateQMatrix();
 		} else {
@@ -109,7 +112,7 @@ public class Simulation {
 			try {
 				FileWriter fstream = new FileWriter("output.txt");
 				BufferedWriter out = new BufferedWriter(fstream);
-				out.write(QMatrix.generateCCM());
+				out.write("On the way");
 				out.close();
 			} catch (Exception e) {
 				e.printStackTrace();

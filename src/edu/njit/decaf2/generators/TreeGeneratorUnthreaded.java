@@ -14,7 +14,6 @@ import java.util.Set;
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.Simulation;
 import edu.njit.decaf2.structures.FailureNode;
-import edu.njit.decaf2.structures.QMatrix;
 import edu.njit.decaf2.structures.State;
 
 /**
@@ -196,7 +195,13 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 			 * complementRate) + "\n\n"); }
 			 */
 
-			QMatrix.update(fIndex, tIndex, rootRate * subTreeRate * complementRate);
+			Simulation.qmatrix.setQuick(fIndex, tIndex, Simulation.qmatrix.getQuick(fIndex, tIndex)
+					+ (rootRate * subTreeRate * complementRate));
+
+			// Custom QMatrix Deprecation in progress
+			// QMatrix.update(fIndex, tIndex, rootRate * subTreeRate *
+			// complementRate);
+
 			Simulation.numberOfTrees++;
 		}
 	}

@@ -6,15 +6,13 @@ package edu.njit.decaf2.generators;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.util.Map.Entry;
 
-import org.ejml.alg.dense.decomposition.lu.LUDecompositionAlt;
-import org.ejml.alg.dense.linsol.lu.LinearSolverLu;
-import org.ejml.alg.dense.mult.MatrixVectorMult;
-import org.ejml.data.DenseMatrix64F;
-
+import cern.colt.matrix.tdouble.DoubleMatrix2D;
+import cern.colt.matrix.tdouble.algo.DenseDoubleAlgebra;
+import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix1D;
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.Simulation;
-import edu.njit.decaf2.structures.QMatrix;
 
 /**
  * DECAF - PMatrixGeneratorUnthreaded
@@ -43,63 +41,58 @@ public final class DependabilityUnthreaded extends DECAF {
 	 * 
 	 */
 	public static double calculateMTTF() {
-		double[][] qmatrix = QMatrix.toDoubleArray();
-		double[][] hvectorArray = new double[1][qmatrix.length];
-		for (int i = 0; i < qmatrix.length; i++) {
-			here: for (int j = 0; j < qmatrix.length; j++) {
+		int statesLen = Simulation.qmatrix.columns();
+		DoubleMatrix2D pmatrix = Simulation.qmatrix.copy();
+		
+		DenseDoubleMatrix1D hvector = new DenseDoubleMatrix1D(statesLen);
+		
+		for (int i = 0; i < statesLen; i++) {
+			here: for (int j = 0; j < statesLen; j++) {
 				if (j == i) {
 					continue;
 				}
-				for (Integer k : Simulation.states[j].getVector().values()) {
-					if (k > 1) {
-						qmatrix[i][j] = 0;
+				for (Entry<String, Integer> entry : Simulation.states[j].getVector().entrySet()) {
+					if (entry.getValue() > Simulation.nodeMap.get(entry.getKey()).getRequired()) {
+						pmatrix.setQuick(i, j, 0);
+
+						// Custom QMatrix Deprecation in progress
+						//qmatrix[i][j] = 0;
 						continue here;
 					}
 				}
-				qmatrix[i][j] = (qmatrix[i][j] / qmatrix[i][i]);
+				pmatrix.setQuick(i, j, pmatrix.getQuick(i, j) / pmatrix.getQuick(i, i));
+				
+				// Custom QMatrix Deprecation in progress
+				//qmatrix[i][j] = (qmatrix[i][j] / qmatrix[i][i]);
 			}
-			hvectorArray[0][i] = -qmatrix[i][i];
-			qmatrix[i][i] = 1;
+			hvector.setQuick(i, -pmatrix.getQuick(i, i));
+			pmatrix.setQuick(i, i, 1);
+			
+			// Custom QMatrix Deprecation in progress
+			//hvectorArray[i] = -qmatrix[i][i];
+			//qmatrix[i][i] = 1;
 		}
 
 		if (DECAF.sriniOutput) {
 			try {
-				FileWriter fstream = new FileWriter("matrix." + qmatrix.length + ".txt");
+				FileWriter fstream = new FileWriter("matrix." + statesLen + ".txt");
 				BufferedWriter out = new BufferedWriter(fstream);
-				out.write(QMatrix.matrixToString(qmatrix));
+				out.write(pmatrix.toString());
 				out.close();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 
-		DenseMatrix64F pmatrix = new DenseMatrix64F(qmatrix);
-		DenseMatrix64F hvector = new DenseMatrix64F(hvectorArray);
-		DenseMatrix64F result = new DenseMatrix64F(new double[qmatrix.length][1]);
-		LUDecompositionAlt ludbalt = new LUDecompositionAlt();
-		ludbalt.decompose(pmatrix);
-
-		LinearSolverLu spSVD = new LinearSolverLu(ludbalt);
-		spSVD.setA(pmatrix);
-		spSVD.invert(pmatrix);
-
-		MatrixVectorMult.mult(pmatrix, hvector, result);
-
+		DenseDoubleMatrix1D result = new DenseDoubleMatrix1D(new double[statesLen]);
+		DenseDoubleAlgebra sa = new DenseDoubleAlgebra();
+		pmatrix = sa.inverse(pmatrix);
+		result = (DenseDoubleMatrix1D) pmatrix.zMult(hvector, result);
+		
 		return result.get(0);
 	}
 
 	public static double calculateSSU() {
-		double[][] qmatrix = QMatrix.toDoubleArray();
-		double[][] eArray = new double[1][qmatrix.length];
-		for (int i = 0; i < qmatrix.length; i++) {
-			eArray[0][i] = 1;
-		}
-
-		DenseMatrix64F pmatrix = new DenseMatrix64F(qmatrix);
-		DenseMatrix64F hvector = new DenseMatrix64F(eArray);
-		DenseMatrix64F result = new DenseMatrix64F(new double[qmatrix.length][1]);
-		MatrixVectorMult.mult(pmatrix, hvector, result);
-
-		return 0;
+		return 0.0;
 	}
 }
