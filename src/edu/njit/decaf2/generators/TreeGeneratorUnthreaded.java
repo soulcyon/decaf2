@@ -151,8 +151,10 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 	 */
 	private static void processRates(final List<String> levels, final State failureTransition,
 			final Map<String, ArrayList<String>> bfhCopy, final double subTreeRate) {
-		final ArrayList<String> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
+		final List<String> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
+		Simulation.numberOfReusedTrees--;
 		for (String transition : likeTransitions) {
+			Simulation.numberOfReusedTrees++;
 			final String[] fromAndTo = transition.split(",");
 			final int fIndex = Integer.parseInt(fromAndTo[0]);
 			final int tIndex = Integer.parseInt(fromAndTo[1]);
@@ -194,14 +196,8 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 			 * System.out.println("Rate: \t" + (rootRate * subTreeRate *
 			 * complementRate) + "\n\n"); }
 			 */
-
 			Simulation.qmatrix.setQuick(fIndex, tIndex, Simulation.qmatrix.getQuick(fIndex, tIndex)
 					+ (rootRate * subTreeRate * complementRate));
-
-			// Custom QMatrix Deprecation in progress
-			// QMatrix.update(fIndex, tIndex, rootRate * subTreeRate *
-			// complementRate);
-
 			Simulation.numberOfTrees++;
 		}
 	}

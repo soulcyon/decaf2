@@ -41,7 +41,6 @@ public class Dependability extends DECAF {
 	 * @return
 	 */
 	public static double calculateSSU() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 }

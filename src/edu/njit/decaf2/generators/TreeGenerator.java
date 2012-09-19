@@ -14,7 +14,6 @@ import java.util.Set;
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.Simulation;
 import edu.njit.decaf2.structures.FailureNode;
-import edu.njit.decaf2.structures.QMatrix;
 import edu.njit.decaf2.structures.State;
 
 /**
@@ -27,7 +26,6 @@ import edu.njit.decaf2.structures.State;
  */
 public final class TreeGenerator extends DECAF {
 	private static Map<String, List<String>> binaryEnumCache;
-
 	/**
 	 * 
 	 */
@@ -44,28 +42,17 @@ public final class TreeGenerator extends DECAF {
 	}
 
 	public static void initSubTrees() {
+		// Build binary enumeration cache once
 		binaryEnumCache = new HashMap<String, List<String>>();
 
-		for (String type : Simulation.nodeMap.keySet()) {
-			final Map<String, Double> gamma = Simulation.nodeMap.get(type).getCascadingFailures();
+		for (Entry<String, FailureNode> entry : Simulation.nodeMap.entrySet()) {
+			final Map<String, Double> gamma = Simulation.nodeMap.get(entry.getKey()).getCascadingFailures();
 			if (!gamma.isEmpty()) {
-				binaryEnumCache.put(type, powerSet(gamma.keySet()));
+				binaryEnumCache.put(entry.getKey(), powerSet(gamma.keySet()));
 			}
 		}
-
-		ArrayList<String> levels;
-		for (Entry<String, FailureNode> entry : Simulation.nodeMap.entrySet()) {
-			levels = new ArrayList<String>();
-			levels.add("1:" + entry.getKey());
-
-			final State initialFT = (State) Simulation.states[0].clone();
-			initialFT.incrementComponentCount(entry.getValue());
-
-			final Map<String, ArrayList<String>> bfhMap = buildBFH();
-			bfhMap.get(entry.getKey()).add("|");
-
-			growSubTree(levels, initialFT, 1.0, bfhMap);
-		}
+		
+        DECAF.threadPool.invoke(new TreeAction());
 	}
 
 	/**
@@ -75,9 +62,8 @@ public final class TreeGenerator extends DECAF {
 	 * @param subRate
 	 * @param bfhMap
 	 */
-	private static void growSubTree(final List<String> levels, final State failureTransition, final double subTreeRate,
+	protected static void growSubTree(final List<String> levels, final State failureTransition, final double subTreeRate,
 			final Map<String, ArrayList<String>> bfhMap) {
-
 		final String[] terminalNodes = levels.get(levels.size() - 1).split(",");
 		final ArrayList<Integer> gammaPermutations = new ArrayList<Integer>();
 		final ArrayList<String> terminalTypes = new ArrayList<String>();
@@ -153,7 +139,9 @@ public final class TreeGenerator extends DECAF {
 	private static void processRates(final List<String> levels, final State failureTransition,
 			final Map<String, ArrayList<String>> bfhCopy, final double subTreeRate) {
 		final List<String> likeTransitions = QMatrixGenerator.likeTransitionMap.get(failureTransition);
+		Simulation.numberOfReusedTrees--;
 		for (String transition : likeTransitions) {
+			Simulation.numberOfReusedTrees++;
 			final String[] fromAndTo = transition.split(",");
 			final int fIndex = Integer.parseInt(fromAndTo[0]);
 			final int tIndex = Integer.parseInt(fromAndTo[1]);
@@ -195,9 +183,9 @@ public final class TreeGenerator extends DECAF {
 			 * System.out.println("Rate: \t" + (rootRate * subTreeRate *
 			 * complementRate) + "\n\n"); }
 			 */
-
-			QMatrix.update(fIndex, tIndex, rootRate * subTreeRate * complementRate);
-			QMatrixGenerator.numberOfTrees++;
+			Simulation.qmatrix.setQuick(fIndex, tIndex, Simulation.qmatrix.getQuick(fIndex, tIndex)
+					+ (rootRate * subTreeRate * complementRate));
+			Simulation.numberOfTrees++;
 		}
 	}
 
@@ -205,7 +193,7 @@ public final class TreeGenerator extends DECAF {
 	 * 
 	 * @return
 	 */
-	private static Map<String, ArrayList<String>> buildBFH() {
+	protected static Map<String, ArrayList<String>> buildBFH() {
 		final HashMap<String, ArrayList<String>> result = new HashMap<String, ArrayList<String>>();
 		for (String k : Simulation.nodeMap.keySet()) {
 			result.put(k, new ArrayList<String>());

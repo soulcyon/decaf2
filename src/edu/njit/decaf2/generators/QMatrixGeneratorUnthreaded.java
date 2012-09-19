@@ -68,7 +68,7 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 				if (j == i) {
 					continue;
 				}
-				
+
 				final double fillV = fillQMatrix(Simulation.states[i], Simulation.states[j]);
 
 				if (Double.isNaN(fillV)) {
@@ -84,29 +84,20 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 					}
 				} else {
 					Simulation.qmatrix.setQuick(i, j, fillV);
-					
-					// Custom QMatrix Deprecation in progress
-					//QMatrix.put(i, j, fillV);
 				}
 			}
 		}
-
+		
 		// Generate trees as required
 		TreeGeneratorUnthreaded.initSubTrees();
 
 		// Fill diagonals with negative row sum
 		for (int i = 0; i < statesLen; i++) {
 			double sum = 0.0;
-			for (int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1) {
+			for (int j = 0; j < statesLen; j++) {
 				sum += Simulation.qmatrix.getQuick(i, j);
-				
-				// Custom QMatrix Deprecation in progress
-				//sum += QMatrix.get(i, j);
 			}
 			Simulation.qmatrix.setQuick(i, i, -sum);
-			
-			// Custom QMatrix Deprecation in progress
-			//QMatrix.put(i, i, -sum);
 		}
 
 		generateStatistics();
@@ -169,44 +160,43 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 		return 0.0;
 	}
 
+	/**
+	 * 
+	 */
 	public static void generateStatistics() {
 		for (ArrayList<String> value : likeTransitionMap.values()) {
-			if (value.size() > 1) {
-				Simulation.numberOfReusedTrees++;
-			}
 			for (String j : value) {
 				String[] t = j.split(",");
-				
-				if( Simulation.qmatrix.getQuick(Integer.parseInt(t[0]), Integer.parseInt(t[1])) != 0 ){
+
+				if (Simulation.qmatrix.getQuick(Integer.parseInt(t[0]), Integer.parseInt(t[1])) != 0) {
 					Simulation.numberOfTransitions++;
 				}
-
-				// Custom QMatrix Deprecation in progress
-				//if (QMatrix.get(Integer.parseInt(t[0]), Integer.parseInt(t[1])) != 0) {
-				//	Simulation.numberOfTransitions++;
-				//}
 			}
 		}
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public static String printQMatrix() {
 		final int statesLen = Simulation.states.length;
 		final StringBuffer result = new StringBuffer();
 		for (int i = 0; i < statesLen; i++) {
 			for (int j = 0; j < statesLen; j++) {
-				if( Simulation.qmatrix.getQuick(i, j) != 0.0 ){
+				if (Simulation.qmatrix.getQuick(i, j) != 0.0) {
 					result.append(Simulation.qmatrix.get(i, j) + "@(" + i + "," + j + "); ");
 				}
-
-				// Custom QMatrix Deprecation in progress
-				//if (QMatrix.get(i, j) != 0.0) {
-				//	result.append(QMatrix.get(i, j) + "@(" + i + "," + j + "); ");
-				//}
 			}
 		}
 		return result.toString();
 	}
 
+	/**
+	 * 
+	 * @param flag
+	 * @return
+	 */
 	public static String printQMatrix(final boolean flag) {
 		final StringBuffer result = new StringBuffer();
 		final int statesLen = Simulation.states.length;

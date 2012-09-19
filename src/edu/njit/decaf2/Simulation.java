@@ -155,6 +155,8 @@ public class Simulation {
 		System.out.println("");
 		System.out.println("Mean Time To Failure:   " + meanTimeToFailure + " s");
 		System.out.println("SS Unavailability:      " + steadyStateUnavailability);
+		
+		System.exit(-1);
 	}
 
 	/**
