@@ -19,6 +19,8 @@ import org.ojalgo.matrix.MatrixFactory;
 import org.ojalgo.matrix.PrimitiveMatrix;
 
 import Jama.Matrix;
+import cern.colt.matrix.tdouble.algo.DenseDoubleAlgebra;
+import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;
 
 /**
  * DECAF - Test$MatrixInversion
@@ -29,7 +31,7 @@ import Jama.Matrix;
  */
 public class Test$MatrixInversion {
 	public static void main(String[] args) {
-		double[][] qmatrix = Test$PMatrices.grab(18);
+		double[][] qmatrix = Test$PMatrices.grab(640);
 		DenseMatrix64F matrix = new DenseMatrix64F(qmatrix);
 		DenseMatrix64F[] results = new DenseMatrix64F[6];
 
@@ -38,13 +40,13 @@ public class Test$MatrixInversion {
 		double t = System.nanoTime();
 		MatrixFactory<?> tmpFactory = PrimitiveMatrix.FACTORY;
 		MatrixBuilder<?> tmpBuilder = tmpFactory.getBuilder(18, 18);
-        for (int j = 0; j < tmpBuilder.getColDim(); j++) {
-            for (int i = 0; i < tmpBuilder.getRowDim(); i++) {
-                tmpBuilder.set(i, j, qmatrix[i][j]);
-            }
-        }
-        BasicMatrix tmpI = tmpBuilder.build();
-        tmpI.invert();
+		for (int j = 0; j < tmpBuilder.getColDim(); j++) {
+			for (int i = 0; i < tmpBuilder.getRowDim(); i++) {
+				tmpBuilder.set(i, j, qmatrix[i][j]);
+			}
+		}
+		BasicMatrix tmpI = tmpBuilder.build();
+		tmpI.invert();
 		System.out.println("OJALGO Inverse:            " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 
 		System.out.println("\nJAMA Benchmarks");
@@ -66,8 +68,7 @@ public class Test$MatrixInversion {
 		System.out.println("Pseudo-inverse SVD:        " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 
 		/**
-		 * ----------------- LUDecompositionAlt + LinearSolverLuKJI
-		 * -----------------
+		 * ----------------- LUDecompositionAlt + LinearSolverLuKJI -----------------
 		 **/
 		t = System.nanoTime();
 
@@ -81,8 +82,7 @@ public class Test$MatrixInversion {
 		System.out.println("LUDecomp + LUKJI-Inverse:  " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 
 		/**
-		 * ----------------- LUDecompositionAlt + LinearSolverLu
-		 * -----------------
+		 * ----------------- LUDecompositionAlt + LinearSolverLu -----------------
 		 **/
 		t = System.nanoTime();
 
@@ -94,8 +94,7 @@ public class Test$MatrixInversion {
 		System.out.println("LUDecomp + LU Inverse:     " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 
 		/**
-		 * ----------------- QRDecompositionHouseholder + LinearSolverQr
-		 * -----------------
+		 * ----------------- QRDecompositionHouseholder + LinearSolverQr -----------------
 		 **/
 		t = System.nanoTime();
 
@@ -109,8 +108,7 @@ public class Test$MatrixInversion {
 		System.out.println("QRHouse + QRSolver:        " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 
 		/**
-		 * ----------------- QRDecompositionHouseholderTran + LinearSolverQr
-		 * -----------------
+		 * ----------------- QRDecompositionHouseholderTran + LinearSolverQr -----------------
 		 **/
 		t = System.nanoTime();
 
@@ -124,8 +122,7 @@ public class Test$MatrixInversion {
 		System.out.println("QRHouseTran + QRSolver:    " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 
 		/**
-		 * ----------------- QRDecompositionHouseholderColumn + LinearSolverQr
-		 * -----------------
+		 * ----------------- QRDecompositionHouseholderColumn + LinearSolverQr -----------------
 		 **/
 		t = System.nanoTime();
 
@@ -137,5 +134,14 @@ public class Test$MatrixInversion {
 		alsqr.invert(results[5]);
 
 		System.out.println("QRHouseColm + QRSolver:    " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
+
+		/**
+		 * ----------------- Parallel Colt Inverse -----------------
+		 **/
+		t = System.nanoTime();
+		DenseDoubleMatrix2D colt = new DenseDoubleMatrix2D(qmatrix);
+		DenseDoubleAlgebra da = new DenseDoubleAlgebra();
+		da.inverse(colt);
+		System.out.println("Parallel Colt Inverse:    " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 	}
 }

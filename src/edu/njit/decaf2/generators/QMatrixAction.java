@@ -9,6 +9,7 @@ import java.util.concurrent.RecursiveAction;
 
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.Simulation;
+import edu.njit.decaf2.structures.Point;
 import edu.njit.decaf2.structures.State;
 
 /**
@@ -50,13 +51,13 @@ public class QMatrixAction extends RecursiveAction {
 
 					if (Double.isNaN(fillV)) {
 						final State differenceState = Simulation.states[i].diff(Simulation.states[j]);
-						final String str = i + "," + j;
+						final Point point = new Point(i, j);
 
 						if (QMatrixGenerator.likeTransitionMap.containsKey(differenceState)) {
-							QMatrixGenerator.likeTransitionMap.get(differenceState).add(str);
+							QMatrixGenerator.likeTransitionMap.get(differenceState).add(point);
 						} else {
-							final CopyOnWriteArrayList<String> temp = new CopyOnWriteArrayList<String>();
-							temp.add(str);
+							final CopyOnWriteArrayList<Point> temp = new CopyOnWriteArrayList<Point>();
+							temp.add(point);
 							QMatrixGenerator.likeTransitionMap.put(differenceState, temp);
 						}
 					} else {

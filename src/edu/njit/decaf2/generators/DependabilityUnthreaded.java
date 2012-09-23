@@ -6,17 +6,21 @@ package edu.njit.decaf2.generators;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.Set;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.data.Eigenpair;
-import org.ejml.ops.EigenOps;
+import org.ojalgo.machine.Hardware;
+import org.ojalgo.machine.VirtualMachine;
+import org.ojalgo.matrix.BasicMatrix;
+import org.ojalgo.matrix.MatrixBuilder;
+import org.ojalgo.matrix.MatrixFactory;
+import org.ojalgo.matrix.PrimitiveMatrix;
 
 import cern.colt.matrix.tdouble.DoubleMatrix1D;
 import cern.colt.matrix.tdouble.DoubleMatrix2D;
 import cern.colt.matrix.tdouble.algo.DenseDoubleAlgebra;
 import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix1D;
-import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.Simulation;
 
@@ -28,6 +32,8 @@ import edu.njit.decaf2.Simulation;
  * 
  */
 public final class DependabilityUnthreaded extends DECAF {
+	private static Set<Integer> systemDownStates = new HashSet<Integer>();
+
 	/**
 	 * 
 	 */
@@ -49,9 +55,9 @@ public final class DependabilityUnthreaded extends DECAF {
 	public static double calculateMTTF() {
 		int statesLen = Simulation.qmatrix.columns();
 		DoubleMatrix2D pmatrix = Simulation.qmatrix.copy();
-		
+
 		DoubleMatrix1D hvector = new DenseDoubleMatrix1D(statesLen);
-		
+
 		for (int i = 0; i < statesLen; i++) {
 			here: for (int j = 0; j < statesLen; j++) {
 				if (j == i) {
@@ -60,6 +66,7 @@ public final class DependabilityUnthreaded extends DECAF {
 				for (Entry<String, Integer> entry : Simulation.states[j].getVector().entrySet()) {
 					if (entry.getValue() > Simulation.nodeMap.get(entry.getKey()).getRequired()) {
 						pmatrix.setQuick(i, j, 0);
+						systemDownStates.add(j);
 						continue here;
 					}
 				}
@@ -84,29 +91,39 @@ public final class DependabilityUnthreaded extends DECAF {
 		pmatrix = sa.inverse(pmatrix);
 		result = pmatrix.zMult(hvector, result);
 
-		
-		DenseMatrix64F pimatrix = new DenseMatrix64F(sa.transpose(pmatrix).toArray());
-		
-		double[] ep = EigenOps.computeEigenVector(pimatrix, 0).vector.data;
-		
-		DoubleMatrix2D result1 = new DenseDoubleMatrix2D(1, ep.length);
-		result1.assign(ep);
-		result1 = sa.transpose(result1);
-		System.out.println(result);
-		
 		return result.get(0);
 	}
 
 	public static double calculateSSU() {
-		DenseDoubleAlgebra da = new DenseDoubleAlgebra();
-		DenseMatrix64F pimatrix = new DenseMatrix64F(da.transpose(Simulation.qmatrix).toArray());
+		double result = 0.0;
+		DoubleMatrix2D dd = Simulation.qmatrix.copy();
+		// DenseDoubleAlgebra da = new DenseDoubleAlgebra();
+		for (int i = 0; i < dd.columns(); i++) {
+			dd.setQuick(i, 0, 1);
+		}
+
+		/* Comment the block below and uncomment other lines for P-Colt SSU */
+		String tmpArchitecture = VirtualMachine.getArchitecture();
+		long tmpMemory = VirtualMachine.getMemory();
+		int tmpThreads = VirtualMachine.getThreads();
 		
-		double[] ep = EigenOps.computeEigenVector(pimatrix, 0).vector.data;
+		org.ojalgo.OjAlgoUtils.ENVIRONMENT = Hardware.makeSimple(tmpArchitecture, tmpMemory, tmpThreads).virtualise();
 		
-		DoubleMatrix2D result = new DenseDoubleMatrix2D(1, ep.length);
-		result.assign(ep);
-		result = da.transpose(result);
-		System.out.println(result);
-		return result.get(0, 0);
+		MatrixFactory<?> tmpFactory = PrimitiveMatrix.FACTORY;
+		MatrixBuilder<?> tmpBuilder = tmpFactory.getBuilder(dd.columns(), dd.columns());
+		for (int j = 0; j < tmpBuilder.getColDim(); j++) {
+			for (int i = 0; i < tmpBuilder.getRowDim(); i++) {
+				tmpBuilder.set(i, j, dd.getQuick(i, j));
+			}
+		}
+		BasicMatrix tmpI = tmpBuilder.build();
+		tmpI = tmpI.invert();
+		/* block end */
+
+		//dd = da.inverse(dd);
+		for (Integer k : systemDownStates) {
+			result += tmpI.doubleValue(0, k);
+		}
+		return result;
 	}
 }

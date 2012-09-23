@@ -20,9 +20,9 @@ public class DECAF {
 	protected static final boolean verboseDebug = false;
 	protected static final int debugX = 0;
 	protected static final int debugY = 8;
-	protected static final boolean enableThreading = false;
-	public static final int threadCount = Runtime.getRuntime().availableProcessors();
-	public static final ForkJoinPool threadPool = new ForkJoinPool();
+	protected static final boolean enableThreading = true;
+	public static final int threadCount = 2;
+	public static final ForkJoinPool threadPool = new ForkJoinPool(256);
 
 	/**
 	 * Utility function to pretty-print error messages thrown by sub-classes.

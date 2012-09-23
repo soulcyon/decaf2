@@ -87,7 +87,7 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 				}
 			}
 		}
-		
+
 		// Generate trees as required
 		TreeGeneratorUnthreaded.initSubTrees();
 

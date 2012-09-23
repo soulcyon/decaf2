@@ -38,7 +38,8 @@ public class Simulation {
 	public static double meanTimeToFailure;
 	public static double steadyStateUnavailability;
 	public static int numberOfTrees;
-	public static int numberOfReusedTrees;
+	public static int numberOfAvoidedTrees;
+	public static int numberOfUniqueTrees;
 	public static int numberOfTransitions;
 
 	public static DenseDoubleMatrix2D qmatrix;
@@ -76,7 +77,7 @@ public class Simulation {
 
 		resultProcessing += System.nanoTime() - t;
 
-		System.out.println("XML Parsing:            " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
+		System.out.println("XML Parsing:              " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 
 		/* ------------------ State Generation ------------------ */
 		t = System.nanoTime();
@@ -84,7 +85,7 @@ public class Simulation {
 		StateGenerator.generateStates();
 
 		resultProcessing += System.nanoTime() - t;
-		System.out.println("State Generation:       " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
+		System.out.println("State Generation:         " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 
 		/* ------------------ QMatrix Generation ------------------ */
 		t = System.nanoTime();
@@ -97,7 +98,7 @@ public class Simulation {
 		String[] nodeKeyArray = new String[nodeMap.keySet().size()];
 		nodeMap.keySet().toArray(nodeKeyArray);
 		Simulation.qmatrix = new DenseDoubleMatrix2D(states.length, states.length);
-		
+
 		if (DECAF.enableThreading) {
 			QMatrixGenerator.generateQMatrix();
 		} else {
@@ -105,7 +106,7 @@ public class Simulation {
 		}
 
 		resultProcessing += System.nanoTime() - t;
-		System.out.println("QMatrix Generation:     " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
+		System.out.println("QMatrix Generation:       " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 
 		if (DECAF.sriniOutput) {
 			t = System.nanoTime();
@@ -124,38 +125,38 @@ public class Simulation {
 		t = System.nanoTime();
 
 		if (DECAF.enableThreading) {
-			meanTimeToFailure = Dependability.calculateMTTF();
+			meanTimeToFailure = DependabilityUnthreaded.calculateMTTF();
 		} else {
 			meanTimeToFailure = DependabilityUnthreaded.calculateMTTF();
 		}
 
-		System.out.println("Calculate MTTF:         " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
+		System.out.println("Calculate MTTF:           " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 		resultProcessing += System.nanoTime() - t;
 
 		/* ------------------ SSU Calculation ------------------ */
 		t = System.nanoTime();
 
 		if (DECAF.enableThreading) {
-			steadyStateUnavailability = Dependability.calculateSSU();
+			steadyStateUnavailability = DependabilityUnthreaded.calculateSSU();
 		} else {
 			steadyStateUnavailability = DependabilityUnthreaded.calculateSSU();
 		}
 
-		System.out.println("Calculate SSU:          " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
+		System.out.println("Calculate SSU:            " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 		resultProcessing += System.nanoTime() - t;
-
-		System.out.println("Total CPU Time:         " + resultProcessing / 1000.0 / 1000.0 / 1000.0 + " s");
 
 		/* ------------------ Generic Statistics ------------------ */
 		System.out.println("");
-		System.out.println("Number of States:       " + states.length);
-		System.out.println("Number of Trees:        " + numberOfTrees);
-		System.out.println("Number of Reused Trees: " + numberOfReusedTrees);
-		System.out.println("Number of Transitions:  " + numberOfTransitions);
+		System.out.println("Number of States:         " + states.length);
+		System.out.println("Number of Trees:          " + numberOfTrees);
+		System.out.println("Number of Trees Avoided:  " + numberOfAvoidedTrees);
+		System.out.println("Number of Unique Trees:   " + numberOfUniqueTrees);
+		System.out.println("Number of F-Transitions:  " + numberOfTransitions);
 		System.out.println("");
-		System.out.println("Mean Time To Failure:   " + meanTimeToFailure + " s");
-		System.out.println("SS Unavailability:      " + steadyStateUnavailability);
-		
+		System.out.println("Mean Time To Failure:     " + meanTimeToFailure + " s");
+		System.out.println("SS Unavailability:        " + steadyStateUnavailability);
+		System.out.println("Total CPU Time:           " + resultProcessing / 1000.0 / 1000.0 / 1000.0 + " s");
+
 		System.exit(-1);
 	}
 

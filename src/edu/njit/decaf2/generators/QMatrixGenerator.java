@@ -11,6 +11,7 @@ import java.util.concurrent.RecursiveAction;
 
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.Simulation;
+import edu.njit.decaf2.structures.Point;
 import edu.njit.decaf2.structures.State;
 
 /**
@@ -23,7 +24,7 @@ import edu.njit.decaf2.structures.State;
  */
 public final class QMatrixGenerator extends DECAF {
 	private static String[] vectorKeys;
-	protected static Map<State, CopyOnWriteArrayList<String>> likeTransitionMap;
+	protected static Map<State, CopyOnWriteArrayList<Point>> likeTransitionMap;
 
 	/**
 	 * 
@@ -50,7 +51,7 @@ public final class QMatrixGenerator extends DECAF {
 	public static void init() {
 		vectorKeys = new String[Simulation.nodeMap.size()];
 		vectorKeys = Simulation.nodeMap.keySet().toArray(vectorKeys);
-		likeTransitionMap = new ConcurrentHashMap<State, CopyOnWriteArrayList<String>>();
+		likeTransitionMap = new ConcurrentHashMap<State, CopyOnWriteArrayList<Point>>();
 	}
 
 	/**
@@ -63,9 +64,9 @@ public final class QMatrixGenerator extends DECAF {
 		// Cache the length of valid transition states
 		final int statesLen = Simulation.states.length;
 		RecursiveAction task = new QMatrixAction(0, statesLen, statesLen);
-		
-        DECAF.threadPool.invoke(task);
-        
+
+		DECAF.threadPool.invoke(task);
+
 		// Generate trees as required
 		TreeGenerator.initSubTrees();
 
@@ -131,15 +132,20 @@ public final class QMatrixGenerator extends DECAF {
 	 * 
 	 */
 	public static void generateStatistics() {
-		for (CopyOnWriteArrayList<String> value : likeTransitionMap.values()) {
-			for (String j : value) {
-				String[] t = j.split(",");
-
-				if (Simulation.qmatrix.getQuick(Integer.parseInt(t[0]), Integer.parseInt(t[1])) != 0) {
+		for (CopyOnWriteArrayList<Point> value : likeTransitionMap.values()) {
+			for (Point j : value) {
+				if (Simulation.qmatrix.getQuick(j.getX(), j.getY()) != 0) {
 					Simulation.numberOfTransitions++;
 				}
 			}
+			for (Point j : value) {
+				if (Simulation.qmatrix.getQuick(j.getX(), j.getY()) != 0) {
+					Simulation.numberOfUniqueTrees++;
+					break;
+				}
+			}
 		}
+		Simulation.numberOfUniqueTrees += Simulation.nodeMap.size();
 	}
 
 	/**
