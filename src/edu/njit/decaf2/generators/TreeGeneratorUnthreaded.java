@@ -132,10 +132,15 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 				}
 			}
 			
-			// Stop generating any more children after 4 levels
-			if( levels.size() > 4 ) {
+			// Approximation conditions
+			if(levels.size() > DECAF.heightThreshold) {
 				return;
 			}
+			
+			if(subTreeRate < DECAF.rateThreshold) {
+				continue nextLevel;
+			}
+			
 			if (c > 0) {
 				final ArrayList<String> levelsCopy = new ArrayList<String>(levels);
 				levelsCopy.add(newLevel.substring(0, newLevel.length() - 1));

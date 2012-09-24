@@ -23,6 +23,8 @@ public class DECAF {
 	protected static final boolean enableThreading = false;
 	public static final int threadCount = 2;
 	public static final ForkJoinPool threadPool = new ForkJoinPool(256);
+	public static final int heightThreshold = 0;
+	public static final double rateThreshold = 0;
 
 	/**
 	 * Utility function to pretty-print error messages thrown by sub-classes.
