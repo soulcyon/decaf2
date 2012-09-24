@@ -10,8 +10,6 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.ojalgo.machine.Hardware;
-import org.ojalgo.machine.VirtualMachine;
 import org.ojalgo.matrix.BasicMatrix;
 import org.ojalgo.matrix.MatrixBuilder;
 import org.ojalgo.matrix.MatrixFactory;
@@ -55,9 +53,8 @@ public final class DependabilityUnthreaded extends DECAF {
 	public static double calculateMTTF() {
 		int statesLen = Simulation.qmatrix.columns();
 		DoubleMatrix2D pmatrix = Simulation.qmatrix.copy();
-
 		DoubleMatrix1D hvector = new DenseDoubleMatrix1D(statesLen);
-
+		
 		for (int i = 0; i < statesLen; i++) {
 			here: for (int j = 0; j < statesLen; j++) {
 				if (j == i) {
@@ -86,43 +83,68 @@ public final class DependabilityUnthreaded extends DECAF {
 				e.printStackTrace();
 			}
 		}
-		DoubleMatrix1D result = new DenseDoubleMatrix1D(new double[statesLen]);
-		DenseDoubleAlgebra sa = new DenseDoubleAlgebra();
-		pmatrix = sa.inverse(pmatrix);
+		
+		DoubleMatrix1D result = new DenseDoubleMatrix1D(statesLen);
+		if( statesLen < 4000 ){
+			DenseDoubleAlgebra sa = new DenseDoubleAlgebra();
+			pmatrix = sa.inverse(pmatrix);
+		} else {
+			MatrixFactory<?> tmpFactory = PrimitiveMatrix.FACTORY;
+			MatrixBuilder<?> tmpBuilder = tmpFactory.getBuilder(statesLen, statesLen);
+			for (int j = 0; j < tmpBuilder.getColDim(); j++) {
+				for (int i = 0; i < tmpBuilder.getRowDim(); i++) {
+					tmpBuilder.set(i, j, pmatrix.getQuick(i, j));
+				}
+			}
+			BasicMatrix tmpI = tmpBuilder.build();
+			tmpI = tmpI.invert();
+			for (int j = 0; j < tmpBuilder.getColDim(); j++) {
+				for (int i = 0; i < tmpBuilder.getRowDim(); i++) {
+					pmatrix.setQuick(i, j, tmpI.doubleValue(i, j));
+				}
+			}
+		}
 		result = pmatrix.zMult(hvector, result);
 
 		return result.get(0);
 	}
-
+	
+	/**
+	 * 
+	 * @return
+	 */
 	public static double calculateSSU() {
+		if( systemDownStates.size() < 1 ){
+			System.out.println(DECAF.error("SSU might be innacurate.  Please compute MTTF before SSU."));
+		}
+		
+		int statesLen = Simulation.qmatrix.columns();
 		double result = 0.0;
 		DoubleMatrix2D dd = Simulation.qmatrix.copy();
-		// DenseDoubleAlgebra da = new DenseDoubleAlgebra();
-		for (int i = 0; i < dd.columns(); i++) {
+		
+		for (int i = 0; i < statesLen; i++) {
 			dd.setQuick(i, 0, 1);
 		}
-
-		/* Comment the block below and uncomment other lines for P-Colt SSU */
-		String tmpArchitecture = VirtualMachine.getArchitecture();
-		long tmpMemory = VirtualMachine.getMemory();
-		int tmpThreads = VirtualMachine.getThreads();
 		
-		org.ojalgo.OjAlgoUtils.ENVIRONMENT = Hardware.makeSimple(tmpArchitecture, tmpMemory, tmpThreads).virtualise();
-		
-		MatrixFactory<?> tmpFactory = PrimitiveMatrix.FACTORY;
-		MatrixBuilder<?> tmpBuilder = tmpFactory.getBuilder(dd.columns(), dd.columns());
-		for (int j = 0; j < tmpBuilder.getColDim(); j++) {
-			for (int i = 0; i < tmpBuilder.getRowDim(); i++) {
-				tmpBuilder.set(i, j, dd.getQuick(i, j));
+		if( statesLen < 200 ){
+			DenseDoubleAlgebra da = new DenseDoubleAlgebra();
+			dd = da.inverse(dd);
+			for (Integer k : systemDownStates) {
+				result += dd.getQuick(0, k);
 			}
-		}
-		BasicMatrix tmpI = tmpBuilder.build();
-		tmpI = tmpI.invert();
-		/* block end */
-
-		//dd = da.inverse(dd);
-		for (Integer k : systemDownStates) {
-			result += tmpI.doubleValue(0, k);
+		} else {
+			MatrixFactory<?> tmpFactory = PrimitiveMatrix.FACTORY;
+			MatrixBuilder<?> tmpBuilder = tmpFactory.getBuilder(dd.columns(), dd.columns());
+			for (int j = 0; j < tmpBuilder.getColDim(); j++) {
+				for (int i = 0; i < tmpBuilder.getRowDim(); i++) {
+					tmpBuilder.set(i, j, dd.getQuick(i, j));
+				}
+			}
+			BasicMatrix tmpI = tmpBuilder.build();
+			tmpI = tmpI.invert();
+			for (Integer k : systemDownStates) {
+				result += tmpI.doubleValue(0, k);
+			}
 		}
 		return result;
 	}

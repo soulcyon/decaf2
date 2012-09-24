@@ -20,7 +20,7 @@ public class DECAF {
 	protected static final boolean verboseDebug = false;
 	protected static final int debugX = 0;
 	protected static final int debugY = 8;
-	protected static final boolean enableThreading = true;
+	protected static final boolean enableThreading = false;
 	public static final int threadCount = 2;
 	public static final ForkJoinPool threadPool = new ForkJoinPool(256);
 
