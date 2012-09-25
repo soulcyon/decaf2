@@ -132,15 +132,26 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 				}
 			}
 			
-			// Approximation conditions
+			// ---Approximation conditions---
 			if(levels.size() > DECAF.heightThreshold) {
-				return;
-			}
-			
-			if(subTreeRate < DECAF.rateThreshold) {
+				if(DECAF.biasType.equals("low") || DECAF.biasType.equals("hybrid"))
+					forceRates(levels, failureTransition, bfhCopy, subTreeRate);
 				continue nextLevel;
 			}
 			
+			if(subTreeRate < DECAF.rateThreshold) {
+				if(DECAF.biasType.equals("low") || DECAF.biasType.equals("hybrid"))
+					forceRates(levels, failureTransition, bfhCopy, subTreeRate);
+				continue nextLevel;
+			}
+			
+			if(failureTransition.sum() > DECAF.nodeThreshold) {
+				if(DECAF.biasType.equals("low") || DECAF.biasType.equals("hybrid"))
+					forceRates(levels, failureTransition, bfhCopy, subTreeRate);
+				continue nextLevel;
+			}
+			
+			//-------------------------------
 			if (c > 0) {
 				final ArrayList<String> levelsCopy = new ArrayList<String>(levels);
 				levelsCopy.add(newLevel.substring(0, newLevel.length() - 1));
@@ -206,6 +217,64 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 			 */
 			Simulation.qmatrix.setQuick(fIndex, tIndex, currentRate + (rootRate * subTreeRate * complementRate));
 			Simulation.numberOfTrees++;
+		}
+	}
+	
+	private static void forceRates(final List<String> truncatedLevels, final State truncationTransition,
+			final Map<String, ArrayList<String>> truncationBfh, final double partialSubTreeRate) {
+		
+		
+		for(State diff : QMatrixGeneratorUnthreaded.likeTransitionMap.keySet()) {
+			
+			if(diff.compareTo(truncationTransition) <= 0)
+				continue;
+			
+			final List<String> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(diff);
+			
+			for (String transition : likeTransitions) {
+				final String[] fromAndTo = transition.split(",");
+				final int fIndex = Integer.parseInt(fromAndTo[0]);
+				final int tIndex = Integer.parseInt(fromAndTo[1]);
+				final State from = Simulation.states[fIndex];
+				final double currentRate = Simulation.qmatrix.getQuick(fIndex, tIndex);
+				final String rootType = truncatedLevels.get(0).substring(truncatedLevels.get(0).indexOf(":") + 1);
+				final FailureNode root = Simulation.nodeMap.get(rootType);
+				final int nAlgo = root.getRedundancy() - from.getComponentCount(rootType);
+				final double lambda = root.getFailureRates()[from.getDemand()];
+				final double rootRate = nAlgo * lambda;
+				double complementRate = 1.0;
+
+				for (Entry<String, FailureNode> entry : Simulation.nodeMap.entrySet()) {
+					int compsAvailable = entry.getValue().getRedundancy() - from.getComponentCount(entry.getKey());
+					for (String s : truncationBfh.get(entry.getKey())) {
+						if ("|".equals(s)) {
+							--compsAvailable;
+						} else if (compsAvailable > 0) {
+							complementRate *= 1 - Simulation.nodeMap.get(s).getRate(entry.getKey());
+						} else {
+							break;
+						}
+					}
+				}
+
+				/*
+				 * if (verboseDebug) { printAllLevels(levels);
+				 * System.out.println("From:\t" + f + " => " + from.toLine());
+				 * System.out.println("To:\t" + t + " => " +
+				 * Simulation.states[t].toLine());
+				 * System.out.println("Failure Transition:" +
+				 * failureTransition.toLine()); System.out.println("n:\t" + n);
+				 * System.out.println("Lambda:\t" + lambda);
+				 * System.out.println("Root Rate:\t" + rootRate);
+				 * System.out.println("Subtree Rate:\t" + subTreeRate);
+				 * System.out.println("Supertree Rate:\t" + complementRate);
+				 * System.out.println("BFHistory:\t" + breadthFirstHistoryCopy);
+				 * System.out.println("Rate: \t" + (rootRate * subTreeRate *
+				 * complementRate) + "\n\n"); }
+				 */
+				
+				Simulation.qmatrix.setQuick(fIndex, tIndex, currentRate + (rootRate * partialSubTreeRate * complementRate));
+			}
 		}
 	}
 

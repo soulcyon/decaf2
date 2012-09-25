@@ -21,10 +21,12 @@ public class DECAF {
 	protected static final int debugX = 0;
 	protected static final int debugY = 8;
 	protected static final boolean enableThreading = false;
-	public static final int threadCount = 2;
+	public static final int threadCount = 8;
 	public static final ForkJoinPool threadPool = new ForkJoinPool(256);
-	public static final int heightThreshold = 0;
-	public static final double rateThreshold = 0;
+	public static final int heightThreshold = 6;
+	public static final double rateThreshold = 0.0005;
+	public static final int nodeThreshold = 8; 
+	public static final String biasType = "high";
 
 	/**
 	 * Utility function to pretty-print error messages thrown by sub-classes.
