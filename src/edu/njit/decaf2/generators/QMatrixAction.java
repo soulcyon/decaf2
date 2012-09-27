@@ -27,7 +27,7 @@ public class QMatrixAction extends RecursiveAction {
 	private int start;
 	private int end;
 	private int statesLen;
-	
+
 	public QMatrixAction(int x, int y, int len) {
 		start = x;
 		end = y;
@@ -46,10 +46,46 @@ public class QMatrixAction extends RecursiveAction {
 			invokeAll(new QMatrixAction(start, mid, statesLen), new QMatrixAction(mid, end, statesLen));
 		} else {
 			for (int i = start; i < end; i++) {
-				for (int j = i == 0 ? 1 : 0; j < statesLen; j = j == i - 1 ? j + 2 : j + 1) {
-					final double fillV = QMatrixGenerator.fillQMatrix(Simulation.states[i], Simulation.states[j]);
+				here: for (int j = 0; j < statesLen; j++) {
+					if (j == i)
+						continue;
 
-					if (Double.isNaN(fillV)) {
+					State from = Simulation.states[i];
+					State to = Simulation.states[j];
+					boolean repairTransition = true;
+					boolean failedTransition = true;
+					boolean enviroTransition = false;
+					String repair = null;
+					final int fromDemand = from.getDemand();
+					final int toDemand = to.getDemand();
+
+					if (fromDemand != toDemand) {
+						enviroTransition = true;
+					}
+					for (int k = 0; k < QMatrixGenerator.vectorKeys.length; k++) {
+						final int iFrom = from.getVector().get(QMatrixGenerator.vectorKeys[k]);
+						final int iTo = to.getVector().get(QMatrixGenerator.vectorKeys[k]);
+
+						if (enviroTransition && iFrom != iTo) {
+							continue here;
+						} else if (repair == null && repairTransition && iTo == iFrom - 1) {
+							repair = QMatrixGenerator.vectorKeys[k];
+						} else if (iFrom != iTo) {
+							repairTransition = false;
+						}
+						if (iTo < iFrom) {
+							failedTransition = false;
+						}
+					}
+
+					if (enviroTransition) {
+						Simulation.qmatrix.setQuick(i, j, Simulation.demandMatrix[fromDemand][toDemand]);
+					}
+					if (repairTransition && repair != null) {
+						Simulation.qmatrix.setQuick(i, j, (double) from.getVector().get(repair)
+								* Simulation.nodeMap.get(repair).getRepairRates()[fromDemand] / (double) from.sum());
+					}
+					if (failedTransition) {
 						final State differenceState = Simulation.states[i].diff(Simulation.states[j]);
 						final Point point = new Point(i, j);
 
@@ -60,8 +96,6 @@ public class QMatrixAction extends RecursiveAction {
 							temp.add(point);
 							QMatrixGenerator.likeTransitionMap.put(differenceState, temp);
 						}
-					} else {
-						Simulation.qmatrix.setQuick(i, j, fillV);
 					}
 				}
 			}
