@@ -161,7 +161,10 @@ public class State extends DECAF implements Cloneable {
 	 * @param node
 	 */
 	public void incrementComponentCount(FailureNode node) {
-		vector.put(node.getType(), vector.get(node.getType()) + 1);
+		int currentCount = vector.get(node.getType());
+		if( currentCount <= node.getRedundancy() ){
+			vector.put(node.getType(), currentCount + 1);
+		}
 	}
 
 	/**
@@ -171,6 +174,18 @@ public class State extends DECAF implements Cloneable {
 	 */
 	public void updateComponentCount(String type, int count) {
 		vector.put(type, count);
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isMaxedTransition() {
+		for (String k : vector.keySet()) {
+			if( Simulation.nodeMap.get(k).getRedundancy() >= vector.get(k) ){
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -275,19 +290,19 @@ public class State extends DECAF implements Cloneable {
 	 * @return
 	 */
 	public int compareTo(State b) {
-		if( b.demand != demand ){
+		if (b.demand != demand) {
 			return -1;
 		}
-		
+
 		boolean flag = false;
-		for( Entry<String, Integer> k : vector.entrySet() ){
-			if(b.vector.get(k.getKey()) < k.getValue()){
+		for (Entry<String, Integer> k : vector.entrySet()) {
+			if (b.vector.get(k.getKey()) < k.getValue()) {
 				return -1;
-			} else if( b.vector.get(k.getKey()) == k.getValue() ) {
+			} else if (b.vector.get(k.getKey()) == k.getValue()) {
 				flag = true;
 			}
 		}
-		
+
 		return flag ? -1 : 0;
 	}
 }

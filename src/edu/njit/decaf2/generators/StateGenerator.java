@@ -45,8 +45,6 @@ public final class StateGenerator extends DECAF {
 		// Go!
 		combStates(0, new ArrayList<Integer>(), list);
 
-		// Performance enhancement - use toArray rather than creating a new
-		// variable for toArray(<T>)
 		Simulation.states = new State[list.size() * Simulation.demandMatrix.length];
 
 		// Iterate over combinations and add demand changes

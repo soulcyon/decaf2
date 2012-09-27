@@ -14,6 +14,7 @@ import java.util.Set;
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.Simulation;
 import edu.njit.decaf2.structures.FailureNode;
+import edu.njit.decaf2.structures.Point;
 import edu.njit.decaf2.structures.State;
 
 /**
@@ -62,7 +63,7 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 
 			final Map<String, ArrayList<String>> bfhMap = buildBFH();
 			bfhMap.get(entry.getKey()).add("|");
-
+			
 			growSubTree(levels, initialFT, 1.0, bfhMap);
 		}
 	}
@@ -74,9 +75,10 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 	 * @param subRate
 	 * @param bfhMap
 	 */
+	public static int counter = 0;
 	private static void growSubTree(final List<String> levels, final State failureTransition, final double subTreeRate,
 			final Map<String, ArrayList<String>> bfhMap) {
-
+		counter++;
 		final String[] terminalNodes = levels.get(levels.size() - 1).split(",");
 		final ArrayList<Integer> gammaPermutations = new ArrayList<Integer>();
 		final ArrayList<String> terminalTypes = new ArrayList<String>();
@@ -171,13 +173,12 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 	 */
 	private static void processRates(final List<String> levels, final State failureTransition,
 			final Map<String, ArrayList<String>> bfhCopy, final double subTreeRate) {
-		final List<String> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
+		final List<Point> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
 
 		Simulation.numberOfAvoidedTrees += likeTransitions.size() - 1;
-		for (String transition : likeTransitions) {
-			final String[] fromAndTo = transition.split(",");
-			final int fIndex = Integer.parseInt(fromAndTo[0]);
-			final int tIndex = Integer.parseInt(fromAndTo[1]);
+		for (Point transition : likeTransitions) {
+			final int fIndex = transition.getX();
+			final int tIndex = transition.getY();
 			final State from = Simulation.states[fIndex];
 			final double currentRate = Simulation.qmatrix.getQuick(fIndex, tIndex);
 			final String rootType = levels.get(0).substring(levels.get(0).indexOf(":") + 1);
@@ -229,12 +230,11 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 			if(diff.compareTo(truncationTransition) <= 0)
 				continue;
 			
-			final List<String> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(diff);
+			final List<Point> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(diff);
 			
-			for (String transition : likeTransitions) {
-				final String[] fromAndTo = transition.split(",");
-				final int fIndex = Integer.parseInt(fromAndTo[0]);
-				final int tIndex = Integer.parseInt(fromAndTo[1]);
+			for (Point transition : likeTransitions) {
+				final int fIndex = transition.getX();
+				final int tIndex = transition.getY();
 				final State from = Simulation.states[fIndex];
 				final double currentRate = Simulation.qmatrix.getQuick(fIndex, tIndex);
 				final String rootType = truncatedLevels.get(0).substring(truncatedLevels.get(0).indexOf(":") + 1);
@@ -310,7 +310,7 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 	 * @param current
 	 * @param list
 	 */
-	private static void cartesianProduct(final List<Integer> limits, final int index, final List<Integer> current,
+	public static void cartesianProduct(final List<Integer> limits, final int index, final List<Integer> current,
 			final List<ArrayList<Integer>> list) {
 
 		if (current.size() == limits.size()) {

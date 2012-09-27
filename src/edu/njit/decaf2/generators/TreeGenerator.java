@@ -57,7 +57,9 @@ public final class TreeGenerator extends DECAF {
 			}
 		}
 
+		double t = System.nanoTime();
 		DECAF.threadPool.invoke(new TreeAction());
+		System.out.println("  TreeGen:        " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 	}
 
 	/**
@@ -66,7 +68,6 @@ public final class TreeGenerator extends DECAF {
 	 * @return
 	 */
 	private static List<String> powerSet(final Set<String> set) {
-
 		final ArrayList<String> members = new ArrayList<String>(set);
 
 		if (members.isEmpty()) {

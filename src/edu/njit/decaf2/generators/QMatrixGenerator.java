@@ -23,7 +23,7 @@ import edu.njit.decaf2.structures.State;
  * 
  */
 public final class QMatrixGenerator extends DECAF {
-	private static String[] vectorKeys;
+	protected static String[] vectorKeys;
 	protected static Map<State, CopyOnWriteArrayList<Point>> likeTransitionMap;
 
 	/**
@@ -65,7 +65,9 @@ public final class QMatrixGenerator extends DECAF {
 		final int statesLen = Simulation.states.length;
 		RecursiveAction task = new QMatrixAction(0, statesLen, statesLen);
 
+		double t = System.nanoTime();
 		DECAF.threadPool.invoke(task);
+		System.out.println("  FillMatrix:             " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 
 		// Generate trees as required
 		TreeGenerator.initSubTrees();
