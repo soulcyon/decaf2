@@ -44,6 +44,7 @@ public class Simulation {
 
 	public static DenseDoubleMatrix2D qmatrix;
 	public static State[] states;
+	public static HashMap<State, Integer> stateMap = new HashMap<State, Integer>();
 	public static double[][] demandMatrix;
 	public static ArrayList<String> typeList = new ArrayList<String>();
 	public static HashMap<String, FailureNode> nodeMap = new HashMap<String, FailureNode>();
@@ -86,6 +87,10 @@ public class Simulation {
 
 		resultProcessing += System.nanoTime() - t;
 		System.out.println("State Generation:         " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
+		
+		for( int i = 0; i < states.length; i++ ){
+			stateMap.put(states[i], i);
+		}
 
 		/* ------------------ QMatrix Generation ------------------ */
 		t = System.nanoTime();
@@ -107,7 +112,7 @@ public class Simulation {
 
 		resultProcessing += System.nanoTime() - t;
 		System.out.println("QMatrix Generation:       " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
-
+		
 		if (DECAF.sriniOutput) {
 			t = System.nanoTime();
 			try {
@@ -137,9 +142,9 @@ public class Simulation {
 		t = System.nanoTime();
 
 		if (DECAF.enableThreading) {
-			steadyStateUnavailability = DependabilityUnthreaded.calculateSSU();
+			//steadyStateUnavailability = DependabilityUnthreaded.calculateSSU();
 		} else {
-			steadyStateUnavailability = DependabilityUnthreaded.calculateSSU();
+			//steadyStateUnavailability = DependabilityUnthreaded.calculateSSU();
 		}
 
 		System.out.println("Calculate SSU:            " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
