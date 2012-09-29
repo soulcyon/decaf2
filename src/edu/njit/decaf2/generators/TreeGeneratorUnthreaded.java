@@ -136,19 +136,19 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 			
 			// ---Approximation conditions---
 			if(levels.size() > DECAF.heightThreshold) {
-				if(DECAF.biasType.equals("low") || DECAF.biasType.equals("hybrid"))
+				if(DECAF.biasType.equals("high") || DECAF.biasType.equals("hybrid"))
 					forceRates(levels, failureTransition, bfhCopy, subTreeRate);
 				continue nextLevel;
 			}
 			
 			if(subTreeRate < DECAF.rateThreshold) {
-				if(DECAF.biasType.equals("low") || DECAF.biasType.equals("hybrid"))
+				if(DECAF.biasType.equals("high") || DECAF.biasType.equals("hybrid"))
 					forceRates(levels, failureTransition, bfhCopy, subTreeRate);
 				continue nextLevel;
 			}
 			
 			if(failureTransition.sum() > DECAF.nodeThreshold) {
-				if(DECAF.biasType.equals("low") || DECAF.biasType.equals("hybrid"))
+				if(DECAF.biasType.equals("high") || DECAF.biasType.equals("hybrid"))
 					forceRates(levels, failureTransition, bfhCopy, subTreeRate);
 				continue nextLevel;
 			}
@@ -216,6 +216,7 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 			 * System.out.println("Rate: \t" + (rootRate * subTreeRate *
 			 * complementRate) + "\n\n"); }
 			 */
+			
 			Simulation.qmatrix.setQuick(fIndex, tIndex, currentRate + (rootRate * subTreeRate * complementRate));
 			Simulation.numberOfTrees++;
 		}
@@ -233,26 +234,32 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 			final List<Point> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(diff);
 			
 			for (Point transition : likeTransitions) {
+				
 				final int fIndex = transition.getX();
 				final int tIndex = transition.getY();
 				final State from = Simulation.states[fIndex];
 				final double currentRate = Simulation.qmatrix.getQuick(fIndex, tIndex);
-				final String rootType = truncatedLevels.get(0).substring(truncatedLevels.get(0).indexOf(":") + 1);
-				final FailureNode root = Simulation.nodeMap.get(rootType);
-				final int nAlgo = root.getRedundancy() - from.getComponentCount(rootType);
-				final double lambda = root.getFailureRates()[from.getDemand()];
-				final double rootRate = nAlgo * lambda;
+				
+				double rootRate = 1.0;
 				double complementRate = 1.0;
-
-				for (Entry<String, FailureNode> entry : Simulation.nodeMap.entrySet()) {
-					int compsAvailable = entry.getValue().getRedundancy() - from.getComponentCount(entry.getKey());
-					for (String s : truncationBfh.get(entry.getKey())) {
-						if ("|".equals(s)) {
-							--compsAvailable;
-						} else if (compsAvailable > 0) {
-							complementRate *= 1 - Simulation.nodeMap.get(s).getRate(entry.getKey());
-						} else {
-							break;
+				
+				if(DECAF.completeTreeRate) {
+					final String rootType = truncatedLevels.get(0).substring(truncatedLevels.get(0).indexOf(":") + 1);
+					final FailureNode root = Simulation.nodeMap.get(rootType);
+					final int nAlgo = root.getRedundancy() - from.getComponentCount(rootType);
+					final double lambda = root.getFailureRates()[from.getDemand()];
+					rootRate = nAlgo * lambda;
+					
+					for (Entry<String, FailureNode> entry : Simulation.nodeMap.entrySet()) {
+						int compsAvailable = entry.getValue().getRedundancy() - from.getComponentCount(entry.getKey());
+						for (String s : truncationBfh.get(entry.getKey())) {
+							if ("|".equals(s)) {
+								--compsAvailable;
+							} else if (compsAvailable > 0) {
+								complementRate *= 1 - Simulation.nodeMap.get(s).getRate(entry.getKey());
+							} else {
+								break;
+							}
 						}
 					}
 				}
