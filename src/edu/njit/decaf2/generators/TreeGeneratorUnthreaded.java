@@ -173,10 +173,12 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 	 */
 	private static void processRates(final List<String> levels, final State failureTransition,
 			final Map<String, ArrayList<String>> bfhCopy, final double subTreeRate) {
+		
 		final List<Point> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
-
-		Simulation.numberOfAvoidedTrees += likeTransitions.size() - 1;
+		Simulation.numberOfAvoidedTrees--;
+		
 		for (Point transition : likeTransitions) {
+			Simulation.numberOfAvoidedTrees++;
 			final int fIndex = transition.getX();
 			final int tIndex = transition.getY();
 			final State from = Simulation.states[fIndex];
@@ -200,23 +202,6 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 					}
 				}
 			}
-
-			/*
-			 * if (verboseDebug) { printAllLevels(levels);
-			 * System.out.println("From:\t" + f + " => " + from.toLine());
-			 * System.out.println("To:\t" + t + " => " +
-			 * Simulation.states[t].toLine());
-			 * System.out.println("Failure Transition:" +
-			 * failureTransition.toLine()); System.out.println("n:\t" + n);
-			 * System.out.println("Lambda:\t" + lambda);
-			 * System.out.println("Root Rate:\t" + rootRate);
-			 * System.out.println("Subtree Rate:\t" + subTreeRate);
-			 * System.out.println("Supertree Rate:\t" + complementRate);
-			 * System.out.println("BFHistory:\t" + breadthFirstHistoryCopy);
-			 * System.out.println("Rate: \t" + (rootRate * subTreeRate *
-			 * complementRate) + "\n\n"); }
-			 */
-			
 			Simulation.qmatrix.setQuick(fIndex, tIndex, currentRate + (rootRate * subTreeRate * complementRate));
 			Simulation.numberOfTrees++;
 		}
@@ -224,7 +209,6 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 	
 	private static void forceRates(final List<String> truncatedLevels, final State truncationTransition,
 			final Map<String, ArrayList<String>> truncationBfh, final double partialSubTreeRate) {
-		
 		
 		for(State diff : QMatrixGeneratorUnthreaded.likeTransitionMap.keySet()) {
 			

@@ -17,7 +17,6 @@ import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;
 
 import com.ctc.wstx.sax.WstxSAXParserFactory;
 
-import edu.njit.decaf2.generators.Dependability;
 import edu.njit.decaf2.generators.DependabilityUnthreaded;
 import edu.njit.decaf2.generators.QMatrixGenerator;
 import edu.njit.decaf2.generators.QMatrixGeneratorUnthreaded;
@@ -37,6 +36,12 @@ public class Simulation {
 	private boolean debug;
 	public static double meanTimeToFailure;
 	public static double steadyStateUnavailability;
+
+	public static double treeGenerationTime;
+	public static double stateGenerationTime;
+	public static double mttfCalculationTime;
+	public static double ssuCalculationTime;
+	public static double qMatrixTime;
 	public static int numberOfTrees;
 	public static int numberOfAvoidedTrees;
 	public static int numberOfUniqueTrees;
@@ -49,6 +54,29 @@ public class Simulation {
 	public static ArrayList<String> typeList = new ArrayList<String>();
 	public static HashMap<String, FailureNode> nodeMap = new HashMap<String, FailureNode>();
 
+	public Simulation(){
+		debug = true;
+		meanTimeToFailure = 0;
+		steadyStateUnavailability = 0;
+		treeGenerationTime = 0;
+		stateGenerationTime = 0;
+		mttfCalculationTime = 0;
+		ssuCalculationTime = 0;
+		qMatrixTime = 0;
+		
+		numberOfTrees = 0;
+		numberOfAvoidedTrees = 0;
+		numberOfUniqueTrees = 0;
+		numberOfTransitions = 0;
+		
+		qmatrix = null;
+		states = new State[0];
+		stateMap = new HashMap<State, Integer>();
+		demandMatrix = new double[0][0];
+		typeList = new ArrayList<String>();
+		nodeMap = new HashMap<String, FailureNode>();
+	}
+	
 	/**
 	 * Run through console. Initializes new instance of Simulation and runs
 	 * appropriate algorithms.
@@ -58,14 +86,15 @@ public class Simulation {
 	public static void main(String[] args) {
 		Simulation sim = new Simulation();
 		sim.setDebug(true);
-		sim.run();
+		sim.run("data/input.xml");
 	}
 
 	/**
 	 * Runs with CPU Time stopwatch. Set DECAF.VerboseDebug = true for detailed
 	 * statistics.
+	 * @param qMatrixTime 
 	 */
-	private void debug_run() {
+	private void debug_run(String input) {
 		if (!debug) {
 			return;
 		}
@@ -74,11 +103,9 @@ public class Simulation {
 		double t = System.nanoTime();
 
 		/* ------------------ XML PARSING ------------------ */
-		loadSimulationData("data/input.xml");
+		loadSimulationData(input);
 
 		resultProcessing += System.nanoTime() - t;
-
-		System.out.println("XML Parsing:              " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
 
 		/* ------------------ State Generation ------------------ */
 		t = System.nanoTime();
@@ -86,9 +113,9 @@ public class Simulation {
 		StateGenerator.generateStates();
 
 		resultProcessing += System.nanoTime() - t;
-		System.out.println("State Generation:         " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
-		
-		for( int i = 0; i < states.length; i++ ){
+		stateGenerationTime = (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0;
+
+		for (int i = 0; i < states.length; i++) {
 			stateMap.put(states[i], i);
 		}
 
@@ -103,7 +130,7 @@ public class Simulation {
 		String[] nodeKeyArray = new String[nodeMap.keySet().size()];
 		nodeMap.keySet().toArray(nodeKeyArray);
 		Simulation.qmatrix = new DenseDoubleMatrix2D(states.length, states.length);
-
+		
 		if (DECAF.enableThreading) {
 			QMatrixGenerator.generateQMatrix();
 		} else {
@@ -111,8 +138,8 @@ public class Simulation {
 		}
 
 		resultProcessing += System.nanoTime() - t;
-		System.out.println("QMatrix Generation:       " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
-		
+		qMatrixTime = (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0;
+
 		if (DECAF.sriniOutput) {
 			t = System.nanoTime();
 			try {
@@ -135,22 +162,29 @@ public class Simulation {
 			meanTimeToFailure = DependabilityUnthreaded.calculateMTTF();
 		}
 
-		System.out.println("Calculate MTTF:           " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
+		mttfCalculationTime = (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0;
 		resultProcessing += System.nanoTime() - t;
 
 		/* ------------------ SSU Calculation ------------------ */
 		t = System.nanoTime();
 
 		if (DECAF.enableThreading) {
-			//steadyStateUnavailability = DependabilityUnthreaded.calculateSSU();
+			// steadyStateUnavailability =
+			// DependabilityUnthreaded.calculateSSU();
 		} else {
-			//steadyStateUnavailability = DependabilityUnthreaded.calculateSSU();
+			// steadyStateUnavailability =
+			// DependabilityUnthreaded.calculateSSU();
 		}
 
-		System.out.println("Calculate SSU:            " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0 + " s");
+		ssuCalculationTime = (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0;
 		resultProcessing += System.nanoTime() - t;
 
 		/* ------------------ Generic Statistics ------------------ */
+		System.out.println("State Gen Time:           " + stateGenerationTime);
+		System.out.println("Tree Gen Time:            " + treeGenerationTime);
+		System.out.println("QMatrix Gen Time:         " + qMatrixTime);
+		System.out.println("MTTF Calc Time:           " + mttfCalculationTime);
+		System.out.println("SSU Calc Time:            " + ssuCalculationTime);
 		System.out.println("");
 		System.out.println("Number of States:         " + states.length);
 		System.out.println("Number of Trees:          " + numberOfTrees);
@@ -161,17 +195,17 @@ public class Simulation {
 		System.out.println("Mean Time To Failure:     " + meanTimeToFailure + " s");
 		System.out.println("SS Unavailability:        " + steadyStateUnavailability);
 		System.out.println("Total CPU Time:           " + resultProcessing / 1000.0 / 1000.0 / 1000.0 + " s");
-
-		System.exit(-1);
+		
+		System.out.println("im done");
+		return;
 	}
 
 	/**
 	 * ===Note=== Deprecated until debug_run is finalized.
 	 */
-	private void run() {
+	public void run(String input) {
 		if (debug) {
-			debug_run();
-			return;
+			debug_run(input);
 		}
 	}
 

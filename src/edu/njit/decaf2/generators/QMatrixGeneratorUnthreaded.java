@@ -6,7 +6,6 @@ package edu.njit.decaf2.generators;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import edu.njit.decaf2.DECAF;
@@ -59,9 +58,10 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 	 */
 	public static void generateQMatrix() {
 		double t = System.nanoTime();
-		
+
 		// TESTING OF VERSION 3 QMATRIX GENERATION
 		final int statesLen = Simulation.states.length;
+
 		/*final int demandLen = Simulation.demandMatrix.length;
 		
 		for (int i = 0; i < statesLen / demandLen; i++) {
@@ -102,6 +102,7 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 			}
 		}*/
 		
+		
 		// Iterate over matrix, ignore diagonal
 		for (int i = 0; i < statesLen; i++) {
 			for (int j = 0; j < statesLen; j++) {
@@ -127,13 +128,14 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 				}
 			}
 		}
-		
-		System.out.println("---Matrix Iteration Time: " + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
-		
+
+		//System.out.println("---Matrix Iteration Time: " + (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0);
+
 		t = System.nanoTime();
 		// Generate trees as required
 		TreeGeneratorUnthreaded.initSubTrees();
-		System.out.println("---Time to Gen Trees:     " + (System.nanoTime() - t)/1000.0/1000.0/1000.0);
+		/*System.out.println("---Time to Gen Trees:     "
+				+ (*/Simulation.treeGenerationTime = (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0/*))*/;
 
 		// Fill diagonals with negative row sum
 		for (int i = 0; i < statesLen; i++) {
@@ -215,7 +217,14 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 					Simulation.numberOfTransitions++;
 				}
 			}
+			for (Point j : value) {
+				if (Simulation.qmatrix.getQuick(j.getX(), j.getY()) != 0) {
+					Simulation.numberOfUniqueTrees++;
+					break;
+				}
+			}
 		}
+		Simulation.numberOfUniqueTrees += Simulation.nodeMap.size();
 	}
 
 	/**

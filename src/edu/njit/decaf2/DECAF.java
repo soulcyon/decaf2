@@ -22,12 +22,12 @@ public class DECAF {
 	public static final int debugY = 8;
 	public static final boolean enableThreading = false;
 	public static final int threadCount = 4;
-	public static final ForkJoinPool threadPool = new ForkJoinPool(256);
-	public static final int heightThreshold = 100;
-	public static final double rateThreshold = 0;
-	public static final int nodeThreshold = 100; 
-	public static final String biasType = "high";
-	public static final boolean completeTreeRate = true;
+	public static ForkJoinPool threadPool = new ForkJoinPool(256);
+	public static int heightThreshold = 100;
+	public static double rateThreshold = 0;
+	public static int nodeThreshold = 100; 
+	public static String biasType = "high";
+	public static boolean completeTreeRate = true;
 
 	/**
 	 * Utility function to pretty-print error messages thrown by sub-classes.

@@ -30,7 +30,7 @@ import edu.njit.decaf2.Simulation;
  * 
  */
 public final class DependabilityUnthreaded extends DECAF {
-	private static Set<Integer> systemDownStates = new HashSet<Integer>();
+	public static Set<Integer> systemDownStates = new HashSet<Integer>();
 
 	/**
 	 * 
