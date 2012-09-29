@@ -4,6 +4,8 @@
  */
 package edu.njit.decaf2.benchmarks;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.util.HashSet;
 
 import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;
@@ -19,7 +21,10 @@ import edu.njit.decaf2.generators.QMatrixGeneratorUnthreaded;
  * @version 2.0
  * 
  */
-public class ResearchBenches_LowBias {
+public class ResearchBenches {
+	private static boolean toCSV = true;
+	private static StringBuffer resultCSV = new StringBuffer();
+	
 	public static double treeGenTime = 0;
 	public static double stateGenTime = 0;
 	public static double mttf = 0;
@@ -27,7 +32,20 @@ public class ResearchBenches_LowBias {
 	public static double totalTrees = 0;
 	public static double avoidedTrees = 0;
 	public static double uniqueTrees = 0;
+	
+	private static int cCount = 0;
+	private static String[] types = new String[4];
+	private static double[] effs = new double[4];
+	private static double[] treeTimes = new double[8];
+	private static double[] mttfs = new double[8];
+	private static double[] treeCounts = new double[8];
+	private static double[] avoidedCounts = new double[8];
+	private static double[] uniqueCounts = new double[8];
 
+	/**
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		DECAF.biasType = "low";
 		DECAF.heightThreshold = 100;
@@ -43,6 +61,7 @@ public class ResearchBenches_LowBias {
 		totalTrees = Simulation.numberOfTrees;
 		avoidedTrees = Simulation.numberOfAvoidedTrees;
 		uniqueTrees = Simulation.numberOfUniqueTrees;
+		resultCSV.append("States," + Simulation.states.length + "\n");
 		System.gc();
 		Runtime.getRuntime().gc();
 		
@@ -59,7 +78,8 @@ public class ResearchBenches_LowBias {
 
 		DECAF.heightThreshold = 6;
 		executeSimulation();
-
+		nextRun();
+		
 		// Run rate threshold trials
 		DECAF.heightThreshold = 100;
 		DECAF.rateThreshold = 0.1;
@@ -73,7 +93,8 @@ public class ResearchBenches_LowBias {
 
 		DECAF.rateThreshold = 0.0001;
 		executeSimulation();
-
+		nextRun();
+		
 		// Run height and rate threshold trials
 		DECAF.heightThreshold = 3;
 		DECAF.rateThreshold = 0.1;
@@ -87,6 +108,7 @@ public class ResearchBenches_LowBias {
 
 		DECAF.rateThreshold = 0.0001;
 		executeSimulation();
+		nextRun();
 
 		DECAF.heightThreshold = 4;
 		DECAF.rateThreshold = 0.1;
@@ -100,6 +122,7 @@ public class ResearchBenches_LowBias {
 
 		DECAF.rateThreshold = 0.0001;
 		executeSimulation();
+		nextRun();
 
 		DECAF.heightThreshold = 5;
 		DECAF.rateThreshold = 0.1;
@@ -113,6 +136,7 @@ public class ResearchBenches_LowBias {
 
 		DECAF.rateThreshold = 0.0001;
 		executeSimulation();
+		nextRun();
 
 		DECAF.heightThreshold = 6;
 		DECAF.rateThreshold = 0.1;
@@ -126,6 +150,17 @@ public class ResearchBenches_LowBias {
 
 		DECAF.rateThreshold = 0.0001;
 		executeSimulation();
+		
+		if( toCSV ){
+			try{
+				FileWriter fstream = new FileWriter("Bench" + Simulation.states.length + "." + DECAF.biasType + ".csv");
+				BufferedWriter out = new BufferedWriter(fstream);
+				out.write(resultCSV.toString());
+				out.close();
+			}catch (Exception e){
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/**
@@ -141,9 +176,106 @@ public class ResearchBenches_LowBias {
 		QMatrixGeneratorUnthreaded.generateQMatrix();
 		DependabilityUnthreaded.systemDownStates = new HashSet<Integer>();
 		Simulation.meanTimeToFailure = DependabilityUnthreaded.calculateMTTF();
-		printTrialResults();
+		
+		if( toCSV ){
+			buildCSV();
+		} else {
+			printTrialResults();
+		}
 		System.gc();
 		Runtime.getRuntime().gc();
+	}
+	
+	private static void buildCSV(){
+		types[cCount/2] = DECAF.heightThreshold + "h / " + DECAF.rateThreshold + "r";
+		treeTimes[cCount] = Simulation.treeGenerationTime;
+		treeTimes[cCount + 1] = Math.abs((Simulation.treeGenerationTime / treeGenTime) - 1);
+		
+		mttfs[cCount] = Simulation.meanTimeToFailure;
+		mttfs[cCount + 1] = Math.abs((Simulation.meanTimeToFailure / mttf) - 1);
+		
+		effs[cCount/2] = (1 - mttfs[cCount + 1]) * treeTimes[cCount + 1];
+		
+		treeCounts[cCount] = Simulation.numberOfTrees;
+		treeCounts[cCount + 1] = Math.abs((Simulation.numberOfTrees / totalTrees) - 1);
+		
+		avoidedCounts[cCount] = Simulation.numberOfAvoidedTrees;
+		avoidedCounts[cCount + 1] = Math.abs((Simulation.numberOfAvoidedTrees / avoidedTrees) - 1);
+		
+		uniqueCounts[cCount] = Simulation.numberOfUniqueTrees;
+		uniqueCounts[cCount + 1] = Math.abs((Simulation.numberOfUniqueTrees / uniqueTrees) - 1);
+		cCount+=2;
+	}
+	
+	private static void nextRun(){
+		resultCSV = resultCSV.append("\n").append(",,")
+		.append(types[0]).append(",").append("Discrep %").append(",")
+		.append(types[1]).append(",").append("Discrep %").append(",")
+		.append(types[2]).append(",").append("Discrep %").append(",")
+		.append(types[3]).append(",").append("Discrep %").append("\n")
+		.append("Tree Time,")
+		.append(treeGenTime).append(",")
+		.append(treeTimes[0]).append(",")
+		.append(treeTimes[1] * 100 + "%").append(",")
+		.append(treeTimes[2]).append(",")
+		.append(treeTimes[3] * 100 + "%").append(",")
+		.append(treeTimes[4]).append(",")
+		.append(treeTimes[5] * 100 + "%").append(",")
+		.append(treeTimes[6]).append(",")
+		.append(treeTimes[7] * 100 + "%").append("\n")
+		.append("MTTF,")
+		.append(mttf).append(",")
+		.append(mttfs[0]).append(",")
+		.append(mttfs[1] * 100 + "%").append(",")
+		.append(mttfs[2]).append(",")
+		.append(mttfs[3] * 100 + "%").append(",")
+		.append(mttfs[4]).append(",")
+		.append(mttfs[5] * 100 + "%").append(",")
+		.append(mttfs[6]).append(",")
+		.append(mttfs[7] * 100 + "%").append("\n")
+		.append("Efficiency").append(",,")
+		.append(effs[0]).append(",,")
+		.append(effs[1]).append(",,")
+		.append(effs[2]).append(",,")
+		.append(effs[3]).append("\n")
+		.append("Total Trees,")
+		.append(totalTrees).append(",")
+		.append(treeCounts[0]).append(",")
+		.append(treeCounts[1] * 100 + "%").append(",")
+		.append(treeCounts[2]).append(",")
+		.append(treeCounts[3] * 100 + "%").append(",")
+		.append(treeCounts[4]).append(",")
+		.append(treeCounts[5] * 100 + "%").append(",")
+		.append(treeCounts[6]).append(",")
+		.append(treeCounts[7] * 100 + "%").append("\n")
+		.append("Avoided Trees,")
+		.append(avoidedTrees).append(",")
+		.append(avoidedCounts[0]).append(",")
+		.append(avoidedCounts[1] * 100 + "%").append(",")
+		.append(avoidedCounts[2]).append(",")
+		.append(avoidedCounts[3] * 100 + "%").append(",")
+		.append(avoidedCounts[4]).append(",")
+		.append(avoidedCounts[5] * 100 + "%").append(",")
+		.append(avoidedCounts[6]).append(",")
+		.append(avoidedCounts[7] * 100 + "%").append("\n")
+		.append("Unique Trees,")
+		.append(uniqueTrees).append(",")
+		.append(uniqueCounts[0]).append(",")
+		.append(uniqueCounts[1] * 100 + "%").append(",")
+		.append(uniqueCounts[2]).append(",")
+		.append(uniqueCounts[3] * 100 + "%").append(",")
+		.append(uniqueCounts[4]).append(",")
+		.append(uniqueCounts[5] * 100 + "%").append(",")
+		.append(uniqueCounts[6]).append(",")
+		.append(uniqueCounts[7] * 100 + "%").append("\n");
+		cCount = 0;
+		types = new String[4];
+		effs = new double[4];
+		treeTimes = new double[8];
+		mttfs = new double[8];
+		treeCounts = new double[8];
+		avoidedCounts = new double[8];
+		uniqueCounts = new double[8];
 	}
 
 	private static void printTrialResults() {

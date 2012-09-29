@@ -196,7 +196,6 @@ public class Simulation {
 		System.out.println("SS Unavailability:        " + steadyStateUnavailability);
 		System.out.println("Total CPU Time:           " + resultProcessing / 1000.0 / 1000.0 / 1000.0 + " s");
 		
-		System.out.println("im done");
 		return;
 	}
 
