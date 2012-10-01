@@ -111,7 +111,6 @@ public class Simulation {
 		t = System.nanoTime();
 
 		StateGenerator.generateStates();
-
 		resultProcessing += System.nanoTime() - t;
 		stateGenerationTime = (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0;
 

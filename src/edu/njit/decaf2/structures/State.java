@@ -291,18 +291,18 @@ public class State extends DECAF implements Cloneable {
 	 */
 	public int compareTo(State b) {
 		if (b.demand != demand) {
-			return -1;
+			return -2;
 		}
 
 		boolean flag = false;
 		for (Entry<String, Integer> k : vector.entrySet()) {
 			if (b.vector.get(k.getKey()) < k.getValue()) {
 				return -1;
-			} else if (b.vector.get(k.getKey()) == k.getValue()) {
+			} else if (b.vector.get(k.getKey()) > k.getValue()) {
 				flag = true;
 			}
 		}
 
-		return flag ? -1 : 0;
+		return flag ? 1 : 0;
 	}
 }
