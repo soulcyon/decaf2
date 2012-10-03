@@ -69,7 +69,6 @@ public class Simulation {
 		numberOfUniqueTrees = 0;
 		numberOfTransitions = 0;
 		
-		qmatrix = null;
 		states = new State[0];
 		stateMap = new HashMap<State, Integer>();
 		demandMatrix = new double[0][0];

@@ -34,7 +34,7 @@ public class DECAF_SAXHandler extends DefaultHandler {
 	 * Resulting data
 	 */
 	private double[][] demandMatrix;
-	private static ArrayList<String> typeList = new ArrayList<String>();
+	private ArrayList<String> typeList = new ArrayList<String>();
 	private ConcurrentHashMap<String, FailureNode> nodeCache = new ConcurrentHashMap<String, FailureNode>();
 
 	/*
@@ -68,7 +68,36 @@ public class DECAF_SAXHandler extends DefaultHandler {
 	private int currentDemandChangeFrom;
 	private int currentDemandChangeTo;
 
-	public static DefaultHandler getInstance() {
+	public static void clear(){
+		getInstance().demandMatrix = null;
+		getInstance().typeList = new ArrayList<String>();
+		getInstance().nodeCache = new ConcurrentHashMap<String, FailureNode>();
+		getInstance().grabDemandInfo = false;
+		getInstance().grabDemandChangeTo = false;
+		getInstance().grabDemandChangeRate = false;
+		getInstance().grabComponentInfo = false;
+		getInstance().grabComponent = false;
+		getInstance().grabCompType = false;
+		getInstance().grabCompRedundancy = false;
+		getInstance().grabCompRequired = false;
+		getInstance().grabCompDemand = false;
+		getInstance().grabCascading = false;
+		getInstance().grabCompDemandRate = false;
+		getInstance().grabCompDemandRepair = false;
+		getInstance().grabDemandLevels = false;
+		getInstance().cascadingCache = new HashMap<String, List<String>>();
+		getInstance().currentDemand = 0;
+		getInstance().currentType = "";
+		getInstance().currentRequired = 0;
+		getInstance().currentRedundancy = 0;
+		getInstance().currentRepairRates = null;
+		getInstance().currentFailureRates = null;
+		getInstance().currentCascadingType = "";
+		getInstance().currentDemandChangeFrom = 0;
+		getInstance().currentDemandChangeTo = 0;
+	}
+	
+	public static DECAF_SAXHandler getInstance() {
 		return instance == null ? instance = new DECAF_SAXHandler() : instance;
 	}
 
@@ -248,13 +277,13 @@ public class DECAF_SAXHandler extends DefaultHandler {
 
 	public static HashMap<String, FailureNode> getNodeMap() {
 		HashMap<String, FailureNode> temp = new HashMap<String, FailureNode>();
-		for (String k : typeList) {
+		for (String k : getInstance().typeList) {
 			temp.put(k, instance.nodeCache.get(k));
 		}
 		return temp;
 	}
 
 	public static ArrayList<String> getTypeList() {
-		return typeList;
+		return getInstance().typeList;
 	}
 }

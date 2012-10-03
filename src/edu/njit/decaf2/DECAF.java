@@ -27,7 +27,7 @@ public class DECAF {
 	public static double rateThreshold = 0;
 	public static int nodeThreshold = 100; 
 	public static String biasType = "high";
-	public static boolean completeTreeRate = false;
+	public static boolean completeTreeRate = true;
 
 	/**
 	 * Utility function to pretty-print error messages thrown by sub-classes.

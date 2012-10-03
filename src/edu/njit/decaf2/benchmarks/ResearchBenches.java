@@ -6,13 +6,10 @@ package edu.njit.decaf2.benchmarks;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.util.HashSet;
 
-import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;
 import edu.njit.decaf2.DECAF;
+import edu.njit.decaf2.DECAF_SAXHandler;
 import edu.njit.decaf2.Simulation;
-import edu.njit.decaf2.generators.DependabilityUnthreaded;
-import edu.njit.decaf2.generators.QMatrixGeneratorUnthreaded;
 
 /**
  * DECAF - ResearchBenches_LowBias
@@ -47,7 +44,8 @@ public class ResearchBenches {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		DECAF.biasType = "low";
+		DECAF.biasType = "high";
+		DECAF.completeTreeRate = false;
 		DECAF.heightThreshold = 100;
 		DECAF.rateThreshold = 0;
 
@@ -150,6 +148,7 @@ public class ResearchBenches {
 
 		DECAF.rateThreshold = 0.0001;
 		executeSimulation();
+		nextRun();
 		
 		if( toCSV ){
 			try{
@@ -167,15 +166,9 @@ public class ResearchBenches {
 	 * 
 	 */
 	private static void executeSimulation() {
-		Simulation.numberOfTrees = 0;
-		Simulation.numberOfAvoidedTrees = 0;
-		Simulation.numberOfUniqueTrees = 0;
-		Simulation.numberOfTransitions = 0;
-		Simulation.qmatrix = new DenseDoubleMatrix2D(Simulation.states.length, Simulation.states.length);
-		QMatrixGeneratorUnthreaded.init();
-		QMatrixGeneratorUnthreaded.generateQMatrix();
-		DependabilityUnthreaded.systemDownStates = new HashSet<Integer>();
-		Simulation.meanTimeToFailure = DependabilityUnthreaded.calculateMTTF();
+		DECAF_SAXHandler.clear();
+		Simulation sim = new Simulation();
+		sim.run("data/input.xml");
 		
 		if( toCSV ){
 			buildCSV();
@@ -189,7 +182,7 @@ public class ResearchBenches {
 	private static void buildCSV(){
 		types[cCount/2] = DECAF.heightThreshold + "h / " + DECAF.rateThreshold + "r";
 		treeTimes[cCount] = Simulation.treeGenerationTime;
-		treeTimes[cCount + 1] = Math.abs((Simulation.treeGenerationTime / treeGenTime) - 1);
+		treeTimes[cCount + 1] = 1 - (Simulation.treeGenerationTime / treeGenTime);
 		
 		mttfs[cCount] = Simulation.meanTimeToFailure;
 		mttfs[cCount + 1] = Math.abs((Simulation.meanTimeToFailure / mttf) - 1);
@@ -197,13 +190,13 @@ public class ResearchBenches {
 		effs[cCount/2] = (1 - mttfs[cCount + 1]) * treeTimes[cCount + 1];
 		
 		treeCounts[cCount] = Simulation.numberOfTrees;
-		treeCounts[cCount + 1] = Math.abs((Simulation.numberOfTrees / totalTrees) - 1);
+		treeCounts[cCount + 1] = 1 - (Simulation.numberOfTrees / totalTrees);
 		
 		avoidedCounts[cCount] = Simulation.numberOfAvoidedTrees;
-		avoidedCounts[cCount + 1] = Math.abs((Simulation.numberOfAvoidedTrees / avoidedTrees) - 1);
+		avoidedCounts[cCount + 1] = 1 - (Simulation.numberOfAvoidedTrees / avoidedTrees);
 		
 		uniqueCounts[cCount] = Simulation.numberOfUniqueTrees;
-		uniqueCounts[cCount + 1] = Math.abs((Simulation.numberOfUniqueTrees / uniqueTrees) - 1);
+		uniqueCounts[cCount + 1] = 1 - (Simulation.numberOfUniqueTrees / uniqueTrees);
 		cCount+=2;
 	}
 	
