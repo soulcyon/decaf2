@@ -16,7 +16,7 @@ import java.util.concurrent.ForkJoinPool;
  */
 public class DECAF {
 	public static final boolean sriniOutput = false;
-	public static final boolean forceStateDemandValidate = true;
+	public static final boolean forceStateDemandValidate = false;
 	public static final boolean verboseDebug = false;
 	public static final int debugX = 0;
 	public static final int debugY = 8;
@@ -25,7 +25,8 @@ public class DECAF {
 	public static ForkJoinPool threadPool = new ForkJoinPool(256);
 	public static int heightThreshold = 100;
 	public static double rateThreshold = 0;
-	public static int nodeThreshold = 100; 
+	public static int nodeThreshold = 100;
+	public static int treeThreshold = 400;
 	public static String biasType = "high";
 	public static boolean completeTreeRate = true;
 

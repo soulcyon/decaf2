@@ -37,6 +37,7 @@ public class Simulation {
 	public static double meanTimeToFailure;
 	public static double steadyStateUnavailability;
 
+	public static double xmlGenerationTime;
 	public static double treeGenerationTime;
 	public static double stateGenerationTime;
 	public static double mttfCalculationTime;
@@ -105,6 +106,7 @@ public class Simulation {
 		loadSimulationData(input);
 
 		resultProcessing += System.nanoTime() - t;
+		xmlGenerationTime = (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0;
 
 		/* ------------------ State Generation ------------------ */
 		t = System.nanoTime();
@@ -178,6 +180,7 @@ public class Simulation {
 		resultProcessing += System.nanoTime() - t;
 
 		/* ------------------ Generic Statistics ------------------ */
+		System.out.println("XML Load Time:            " + xmlGenerationTime);
 		System.out.println("State Gen Time:           " + stateGenerationTime);
 		System.out.println("Tree Gen Time:            " + treeGenerationTime);
 		System.out.println("QMatrix Gen Time:         " + qMatrixTime);

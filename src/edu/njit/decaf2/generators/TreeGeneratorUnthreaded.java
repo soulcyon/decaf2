@@ -5,17 +5,21 @@
 package edu.njit.decaf2.generators;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javolution.util.FastMap;
+
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.Simulation;
+import edu.njit.decaf2.structures.DelegateStore;
 import edu.njit.decaf2.structures.FailureNode;
 import edu.njit.decaf2.structures.Point;
 import edu.njit.decaf2.structures.State;
+import edu.njit.decaf2.structures.PowerSetComparator;
 
 /**
  * 
@@ -27,7 +31,9 @@ import edu.njit.decaf2.structures.State;
  */
 public final class TreeGeneratorUnthreaded extends DECAF {
 	private static Map<String, List<String>> binaryEnumCache;
-
+	private static Map<String, ArrayList<DelegateStore>> delegateCallStores;
+	//private static int nextRoot = 0;
+	
 	/**
 	 * 
 	 */
@@ -44,13 +50,15 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 	}
 
 	public static void initSubTrees() {
-		binaryEnumCache = new HashMap<String, List<String>>();
-
+		binaryEnumCache = new FastMap<String, List<String>>();
+		delegateCallStores = new FastMap<String, ArrayList<DelegateStore>>();
+		
 		for (String type : Simulation.nodeMap.keySet()) {
 			final Map<String, Double> gamma = Simulation.nodeMap.get(type).getCascadingFailures();
 			if (!gamma.isEmpty()) {
-				binaryEnumCache.put(type, powerSet(gamma.keySet()));
+				binaryEnumCache.put(type, powerSet(gamma.keySet(), type));
 			}
+			delegateCallStores.put(type, new ArrayList<DelegateStore>());
 		}
 
 		ArrayList<String> levels;
@@ -66,6 +74,7 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 
 			growSubTree(levels, initialFT, 1.0, bfhMap);
 		}
+		triggerDelegation();
 	}
 
 	/**
@@ -92,7 +101,7 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 				terminalTypes.add(type);
 			}
 		}
-
+		
 		final ArrayList<ArrayList<Integer>> productSet = new ArrayList<ArrayList<Integer>>();
 		cartesianProduct(gammaPermutations, 0, new ArrayList<Integer>(gammaPermutations.size()), productSet);
 
@@ -153,17 +162,82 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 					forceRates(levels, failureTransition, bfhCopy, subTreeRate);
 				continue nextLevel;
 			}
+			
+			if( counter > DECAF.treeThreshold ){
+				return;
+			}
 
 			// -------------------------------
 			if (c > 0) {
 				final ArrayList<String> levelsCopy = new ArrayList<String>(levels);
 				levelsCopy.add(newLevel.substring(0, newLevel.length() - 1));
-				growSubTree(levelsCopy, ftCopy, subTreeRateCopy, bfhCopy);
+				
+				//growSubTree(levelsCopy, ftCopy, subTreeRateCopy, bfhCopy);
+				delegate(new DelegateStore(levelsCopy, ftCopy, subTreeRateCopy, bfhCopy));
 			} else {
 				processRates(levels, failureTransition, bfhCopy, subTreeRate);
 			}
 		}
 	}
+
+	/**
+	 * 
+	 * @param delegateStore
+	 */
+	private static void delegate(DelegateStore delegateStore) {
+		delegateCallStores.get(delegateStore.root).add(delegateStore);
+	}
+	
+	private static void triggerDelegation(){
+		while(true){
+			double max = 0;
+			int t = 0;
+			String o = "";
+			DelegateStore next = null;
+	
+			for( Entry<String, ArrayList<DelegateStore>> k : delegateCallStores.entrySet() ){
+				int i = 0;
+				for( DelegateStore value : k.getValue()){
+					if( value.rate > max ){
+						max = value.rate;
+						next = value;
+						t = i;
+						o = k.getKey();
+					}
+					i++;
+				}
+			}
+			if( next != null ){
+				delegateCallStores.get(o).remove(t);
+				growSubTree(next.levels, next.ft, next.rate, next.bfhMap);
+			} else {
+				break;
+			}
+		}
+	}
+	
+	/*private static void triggerDelegation(){
+		String[] nodeList = new String[delegateCallStores.size()];
+		delegateCallStores.keySet().toArray(nodeList);
+		String nextKey = nodeList[nextRoot];
+		if( nextRoot + 1 >= nodeList.length ){
+			nextRoot = 0;
+		} else {
+			nextRoot++;
+		}
+		if( delegateCallStores.get(nextKey).size() > 0 ){
+			DelegateStore next = delegateCallStores.get(nextKey).get(0);
+			delegateCallStores.get(nextKey).remove(0);
+			growSubTree(next.levels, next.ft, next.rate, next.bfhMap);
+		} else {
+			for( ArrayList<DelegateStore> k : delegateCallStores.values() ){
+				if( k.size() != 0 ){
+					triggerDelegation();
+					break;
+				}
+			}
+		}
+	}*/
 
 	/**
 	 * 
@@ -274,7 +348,7 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 	 * @return
 	 */
 	private static Map<String, ArrayList<String>> buildBFH() {
-		final HashMap<String, ArrayList<String>> result = new HashMap<String, ArrayList<String>>();
+		final Map<String, ArrayList<String>> result = new FastMap<String, ArrayList<String>>();
 		for (String k : Simulation.nodeMap.keySet()) {
 			result.put(k, new ArrayList<String>());
 		}
@@ -287,7 +361,7 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 	 * @return
 	 */
 	private static Map<String, ArrayList<String>> buildBFH(final Map<String, ArrayList<String>> clone) {
-		final HashMap<String, ArrayList<String>> result = new HashMap<String, ArrayList<String>>();
+		final Map<String, ArrayList<String>> result = new FastMap<String, ArrayList<String>>();
 		for (Entry<String, ArrayList<String>> entry : clone.entrySet()) {
 			result.put(entry.getKey(), new ArrayList<String>(entry.getValue()));
 		}
@@ -324,7 +398,7 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 	 * @param set
 	 * @return
 	 */
-	private static List<String> powerSet(final Set<String> set) {
+	private static List<String> powerSet(final Set<String> set, final String parentType) {
 
 		final ArrayList<String> members = new ArrayList<String>(set);
 
@@ -345,7 +419,11 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 			}
 			binaryEnum.add(p, block.substring(0, block.length() - 1));
 		}
-
-		return binaryEnum;
+		String temp = binaryEnum.remove(0);
+		Collections.sort(binaryEnum, new PowerSetComparator(parentType));
+		ArrayList<String> result = new ArrayList<String>();
+		result.add(temp);
+		result.addAll(binaryEnum);
+		return result;
 	}
 }
