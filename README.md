@@ -1,6 +1,9 @@
-# DECAF2
-#### Dependability Evaluator of Cascading Failures
+decaf2
+======
 
-This DECAF2 Repo has been obsoleted by newer code.
+Dependability Evaluator of Cascading Failures v2
 
-Visit [http://soulcyon.github.com/decaf2/](http://soulcyon.github.com/decaf2/) for documentation and more info.
+Utilizing:
+- Like Transition Cache
+- Delegation for cutting trees ala Tree Counter
+- Parallel Colt to solve MTTF and SSU
