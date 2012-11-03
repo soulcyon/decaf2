@@ -21,6 +21,7 @@ import edu.njit.decaf2.generators.DependabilityUnthreaded;
 import edu.njit.decaf2.generators.QMatrixGenerator;
 import edu.njit.decaf2.generators.QMatrixGeneratorUnthreaded;
 import edu.njit.decaf2.generators.StateGenerator;
+import edu.njit.decaf2.generators.TreeGeneratorUnthreaded;
 import edu.njit.decaf2.structures.FailureNode;
 import edu.njit.decaf2.structures.State;
 
@@ -33,7 +34,7 @@ import edu.njit.decaf2.structures.State;
  * 
  */
 public class Simulation {
-	private boolean debug;
+	private boolean debug = true;
 	public static double meanTimeToFailure;
 	public static double steadyStateUnavailability;
 
@@ -75,6 +76,11 @@ public class Simulation {
 		demandMatrix = new double[0][0];
 		typeList = new ArrayList<String>();
 		nodeMap = new HashMap<String, FailureNode>();
+		qmatrix = null;
+		QMatrixGeneratorUnthreaded.likeTransitionMap = null;
+		TreeGeneratorUnthreaded.counter = 0;
+		TreeGeneratorUnthreaded.binaryEnumCache = null;
+		TreeGeneratorUnthreaded.delegateCallStores = null;
 	}
 	
 	/**
@@ -130,7 +136,6 @@ public class Simulation {
 		String[] nodeKeyArray = new String[nodeMap.keySet().size()];
 		nodeMap.keySet().toArray(nodeKeyArray);
 		Simulation.qmatrix = new DenseDoubleMatrix2D(states.length, states.length);
-		
 		if (DECAF.enableThreading) {
 			QMatrixGenerator.generateQMatrix();
 		} else {
@@ -145,7 +150,12 @@ public class Simulation {
 			try {
 				FileWriter fstream = new FileWriter("output.txt");
 				BufferedWriter out = new BufferedWriter(fstream);
-				out.write("On the way");
+				for( int i = 0; i < Simulation.states.length; i++ ){
+					for( int j = 0; j < Simulation.states.length; j++ ){
+						out.write(qmatrix.get(i, j) + ",");
+					}
+					out.write("\n");
+				}
 				out.close();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -169,13 +179,11 @@ public class Simulation {
 		t = System.nanoTime();
 
 		if (DECAF.enableThreading) {
-			// steadyStateUnavailability =
-			// DependabilityUnthreaded.calculateSSU();
+			 //steadyStateUnavailability = DependabilityUnthreaded.calculateSSU();
 		} else {
-			// steadyStateUnavailability =
-			// DependabilityUnthreaded.calculateSSU();
+			 //steadyStateUnavailability = DependabilityUnthreaded.calculateSSU();
 		}
-
+		
 		ssuCalculationTime = (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0;
 		resultProcessing += System.nanoTime() - t;
 
@@ -196,7 +204,6 @@ public class Simulation {
 		System.out.println("Mean Time To Failure:     " + meanTimeToFailure + " s");
 		System.out.println("SS Unavailability:        " + steadyStateUnavailability);
 		System.out.println("Total CPU Time:           " + resultProcessing / 1000.0 / 1000.0 / 1000.0 + " s");
-		
 		return;
 	}
 

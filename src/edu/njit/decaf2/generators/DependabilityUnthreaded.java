@@ -10,14 +10,15 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.ojalgo.matrix.BasicMatrix;
-import org.ojalgo.matrix.MatrixBuilder;
-import org.ojalgo.matrix.MatrixFactory;
-import org.ojalgo.matrix.PrimitiveMatrix;
-
 import cern.colt.matrix.tdouble.DoubleMatrix1D;
 import cern.colt.matrix.tdouble.DoubleMatrix2D;
 import cern.colt.matrix.tdouble.algo.DenseDoubleAlgebra;
+import cern.colt.matrix.tdouble.algo.decomposition.DenseDoubleEigenvalueDecomposition;
+import cern.colt.matrix.tdouble.algo.decomposition.DenseDoubleLUDecomposition;
+import cern.colt.matrix.tdouble.algo.solver.DoubleBiCG;
+import cern.colt.matrix.tdouble.algo.solver.DoubleCGS;
+import cern.colt.matrix.tdouble.algo.solver.DoubleGMRES;
+import cern.colt.matrix.tdouble.algo.solver.IterativeSolverDoubleNotConvergedException;
 import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix1D;
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.Simulation;
@@ -61,7 +62,8 @@ public final class DependabilityUnthreaded extends DECAF {
 					continue;
 				}
 				for (Entry<String, Integer> entry : Simulation.states[j].getVector().entrySet()) {
-					if (entry.getValue() > Simulation.nodeMap.get(entry.getKey()).getRequired()) {
+					if (Simulation.nodeMap.get(entry.getKey()).getRedundancy() - entry.getValue() < 
+							Simulation.nodeMap.get(entry.getKey()).getRequired()) {
 						pmatrix.setQuick(i, j, 0);
 						systemDownStates.add(j);
 						continue here;
@@ -73,7 +75,7 @@ public final class DependabilityUnthreaded extends DECAF {
 			pmatrix.setQuick(i, i, 1);
 		}
 
-		if (DECAF.sriniOutput) {
+		/*if (DECAF.sriniOutput) {
 			try {
 				FileWriter fstream = new FileWriter("matrix." + statesLen + ".txt");
 				BufferedWriter out = new BufferedWriter(fstream);
@@ -82,28 +84,17 @@ public final class DependabilityUnthreaded extends DECAF {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}
-		
+		}*/
+
 		DoubleMatrix1D result = new DenseDoubleMatrix1D(statesLen);
-		if( statesLen < 4000 ){
-			DenseDoubleAlgebra sa = new DenseDoubleAlgebra();
-			pmatrix = sa.inverse(pmatrix);
-		} else {
-			MatrixFactory<?> tmpFactory = PrimitiveMatrix.FACTORY;
-			MatrixBuilder<?> tmpBuilder = tmpFactory.getBuilder(statesLen, statesLen);
-			for (int j = 0; j < tmpBuilder.getColDim(); j++) {
-				for (int i = 0; i < tmpBuilder.getRowDim(); i++) {
-					tmpBuilder.set(i, j, pmatrix.getQuick(i, j));
-				}
-			}
-			BasicMatrix tmpI = tmpBuilder.build();
-			tmpI = tmpI.invert();
-			for (int j = 0; j < tmpBuilder.getColDim(); j++) {
-				for (int i = 0; i < tmpBuilder.getRowDim(); i++) {
-					pmatrix.setQuick(i, j, tmpI.doubleValue(i, j));
-				}
-			}
-		}
+		DenseDoubleAlgebra sa = new DenseDoubleAlgebra();
+		pmatrix = sa.inverse(pmatrix);
+		/*DoubleGMRES t = new DoubleGMRES(hvector);
+		try {
+			t.solve(pmatrix, hvector, result);
+		} catch (IterativeSolverDoubleNotConvergedException e) {
+			e.printStackTrace();
+		}*/
 		result = pmatrix.zMult(hvector, result);
 
 		return result.get(0);
@@ -125,26 +116,27 @@ public final class DependabilityUnthreaded extends DECAF {
 		for (int i = 0; i < statesLen; i++) {
 			dd.setQuick(i, 0, 1);
 		}
+		DenseDoubleMatrix1D temp = new DenseDoubleMatrix1D(statesLen);
+		DenseDoubleMatrix1D e = new DenseDoubleMatrix1D(statesLen);
+		for(int i = 0; i < statesLen; i++ ){
+			e.setQuick(i, 1);
+		}
+		DoubleGMRES t = new DoubleGMRES(temp);
+		try {
+			System.out.println(t.solve(dd, e, temp));
+			double r = 0;
+			for( int i = 0; i < statesLen; i++ ){
+				r += temp.getQuick(i);
+			}
+			System.out.println(r/statesLen);
+		} catch (IterativeSolverDoubleNotConvergedException err) {
+			err.printStackTrace();
+		}
+
+		dd = new DenseDoubleAlgebra().inverse(dd);
 		
-		if( statesLen < 200 ){
-			DenseDoubleAlgebra da = new DenseDoubleAlgebra();
-			dd = da.inverse(dd);
-			for (Integer k : systemDownStates) {
-				result += dd.getQuick(0, k);
-			}
-		} else {
-			MatrixFactory<?> tmpFactory = PrimitiveMatrix.FACTORY;
-			MatrixBuilder<?> tmpBuilder = tmpFactory.getBuilder(dd.columns(), dd.columns());
-			for (int j = 0; j < tmpBuilder.getColDim(); j++) {
-				for (int i = 0; i < tmpBuilder.getRowDim(); i++) {
-					tmpBuilder.set(i, j, dd.getQuick(i, j));
-				}
-			}
-			BasicMatrix tmpI = tmpBuilder.build();
-			tmpI = tmpI.invert();
-			for (Integer k : systemDownStates) {
-				result += tmpI.doubleValue(0, k);
-			}
+		for (Integer k : systemDownStates) {
+			result += dd.getQuick(0, k);
 		}
 		return result;
 	}

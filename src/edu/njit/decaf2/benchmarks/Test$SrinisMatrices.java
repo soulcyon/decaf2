@@ -28,9 +28,8 @@ public class Test$SrinisMatrices {
 			String strLine = "";
 
 			while ((strLine = br.readLine()) != null) {
-				newCode += strLine;
+				newCode += strLine + "\n";
 			}
-
 			in.close();
 
 			fstream = new FileInputStream("srini.txt");
@@ -39,13 +38,14 @@ public class Test$SrinisMatrices {
 			strLine = "";
 
 			while ((strLine = br.readLine()) != null) {
-				oldCode += strLine;
+				oldCode += strLine + "\n";
 			}
 
 			in.close();
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 		}
+		/* Srini Discrepency 
 		String[] newSplit = newCode.split("; ");
 		String[] oldSplit = oldCode.split("; ");
 		int count = newSplit.length;
@@ -61,6 +61,18 @@ public class Test$SrinisMatrices {
 			double oldDouble = Double.parseDouble(oldSplit[i].split("@")[0]);
 			if (Math.abs((newDouble - oldDouble) / oldDouble) > 0.00000000001) {
 				System.out.println("Discrepency at " + i + " - " + newSplit[i] + " vs " + oldSplit[i]);
+			}
+		}*/
+		String[] newSplit = newCode.split("\n");
+		String[] oldSplit = oldCode.split("\n");
+		System.out.println("Starting compare of " + newSplit.length + " and " + oldSplit.length);
+		for( int i = 0; i < newSplit.length; i++ ){
+			String[] newSub = newSplit[i].split(",");
+			String[] oldSub = oldSplit[i].split(",");
+			for( int j = 0; j < newSub.length; j++ ){
+				if( newSub[j].compareTo(oldSub[j]) != 0 ){
+					System.out.println("Discrepency at " + i + ", " + j + " (" + newSub[j] + ") vs (" + oldSub[j] + ")");
+				}
 			}
 		}
 	}

@@ -256,9 +256,10 @@ public class State extends DECAF implements Cloneable {
 
 	@Override
 	public int hashCode() {
-		int result = (DECAF.forceStateDemandValidate) ? Integer.valueOf(demand).hashCode() : 0;
+		int result = 31/* + Integer.valueOf(demand).hashCode()*/;
 		for (String k : vector.keySet()) {
-			result += k.hashCode() + Integer.valueOf(vector.get(k)).hashCode();
+			result *= 31;
+			result *= Simulation.nodeMap.get(k).getRedundancy() + ((k.hashCode() * 17) ^ Integer.valueOf(vector.get(k)).hashCode()) + 1;
 		}
 		return Integer.valueOf(result).hashCode();
 	}
@@ -271,11 +272,9 @@ public class State extends DECAF implements Cloneable {
 
 		final State other = (State) obj;
 
-		if (DECAF.forceStateDemandValidate) {
-			if (demand != other.demand) {
-				return false;
-			}
-		}
+		/*if (demand != other.demand) {
+			return false;
+		}*/
 
 		for (String k : vector.keySet()) {
 			if (!other.vector.containsKey(k) || vector.get(k) != other.vector.get(k)) {

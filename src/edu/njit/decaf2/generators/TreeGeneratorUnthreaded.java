@@ -30,8 +30,8 @@ import edu.njit.decaf2.structures.PowerSetComparator;
  * 
  */
 public final class TreeGeneratorUnthreaded extends DECAF {
-	private static Map<String, List<String>> binaryEnumCache;
-	private static Map<String, ArrayList<DelegateStore>> delegateCallStores;
+	public static Map<String, List<String>> binaryEnumCache;
+	public static Map<String, ArrayList<DelegateStore>> delegateCallStores;
 	//private static int nextRoot = 0;
 	
 	/**
@@ -74,7 +74,7 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 
 			growSubTree(levels, initialFT, 1.0, bfhMap);
 		}
-		triggerDelegation();
+		//triggerDelegation();
 	}
 
 	/**
@@ -172,8 +172,8 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 				final ArrayList<String> levelsCopy = new ArrayList<String>(levels);
 				levelsCopy.add(newLevel.substring(0, newLevel.length() - 1));
 				
-				//growSubTree(levelsCopy, ftCopy, subTreeRateCopy, bfhCopy);
-				delegate(new DelegateStore(levelsCopy, ftCopy, subTreeRateCopy, bfhCopy));
+				growSubTree(levelsCopy, ftCopy, subTreeRateCopy, bfhCopy);
+				//delegate(new DelegateStore(levelsCopy, ftCopy, subTreeRateCopy, bfhCopy));
 			} else {
 				processRates(levels, failureTransition, bfhCopy, subTreeRate);
 			}
@@ -248,7 +248,6 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 	 */
 	private static void processRates(final List<String> levels, final State failureTransition,
 			final Map<String, ArrayList<String>> bfhCopy, final double subTreeRate) {
-
 		final List<Point> likeTransitions = QMatrixGeneratorUnthreaded.likeTransitionMap.get(failureTransition);
 		Simulation.numberOfAvoidedTrees--;
 

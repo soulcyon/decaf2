@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import javolution.util.FastMap;
+
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.Simulation;
 import edu.njit.decaf2.structures.Point;
@@ -47,7 +49,7 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 	 * @param vectorKeys
 	 */
 	public static void init() {
-		likeTransitionMap = new HashMap<State, ArrayList<Point>>();
+		likeTransitionMap = new FastMap<State, ArrayList<Point>>();
 	}
 
 	/**
@@ -115,7 +117,6 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 				if (Double.isNaN(fillV)) {
 					final State differenceState = Simulation.states[i].diff(Simulation.states[j]);
 					final Point ptr = new Point(i, j);
-
 					if (likeTransitionMap.containsKey(differenceState)) {
 						likeTransitionMap.get(differenceState).add(ptr);
 					} else {

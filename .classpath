@@ -9,5 +9,8 @@
 	<classpathentry kind="lib" path="lib/ojalgo-32.0.jar"/>
 	<classpathentry kind="lib" path="lib/javolution-6.0-20120909.204206-2.jar"/>
 	<classpathentry kind="lib" path="lib/parallelcolt-0.9.4.jar"/>
+	<classpathentry kind="lib" path="lib/bb.jar"/>
+	<classpathentry kind="lib" path="lib/jsci-core.jar"/>
+	<classpathentry kind="lib" path="lib/mt-13.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
