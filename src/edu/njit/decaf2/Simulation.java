@@ -179,9 +179,9 @@ public class Simulation {
 		t = System.nanoTime();
 
 		if (DECAF.enableThreading) {
-			 //steadyStateUnavailability = DependabilityUnthreaded.calculateSSU();
+			 steadyStateUnavailability = DependabilityUnthreaded.calculateSSU();
 		} else {
-			 //steadyStateUnavailability = DependabilityUnthreaded.calculateSSU();
+			 steadyStateUnavailability = DependabilityUnthreaded.calculateSSU();
 		}
 		
 		ssuCalculationTime = (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0;

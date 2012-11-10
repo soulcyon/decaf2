@@ -22,7 +22,7 @@ public class DECAF {
 	public static final boolean enableThreading = false;
 	public static final int threadCount = 4;
 	public static ForkJoinPool threadPool = new ForkJoinPool(256);
-	public static int heightThreshold = 1000000;
+	public static int heightThreshold = 6;
 	public static double rateThreshold = 0;
 	public static int nodeThreshold = 10000000;
 	public static int treeThreshold = 10000000;

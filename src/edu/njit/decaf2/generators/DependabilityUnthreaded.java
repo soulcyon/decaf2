@@ -116,25 +116,23 @@ public final class DependabilityUnthreaded extends DECAF {
 		for (int i = 0; i < statesLen; i++) {
 			dd.setQuick(i, 0, 1);
 		}
-		DenseDoubleMatrix1D temp = new DenseDoubleMatrix1D(statesLen);
+		/*DenseDoubleMatrix1D temp = new DenseDoubleMatrix1D(statesLen);
 		DenseDoubleMatrix1D e = new DenseDoubleMatrix1D(statesLen);
-		for(int i = 0; i < statesLen; i++ ){
-			e.setQuick(i, 1);
+		for(int i = 1; i < statesLen; i++ ){
+			e.setQuick(i, 0);
 		}
+		e.setQuick(0, 1);
 		DoubleGMRES t = new DoubleGMRES(temp);
 		try {
-			System.out.println(t.solve(dd, e, temp));
-			double r = 0;
-			for( int i = 0; i < statesLen; i++ ){
-				r += temp.getQuick(i);
+			t.solve(new DenseDoubleAlgebra().transpose(dd), e, temp);
+			for (Integer k : systemDownStates) {
+				result += temp.getQuick(k);
 			}
-			System.out.println(r/statesLen);
 		} catch (IterativeSolverDoubleNotConvergedException err) {
 			err.printStackTrace();
-		}
+		}*/
 
 		dd = new DenseDoubleAlgebra().inverse(dd);
-		
 		for (Integer k : systemDownStates) {
 			result += dd.getQuick(0, k);
 		}
