@@ -256,13 +256,13 @@ public class State extends DECAF implements Cloneable {
 
 	@Override
 	public int hashCode() {
-		int result = 31/* + Integer.valueOf(demand).hashCode()*/;
+		int result = Integer.valueOf(demand).hashCode();
 		for (String k : vector.keySet()) {
-			result *= 31;
-			result *= Simulation.nodeMap.get(k).getRedundancy() + ((k.hashCode() * 17) ^ Integer.valueOf(vector.get(k)).hashCode()) + 1;
+			result += k.hashCode() + Integer.valueOf(vector.get(k)).hashCode();
 		}
 		return Integer.valueOf(result).hashCode();
 	}
+
 
 	@Override
 	public boolean equals(Object obj) {
@@ -272,9 +272,9 @@ public class State extends DECAF implements Cloneable {
 
 		final State other = (State) obj;
 
-		/*if (demand != other.demand) {
+		if (demand != other.demand) {
 			return false;
-		}*/
+		}
 
 		for (String k : vector.keySet()) {
 			if (!other.vector.containsKey(k) || vector.get(k) != other.vector.get(k)) {

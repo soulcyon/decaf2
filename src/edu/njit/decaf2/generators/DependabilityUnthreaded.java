@@ -20,6 +20,7 @@ import cern.colt.matrix.tdouble.algo.solver.DoubleCGS;
 import cern.colt.matrix.tdouble.algo.solver.DoubleGMRES;
 import cern.colt.matrix.tdouble.algo.solver.IterativeSolverDoubleNotConvergedException;
 import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix1D;
+import cern.colt.matrix.tdouble.impl.SparseDoubleMatrix2D;
 import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.Simulation;
 
@@ -55,7 +56,7 @@ public final class DependabilityUnthreaded extends DECAF {
 		int statesLen = Simulation.qmatrix.columns();
 		DoubleMatrix2D pmatrix = Simulation.qmatrix.copy();
 		DoubleMatrix1D hvector = new DenseDoubleMatrix1D(statesLen);
-		
+
 		for (int i = 0; i < statesLen; i++) {
 			here: for (int j = 0; j < statesLen; j++) {
 				if (j == i) {
@@ -74,7 +75,6 @@ public final class DependabilityUnthreaded extends DECAF {
 			hvector.setQuick(i, -pmatrix.getQuick(i, i));
 			pmatrix.setQuick(i, i, 1);
 		}
-
 		/*if (DECAF.sriniOutput) {
 			try {
 				FileWriter fstream = new FileWriter("matrix." + statesLen + ".txt");
@@ -87,15 +87,15 @@ public final class DependabilityUnthreaded extends DECAF {
 		}*/
 
 		DoubleMatrix1D result = new DenseDoubleMatrix1D(statesLen);
-		DenseDoubleAlgebra sa = new DenseDoubleAlgebra();
-		pmatrix = sa.inverse(pmatrix);
-		/*DoubleGMRES t = new DoubleGMRES(hvector);
+		DoubleGMRES t = new DoubleGMRES(hvector);
 		try {
 			t.solve(pmatrix, hvector, result);
 		} catch (IterativeSolverDoubleNotConvergedException e) {
 			e.printStackTrace();
-		}*/
-		result = pmatrix.zMult(hvector, result);
+		}
+		/*DenseDoubleAlgebra sa = new DenseDoubleAlgebra();
+		pmatrix = sa.inverse(pmatrix);
+		result = pmatrix.zMult(hvector, result);*/
 
 		return result.get(0);
 	}
@@ -109,6 +109,8 @@ public final class DependabilityUnthreaded extends DECAF {
 			System.out.println(DECAF.error("SSU might be innacurate.  Please compute MTTF before SSU."));
 		}
 		
+		long t = System.nanoTime();
+		
 		int statesLen = Simulation.qmatrix.columns();
 		double result = 0.0;
 		DoubleMatrix2D dd = Simulation.qmatrix.copy();
@@ -116,26 +118,26 @@ public final class DependabilityUnthreaded extends DECAF {
 		for (int i = 0; i < statesLen; i++) {
 			dd.setQuick(i, 0, 1);
 		}
-		/*DenseDoubleMatrix1D temp = new DenseDoubleMatrix1D(statesLen);
+		DenseDoubleMatrix1D temp = new DenseDoubleMatrix1D(statesLen);
 		DenseDoubleMatrix1D e = new DenseDoubleMatrix1D(statesLen);
 		for(int i = 1; i < statesLen; i++ ){
 			e.setQuick(i, 0);
 		}
 		e.setQuick(0, 1);
-		DoubleGMRES t = new DoubleGMRES(temp);
+		System.out.println(new SparseDoubleMatrix2D(dd.toArray()).toStringShort());
 		try {
-			t.solve(new DenseDoubleAlgebra().transpose(dd), e, temp);
+			new DoubleGMRES(temp).solve(new DenseDoubleAlgebra().transpose(dd), e, temp);
 			for (Integer k : systemDownStates) {
 				result += temp.getQuick(k);
 			}
 		} catch (IterativeSolverDoubleNotConvergedException err) {
 			err.printStackTrace();
-		}*/
+		}
 
-		dd = new DenseDoubleAlgebra().inverse(dd);
+		/*dd = new DenseDoubleAlgebra().inverse(dd);
 		for (Integer k : systemDownStates) {
 			result += dd.getQuick(0, k);
-		}
+		}*/
 		return result;
 	}
 }

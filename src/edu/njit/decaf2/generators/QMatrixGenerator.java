@@ -80,8 +80,6 @@ public final class QMatrixGenerator extends DECAF {
 			}
 			Simulation.qmatrix.setQuick(i, i, -sum);
 		}
-
-		generateStatistics();
 	}
 
 	/**
@@ -128,26 +126,6 @@ public final class QMatrixGenerator extends DECAF {
 					/ (double) from.sum();
 		}
 		return 0.0;
-	}
-
-	/**
-	 * 
-	 */
-	public static void generateStatistics() {
-		for (CopyOnWriteArrayList<Point> value : likeTransitionMap.values()) {
-			for (Point j : value) {
-				if (Simulation.qmatrix.getQuick(j.getX(), j.getY()) != 0) {
-					Simulation.numberOfTransitions++;
-				}
-			}
-			for (Point j : value) {
-				if (Simulation.qmatrix.getQuick(j.getX(), j.getY()) != 0) {
-					Simulation.numberOfUniqueTrees++;
-					break;
-				}
-			}
-		}
-		Simulation.numberOfUniqueTrees += Simulation.nodeMap.size();
 	}
 
 	/**

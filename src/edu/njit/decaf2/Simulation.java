@@ -9,11 +9,15 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import javolution.util.FastMap;
+
 import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;
+import cern.colt.matrix.tdouble.impl.SparseDoubleMatrix2D;
 
 import com.ctc.wstx.sax.WstxSAXParserFactory;
 
@@ -45,16 +49,14 @@ public class Simulation {
 	public static double ssuCalculationTime;
 	public static double qMatrixTime;
 	public static int numberOfTrees;
-	public static int numberOfAvoidedTrees;
 	public static int numberOfUniqueTrees;
-	public static int numberOfTransitions;
 
 	public static DenseDoubleMatrix2D qmatrix;
 	public static State[] states;
-	public static HashMap<State, Integer> stateMap = new HashMap<State, Integer>();
+	public static Map<State, Integer> stateMap = new FastMap<State, Integer>();
 	public static double[][] demandMatrix;
 	public static ArrayList<String> typeList = new ArrayList<String>();
-	public static HashMap<String, FailureNode> nodeMap = new HashMap<String, FailureNode>();
+	public static Map<String, FailureNode> nodeMap = new FastMap<String, FailureNode>();
 
 	public Simulation(){
 		debug = true;
@@ -67,9 +69,7 @@ public class Simulation {
 		qMatrixTime = 0;
 		
 		numberOfTrees = 0;
-		numberOfAvoidedTrees = 0;
 		numberOfUniqueTrees = 0;
-		numberOfTransitions = 0;
 		
 		states = new State[0];
 		stateMap = new HashMap<State, Integer>();
@@ -78,7 +78,6 @@ public class Simulation {
 		nodeMap = new HashMap<String, FailureNode>();
 		qmatrix = null;
 		QMatrixGeneratorUnthreaded.likeTransitionMap = null;
-		TreeGeneratorUnthreaded.counter = 0;
 		TreeGeneratorUnthreaded.binaryEnumCache = null;
 		TreeGeneratorUnthreaded.delegateCallStores = null;
 	}
@@ -145,7 +144,7 @@ public class Simulation {
 		resultProcessing += System.nanoTime() - t;
 		qMatrixTime = (System.nanoTime() - t) / 1000.0 / 1000.0 / 1000.0;
 
-		if (DECAF.sriniOutput) {
+		/*if (DECAF.sriniOutput) {
 			t = System.nanoTime();
 			try {
 				FileWriter fstream = new FileWriter("output.txt");
@@ -161,7 +160,7 @@ public class Simulation {
 				e.printStackTrace();
 			}
 			resultProcessing += System.nanoTime() - t;
-		}
+		}*/
 
 		/* ------------------ MTTF Calculation ------------------ */
 		t = System.nanoTime();
@@ -196,10 +195,9 @@ public class Simulation {
 		System.out.println("SSU Calc Time:            " + ssuCalculationTime);
 		System.out.println("");
 		System.out.println("Number of States:         " + states.length);
-		System.out.println("Number of Trees:          " + numberOfTrees);
-		System.out.println("Number of Trees Avoided:  " + numberOfAvoidedTrees);
 		System.out.println("Number of Unique Trees:   " + numberOfUniqueTrees);
-		System.out.println("Number of F-Transitions:  " + numberOfTransitions);
+		System.out.println("Number of Trees (Srini):  " + numberOfTrees);
+		System.out.println("Number of Trees Avoided:  " + (numberOfTrees - numberOfUniqueTrees));
 		System.out.println("");
 		System.out.println("Mean Time To Failure:     " + meanTimeToFailure + " s");
 		System.out.println("SS Unavailability:        " + steadyStateUnavailability);

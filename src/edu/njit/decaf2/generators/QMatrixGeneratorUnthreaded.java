@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import cern.colt.matrix.tdouble.impl.SparseDoubleMatrix2D;
+
 import javolution.util.FastMap;
 
 import edu.njit.decaf2.DECAF;
@@ -63,7 +65,6 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 
 		// TESTING OF VERSION 3 QMATRIX GENERATION
 		final int statesLen = Simulation.states.length;
-
 		/*final int demandLen = Simulation.demandMatrix.length;
 		
 		for (int i = 0; i < statesLen / demandLen; i++) {
@@ -146,8 +147,6 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 			}
 			Simulation.qmatrix.setQuick(i, i, -sum);
 		}
-
-		generateStatistics();
 	}
 
 	/**
@@ -206,26 +205,6 @@ public final class QMatrixGeneratorUnthreaded extends DECAF {
 					/ (double) from.sum();
 		}
 		return 0.0;
-	}
-
-	/**
-	 * 
-	 */
-	public static void generateStatistics() {
-		for (ArrayList<Point> value : likeTransitionMap.values()) {
-			for (Point j : value) {
-				if (Simulation.qmatrix.getQuick(j.getX(), j.getY()) != 0) {
-					Simulation.numberOfTransitions++;
-				}
-			}
-			for (Point j : value) {
-				if (Simulation.qmatrix.getQuick(j.getX(), j.getY()) != 0) {
-					Simulation.numberOfUniqueTrees++;
-					break;
-				}
-			}
-		}
-		Simulation.numberOfUniqueTrees += Simulation.nodeMap.size();
 	}
 
 	/**

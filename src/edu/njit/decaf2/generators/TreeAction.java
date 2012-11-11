@@ -159,10 +159,8 @@ public class TreeAction extends RecursiveAction {
 			final Map<String, List<String>> bfhCopy, final double subTreeRate) {
 		
 		final List<Point> likeTransitions = QMatrixGenerator.likeTransitionMap.get(failureTransition);
-		Simulation.numberOfAvoidedTrees--;
 		
 		for (Point transition : likeTransitions) {
-			Simulation.numberOfAvoidedTrees++;
 			final int fIndex = transition.getX();
 			final int tIndex = transition.getY();
 			final State from = Simulation.states[fIndex];

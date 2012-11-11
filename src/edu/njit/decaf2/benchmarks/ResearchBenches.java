@@ -36,7 +36,6 @@ public class ResearchBenches {
 	private static double[] treeTimes = new double[8];
 	private static double[] mttfs = new double[8];
 	private static double[] treeCounts = new double[8];
-	private static double[] avoidedCounts = new double[8];
 	private static double[] uniqueCounts = new double[8];
 
 	/**
@@ -57,7 +56,6 @@ public class ResearchBenches {
 		mttf = Simulation.meanTimeToFailure;
 		ssu = Simulation.steadyStateUnavailability;
 		totalTrees = Simulation.numberOfTrees;
-		avoidedTrees = Simulation.numberOfAvoidedTrees;
 		uniqueTrees = Simulation.numberOfUniqueTrees;
 		resultCSV.append("States," + Simulation.states.length + "\n");
 		System.gc();
@@ -192,9 +190,6 @@ public class ResearchBenches {
 		treeCounts[cCount] = Simulation.numberOfTrees;
 		treeCounts[cCount + 1] = 1 - (Simulation.numberOfTrees / totalTrees);
 		
-		avoidedCounts[cCount] = Simulation.numberOfAvoidedTrees;
-		avoidedCounts[cCount + 1] = 1 - (Simulation.numberOfAvoidedTrees / avoidedTrees);
-		
 		uniqueCounts[cCount] = Simulation.numberOfUniqueTrees;
 		uniqueCounts[cCount + 1] = 1 - (Simulation.numberOfUniqueTrees / uniqueTrees);
 		cCount+=2;
@@ -241,16 +236,6 @@ public class ResearchBenches {
 		.append(treeCounts[5] * 100 + "%").append(",")
 		.append(treeCounts[6]).append(",")
 		.append(treeCounts[7] * 100 + "%").append("\n")
-		.append("Avoided Trees,")
-		.append(avoidedTrees).append(",")
-		.append(avoidedCounts[0]).append(",")
-		.append(avoidedCounts[1] * 100 + "%").append(",")
-		.append(avoidedCounts[2]).append(",")
-		.append(avoidedCounts[3] * 100 + "%").append(",")
-		.append(avoidedCounts[4]).append(",")
-		.append(avoidedCounts[5] * 100 + "%").append(",")
-		.append(avoidedCounts[6]).append(",")
-		.append(avoidedCounts[7] * 100 + "%").append("\n")
 		.append("Unique Trees,")
 		.append(uniqueTrees).append(",")
 		.append(uniqueCounts[0]).append(",")
@@ -267,7 +252,6 @@ public class ResearchBenches {
 		treeTimes = new double[8];
 		mttfs = new double[8];
 		treeCounts = new double[8];
-		avoidedCounts = new double[8];
 		uniqueCounts = new double[8];
 	}
 
@@ -292,10 +276,7 @@ public class ResearchBenches {
 
 		System.out.println("Total Trees      " + Simulation.numberOfTrees + " ("
 				+ Math.abs((Simulation.numberOfTrees / totalTrees) - 1) * 100 + "%)");
-
-		System.out.println("Avoided Trees    " + Simulation.numberOfAvoidedTrees + " ("
-				+ Math.abs((Simulation.numberOfAvoidedTrees / avoidedTrees) - 1) * 100 + "%)");
-
+		
 		System.out.println("Unique Trees     " + Simulation.numberOfUniqueTrees + " ("
 				+ Math.abs((Simulation.numberOfUniqueTrees / uniqueTrees) - 1) * 100 + "%)");
 	}

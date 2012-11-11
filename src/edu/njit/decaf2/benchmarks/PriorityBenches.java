@@ -21,7 +21,7 @@ import edu.njit.decaf2.Simulation;
 public class PriorityBenches {
 	private static boolean toCSV = true;
 	private static StringBuffer resultCSV = new StringBuffer();
-	
+
 	public static double treeGenTime = 0;
 	public static double stateGenTime = 0;
 	public static double mttf = 0;
@@ -29,19 +29,18 @@ public class PriorityBenches {
 	public static double totalTrees = 0;
 	public static double avoidedTrees = 0;
 	public static double uniqueTrees = 0;
-	
+
 	private static int cCount = 0;
-	private static int start = 10;
-	private static int increment = 25;
-	private static int max = 1000;
-	private static int length = 1 + ((max - start) / increment);
+	private static double start = 0.05;
+	private static double increment = 0.05;
+	private static double max = 0.5;
+	private static int length = 10;
 	private static double[] treeTimes = new double[length];
 	private static double[] mttfs = new double[length];
 	private static double[] treeEFF = new double[length];
 	private static double[] mttfEFF = new double[length];
 	private static double[] effs = new double[length];
 	private static double[] treeCounts = new double[length];
-	private static double[] avoidedCounts = new double[length];
 	private static double[] uniqueCounts = new double[length];
 
 	/**
@@ -61,27 +60,30 @@ public class PriorityBenches {
 		mttf = Simulation.meanTimeToFailure;
 		ssu = Simulation.steadyStateUnavailability;
 		totalTrees = Simulation.numberOfTrees;
-		avoidedTrees = Simulation.numberOfAvoidedTrees;
 		uniqueTrees = Simulation.numberOfUniqueTrees;
 		resultCSV.append("States," + Simulation.states.length + "\n");
-		
+		resultCSV.append("Total Unique Trees," + uniqueTrees + "\n");
+		resultCSV.append("MTTF," + mttf + "\n");
+		resultCSV.append("Total Tree Time," + treeGenTime + "\n");
+
 		printTrialResults();
-		
-		for( int i = start; i < max; i+=increment ){
+
+		for (double i = uniqueTrees * start; i < uniqueTrees * max; i += uniqueTrees * increment) {
 			System.out.println("doing: " + i);
 			// Run height threshold trials
-			DECAF.treeThreshold = i;
+			DECAF.treeThreshold = (int) i;
 			executeSimulation();
 		}
 		nextRun();
-		
-		if( toCSV ){
-			try{
-				FileWriter fstream = new FileWriter("Bench" + Simulation.states.length + ".30-" + DECAF.treeThreshold + ".csv");
+
+		if (toCSV) {
+			try {
+				FileWriter fstream = new FileWriter("Bench" + Simulation.states.length + "."
+						+ (int)(uniqueTrees * start) + "-" + (int)(uniqueTrees * max) + ".csv");
 				BufferedWriter out = new BufferedWriter(fstream);
 				out.write(resultCSV.toString());
 				out.close();
-			}catch (Exception e){
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -94,7 +96,7 @@ public class PriorityBenches {
 		DECAF_SAXHandler.clear();
 		Simulation sim = new Simulation();
 		sim.run("data/input.xml");
-		if( toCSV ){
+		if (toCSV) {
 			buildCSV();
 		} else {
 			printTrialResults();
@@ -102,61 +104,59 @@ public class PriorityBenches {
 		System.gc();
 		Runtime.getRuntime().gc();
 	}
-	
-	private static void buildCSV(){
+
+	private static void buildCSV() {
 		treeTimes[cCount] = Simulation.treeGenerationTime;
 		treeEFF[cCount] = 1 - (Simulation.treeGenerationTime / treeGenTime);
 		mttfs[cCount] = Simulation.meanTimeToFailure;
 		mttfEFF[cCount] = Math.abs((Simulation.meanTimeToFailure / mttf) - 1);
 		effs[cCount] = (1 - mttfEFF[cCount]) * treeEFF[cCount];
 		treeCounts[cCount] = Simulation.numberOfTrees;
-		avoidedCounts[cCount] = Simulation.numberOfAvoidedTrees;
 		uniqueCounts[cCount] = Simulation.numberOfUniqueTrees;
 		cCount++;
 	}
-	
-	private static void nextRun(){
-		resultCSV = resultCSV.append("\n").append("\n").append("\n").append("\n").append("\n").append("\n");
-		
-		for( int i = start; i < max; i+=increment ){
+
+	private static void nextRun() {
+		resultCSV = resultCSV.append("\n").append("\n").append("\n").append("\n").append("\n")
+				.append("\n");
+
+		for (int i = (int) (uniqueTrees * start); i < max; i += increment) {
 			resultCSV.append(",").append(i);
 		}
 		resultCSV.append("\n").append("Tree Gen Time");
-		for( int i = 0; i < length; i++ ){
+		for (int i = 0; i < length; i++) {
 			resultCSV.append(",").append(treeTimes[i]);
 		}
 		resultCSV.append("\n").append("Tree Gen Discrep");
-		for( int i = 0; i < length; i++ ){
+		for (int i = 0; i < length; i++) {
 			resultCSV.append(",").append(treeEFF[i]);
 		}
 		resultCSV.append("\n").append("MTTF");
-		for( int i = 0; i < length; i++ ){
+		for (int i = 0; i < length; i++) {
 			resultCSV.append(",").append(mttfs[i]);
 		}
 		resultCSV.append("\n").append("MTTF Discrep");
-		for( int i = 0; i < length; i++ ){
+		for (int i = 0; i < length; i++) {
 			resultCSV.append(",").append(mttfEFF[i]);
 		}
 		resultCSV.append("\n").append("Efficiency");
-		for( int i = 0; i < length; i++ ){
+		for (int i = 0; i < length; i++) {
 			resultCSV.append(",").append(effs[i]);
 		}
 		resultCSV.append("\n").append("Total Trees");
-		for( int i = 0; i < length; i++ ){
+		for (int i = 0; i < length; i++) {
 			resultCSV.append(",").append(treeCounts[i]);
 		}
-		resultCSV.append("\n").append("Avoided Trees");
-		for( int i = 0; i < length; i++ ){
-			resultCSV.append(",").append(avoidedCounts[i]);
-		}
 		resultCSV.append("\n").append("Unique Trees");
-		for( int i = 0; i < length; i++ ){
+		for (int i = 0; i < length; i++) {
 			resultCSV.append(",").append(uniqueCounts[i]);
 		}
 		resultCSV.append("\n");
 	}
+
 	private static void printTrialResults() {
-		System.out.println("============================================================================");
+		System.out
+				.println("============================================================================");
 		System.out.println("States           " + Simulation.states.length);
 		System.out.println("--CUT HEIGHT @   " + DECAF.heightThreshold);
 		System.out.println("--CUT RATE @     " + DECAF.rateThreshold);
@@ -176,9 +176,6 @@ public class PriorityBenches {
 
 		System.out.println("Total Trees      " + Simulation.numberOfTrees + " ("
 				+ Math.abs((Simulation.numberOfTrees / totalTrees) - 1) * 100 + "%)");
-
-		System.out.println("Avoided Trees    " + Simulation.numberOfAvoidedTrees + " ("
-				+ Math.abs((Simulation.numberOfAvoidedTrees / avoidedTrees) - 1) * 100 + "%)");
 
 		System.out.println("Unique Trees     " + Simulation.numberOfUniqueTrees + " ("
 				+ Math.abs((Simulation.numberOfUniqueTrees / uniqueTrees) - 1) * 100 + "%)");

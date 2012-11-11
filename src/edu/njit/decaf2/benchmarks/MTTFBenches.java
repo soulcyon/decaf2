@@ -13,8 +13,8 @@ import edu.njit.decaf2.DECAF;
 import edu.njit.decaf2.Simulation;
 
 public class MTTFBenches {
-	private static double start = 0.1;
-	private static double end = 0.55;
+	private static double start = 0.2;
+	private static double end = 0.9;
 	private static double increment = 0.01;
 	private static int length = (int) ((end - start)/increment) + 1;
 	private static double[] times = new double[length];
