@@ -2,15 +2,16 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="lib" path="lib/stax2-api-3.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/woodstox-core-lgpl-4.1.3.jar"/>
-	<classpathentry kind="lib" path="lib/ejml-0.20.jar"/>
-	<classpathentry kind="lib" path="lib/Jama-1.0.2.jar"/>
-	<classpathentry kind="lib" path="lib/ojalgo-32.0.jar"/>
 	<classpathentry kind="lib" path="lib/javolution-6.0-20120909.204206-2.jar"/>
+	<classpathentry kind="lib" path="lib/arpack-combo.jar"/>
+	<classpathentry kind="lib" path="lib/csparsej.jar"/>
+	<classpathentry kind="lib" path="lib/jplasma.jar"/>
+	<classpathentry kind="lib" path="lib/jtransforms.jar"/>
+	<classpathentry kind="lib" path="lib/junit.jar"/>
+	<classpathentry kind="lib" path="lib/netlib-java.jar"/>
+	<classpathentry kind="lib" path="lib/optimization.jar"/>
 	<classpathentry kind="lib" path="lib/parallelcolt-0.9.4.jar"/>
-	<classpathentry kind="lib" path="lib/bb.jar"/>
-	<classpathentry kind="lib" path="lib/jsci-core.jar"/>
-	<classpathentry kind="lib" path="lib/mt-13.jar"/>
+	<classpathentry kind="lib" path="lib/woodstox-core-lgpl-4.1.4.jar"/>
+	<classpathentry kind="lib" path="lib/stax2-api-3.1.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

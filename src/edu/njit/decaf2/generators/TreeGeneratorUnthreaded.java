@@ -98,7 +98,6 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 				terminalTypes.add(type);
 			}
 		}
-		
 		ArrayList<ArrayList<Integer>> productSet = new ArrayList<ArrayList<Integer>>();
 		cartesianProduct(gammaPermutations, 0, new ArrayList<Integer>(gammaPermutations.size()), productSet);
 
@@ -106,7 +105,6 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 			final State ftCopy = failureTransition.clone();
 			final Map<String, ArrayList<String>> bfhCopy = buildBFH(bfhMap);
 			final ArrayList<Integer> breadthEncoding = productSet.get(c);
-
 			double subTreeRateCopy = subTreeRate;
 			final StringBuffer newLevel = new StringBuffer();
 
@@ -115,7 +113,6 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 				final FailureNode parentFailureNode = Simulation.nodeMap.get(parentType);
 				final int binEnumId = breadthEncoding.get(b);
 				final String block = binaryEnumCache.get(parentType).get(binEnumId) + ",";
-
 				newLevel.append(block);
 				final String[] gammaStatus = block.split(",");
 
@@ -213,29 +210,6 @@ public final class TreeGeneratorUnthreaded extends DECAF {
 		}
 	}
 	
-	/*private static void triggerDelegation(){
-		String[] nodeList = new String[delegateCallStores.size()];
-		delegateCallStores.keySet().toArray(nodeList);
-		String nextKey = nodeList[nextRoot];
-		if( nextRoot + 1 >= nodeList.length ){
-			nextRoot = 0;
-		} else {
-			nextRoot++;
-		}
-		if( delegateCallStores.get(nextKey).size() > 0 ){
-			DelegateStore next = delegateCallStores.get(nextKey).get(0);
-			delegateCallStores.get(nextKey).remove(0);
-			growSubTree(next.levels, next.ft, next.rate, next.bfhMap);
-		} else {
-			for( ArrayList<DelegateStore> k : delegateCallStores.values() ){
-				if( k.size() != 0 ){
-					triggerDelegation();
-					break;
-				}
-			}
-		}
-	}*/
-
 	/**
 	 * 
 	 * @param levels
